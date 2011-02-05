@@ -1,0 +1,106 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="3.5" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>9.0.30729</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{467A29AF-234B-4352-85D0-987F70FB4AC5}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>MindTouch.Web.Client.Test</RootNamespace>
+    <AssemblyName>test.mindtouch.web.client</AssemblyName>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="log4net, Version=1.2.10.0, Culture=neutral, PublicKeyToken=1b44e1d426115821, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\redist\log4net.dll</HintPath>
+    </Reference>
+    <Reference Include="nunit.framework, Version=2.4.8.0, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\redist\nunit.framework.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Xml.Linq">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Data.DataSetExtensions">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="CookieTests.cs" />
+    <Compile Include="DreamHeadersTests.cs" />
+    <Compile Include="DreamMessageTests.cs" />
+    <Compile Include="PlugTests.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="XUri-Test.cs" />
+    <Compile Include="XUriChildMapTests.cs" />
+    <Compile Include="XUriMapTests.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\mindtouch.common\mindtouch.common.csproj">
+      <Project>{EA09760D-B1FC-4E5F-A5A8-B3BD16395378}</Project>
+      <Name>mindtouch.common</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\mindtouch.dream.test\mindtouch.dream.test.csproj">
+      <Project>{C4CC19EB-8149-4F39-A6E6-753886309CF6}</Project>
+      <Name>mindtouch.dream.test</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\mindtouch.tasking\mindtouch.tasking.csproj">
+      <Project>{BFAF0A9D-8B7F-4225-B7CE-67C08F62AA94}</Project>
+      <Name>mindtouch.tasking</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\mindtouch.web.client.test\mindtouch.web.client.test.csproj">
+      <Project>{828D7DD9-C2EF-4FA5-B548-82856B87C78A}</Project>
+      <Name>mindtouch.web.client.test</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\mindtouch.web.client\mindtouch.web.client.csproj">
+      <Project>{405573DD-20FB-4F51-9634-63646F1AE479}</Project>
+      <Name>mindtouch.web.client</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\mindtouch.web.server\mindtouch.web.server.csproj">
+      <Project>{3E706653-69D1-4522-BEE8-ECEC1A1BF7DE}</Project>
+      <Name>mindtouch.web.server</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\mindtouch.xml\mindtouch.xml.csproj">
+      <Project>{78811CFB-C61D-4914-81D6-E43B33F44527}</Project>
+      <Name>mindtouch.xml</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

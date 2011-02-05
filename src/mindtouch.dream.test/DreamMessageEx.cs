@@ -24,16 +24,8 @@ using System.Text;
 
 namespace MindTouch.Dream.Test {
     
-    /// <summary>
-    /// Extension methods for testing with <see cref="DreamMessage"/>.
-    /// </summary>
     public static class DreamMessageEx {
 
-        /// <summary>
-        /// Extract the error string from a message.
-        /// </summary>
-        /// <param name="message">Message to examine.</param>
-        /// <returns>error string if one is contained in the message.</returns>
         public static string GetErrorString(this DreamMessage message) {
             if(message.IsSuccessful) {
                 return null;

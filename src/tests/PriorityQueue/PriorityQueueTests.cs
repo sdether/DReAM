@@ -20,8 +20,8 @@
  */
 
 using System;
-using System.Collections.Generic;
 using NUnit.Framework;
+using MindTouch.Collections;
 
 namespace MindTouch.Dream.PriorityQueue.Test {
     [TestFixture]

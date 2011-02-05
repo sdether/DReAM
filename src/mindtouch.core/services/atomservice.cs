@@ -21,7 +21,7 @@
 
 using System;
 using System.Collections.Generic;
-
+using MindTouch.Dream.Web.Client;
 using MindTouch.Tasking;
 using MindTouch.Xml;
 

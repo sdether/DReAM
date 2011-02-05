@@ -75,79 +75,48 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ArrayUtilTests.cs" />
-    <Compile Include="AutoMockPlugTests.cs" />
-    <Compile Include="BlockingQueueTests.cs" />
-    <Compile Include="ChunkedArrayTests.cs" />
-    <Compile Include="ChunkedMemoryStreamTest.cs" />
-    <Compile Include="ContainerTests.cs" />
-    <Compile Include="Collections\LockFreeItemConsumerQueueTests.cs" />
-    <Compile Include="Collections\LockFreeQueueTests.cs" />
-    <Compile Include="Collections\LockFreeStackTests.cs" />
-    <Compile Include="Collections\WorkStealingDequeTests.cs" />
-    <Compile Include="CookieTests.cs" />
-    <Compile Include="DreamFeatureTests.cs" />
-    <Compile Include="DreamHeadersTests.cs" />
-    <Compile Include="ExpiringDictionaryTests.cs" />
-    <Compile Include="CoroutineTests.cs" />
-    <Compile Include="CultureUtilTests.cs" />
-    <Compile Include="DreamContextTests.cs" />
-    <Compile Include="DreamHostTest.cs" />
-    <Compile Include="DreamMessageTests.cs" />
     <Compile Include="DreamMiscTest.cs" />
     <Compile Include="AssemblyInfo.cs" />
-    <Compile Include="ExpiringHashSetTests.cs" />
-    <Compile Include="InMemoryKeyValueCacheTests.cs" />
-    <Compile Include="LockTests.cs" />
-    <Compile Include="MockDataCatalogTests.cs" />
-    <Compile Include="MockPlugTests.cs" />
-    <Compile Include="MysqlDocStoreManagerTests.cs" />
-    <Compile Include="PlugTests.cs" />
-    <Compile Include="PubSubTests.cs" />
-    <Compile Include="ResultTest.cs" />
-    <Compile Include="SampleService.cs" />
-    <Compile Include="Service2ServiceTests.cs" />
-    <Compile Include="ServiceExceptionMapTests.cs" />
-    <Compile Include="ServiceInheritanceTests.cs" />
-    <Compile Include="ServiceTests.cs" />
     <Compile Include="StreamUtilTests.cs" />
     <Compile Include="StringUtilTests.cs" />
     <Compile Include="SysUtilTests.cs" />
-    <Compile Include="TaskTests.cs" />
-    <Compile Include="TaskTimerTests.cs" />
-    <Compile Include="Threading\MonitorSemaphoreTests.cs" />
-    <Compile Include="Threading\ThreadPoolTests.cs" />
-    <Compile Include="TimesTests.cs" />
-    <Compile Include="TransactionalQueue\MultiFileQueueStreamTests.cs" />
-    <Compile Include="TransactionalQueue\TransactionalQueueTests.cs" />
-    <Compile Include="TransactionalQueue\QueueStreamValueTests.cs" />
-    <Compile Include="TransactionalQueue\SingleFileQueueStreamTests.cs" />
-    <Compile Include="TransactionalQueue\XDocQueueItemSerializerTests.cs" />
-    <Compile Include="TransactionalQueue\XDocQueueTests.cs" />
-    <Compile Include="TrimmingStringReaderTests.cs" />
-    <Compile Include="TrimmingTextReaderTests.cs" />
-    <Compile Include="XDoc-Test.cs" />
-    <Compile Include="XDocAutofacContainerConfiguratorTests.cs" />
-    <Compile Include="XDocDiffTests.cs" />
-    <Compile Include="XUri-Test.cs" />
-    <Compile Include="XUriMapTests.cs" />
-    <Compile Include="XUriChildMapTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+    <None Include="Makefile" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\mindtouch.common\mindtouch.common.csproj">
+      <Project>{EA09760D-B1FC-4E5F-A5A8-B3BD16395378}</Project>
+      <Name>mindtouch.common</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\mindtouch.core\mindtouch.core.csproj">
       <Project>{CAAE6609-8532-4CCA-ABD5-186C43F77687}</Project>
       <Name>mindtouch.core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\mindtouch.data\mindtouch.data.csproj">
+      <Project>{BAC24EDD-A0AA-46F3-80B1-5C14E99E68E3}</Project>
+      <Name>mindtouch.data</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\mindtouch.dream.test\mindtouch.dream.test.csproj">
       <Project>{C4CC19EB-8149-4F39-A6E6-753886309CF6}</Project>
       <Name>mindtouch.dream.test</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\mindtouch.dream\mindtouch.dream.csproj">
+    <ProjectReference Include="..\..\mindtouch.tasking\mindtouch.tasking.csproj">
+      <Project>{BFAF0A9D-8B7F-4225-B7CE-67C08F62AA94}</Project>
+      <Name>mindtouch.tasking</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\mindtouch.web.client\mindtouch.web.client.csproj">
+      <Project>{405573DD-20FB-4F51-9634-63646F1AE479}</Project>
+      <Name>mindtouch.web.client</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\mindtouch.web.server\mindtouch.web.server.csproj">
       <Project>{3E706653-69D1-4522-BEE8-ECEC1A1BF7DE}</Project>
-      <Name>mindtouch.dream</Name>
+      <Name>mindtouch.web.server</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\mindtouch.xml\mindtouch.xml.csproj">
+      <Project>{78811CFB-C61D-4914-81D6-E43B33F44527}</Project>
+      <Name>mindtouch.xml</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

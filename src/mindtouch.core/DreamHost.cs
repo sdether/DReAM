@@ -51,10 +51,10 @@ namespace MindTouch.Dream {
         //--- Class Methods ---
         private static XUri MakeUri(IPAddress address, int port) {
             switch(address.AddressFamily) {
-                case System.Net.Sockets.AddressFamily.InterNetwork:
-                    return new XUri(String.Format("http://{0}:{1}/", address, port));
-                case System.Net.Sockets.AddressFamily.InterNetworkV6:
-                    return new XUri(String.Format("http://[{0}]:{1}/", address, port));
+            case System.Net.Sockets.AddressFamily.InterNetwork:
+                return new XUri(String.Format("http://{0}:{1}/", address, port));
+            case System.Net.Sockets.AddressFamily.InterNetworkV6:
+                return new XUri(String.Format("http://[{0}]:{1}/", address, port));
             }
             return null;
         }
@@ -109,11 +109,11 @@ namespace MindTouch.Dream {
             }
 
             // use default servername
-            XUri publicUri = config["uri.public"].AsUri;
+            XUri publicUri = config["uri.public"].AsUri();
             if(publicUri == null) {
 
                 // backwards compatibility
-                publicUri = config["server-name"].AsUri;
+                publicUri = config["server-name"].AsUri();
                 if(publicUri == null) {
                     foreach(IPAddress addr in Dns.GetHostAddresses(Dns.GetHostName())) {
                         if(addr.AddressFamily == AddressFamily.InterNetwork) {
@@ -135,12 +135,7 @@ namespace MindTouch.Dream {
                 // initialize environment
                 string apikey = config["apikey"].AsText ?? StringUtil.CreateAlphaNumericKey(32);
                 XDoc serviceConfig = new XDoc("config");
-                var storageType = config["storage/@type"].AsText ?? "local";
-                if("s3".EqualsInvariant(storageType)) {
-                    serviceConfig.Add(config["storage"]);
-                } else {
-                    serviceConfig.Elem("storage-dir", config["storage-dir"].AsText ?? config["service-dir"].AsText ?? appDirectory);
-                }
+                serviceConfig.Elem("storage-dir", config["storage-dir"].AsText ?? config["service-dir"].AsText ?? appDirectory);
                 serviceConfig.Elem("apikey", apikey);
                 serviceConfig.Elem("uri.public", publicUri);
                 serviceConfig.Elem("connect-limit", limit);
@@ -356,15 +351,15 @@ namespace MindTouch.Dream {
 
         private void AddListener(XUri uri) {
             switch(uri.Scheme.ToLowerInvariant()) {
-                case Scheme.HTTP:
-                case Scheme.HTTPS: {
-                        HttpTransport transport = new Http.HttpTransport(_env, uri);
-                        transport.Startup();
-                        _transports.Add(transport);
-                    }
-                    break;
-                default:
-                    throw new ArgumentException("unsupported scheme: " + uri.Scheme);
+            case Scheme.HTTP:
+            case Scheme.HTTPS: {
+                    HttpTransport transport = new Http.HttpTransport(_env, uri);
+                    transport.Startup();
+                    _transports.Add(transport);
+                }
+                break;
+            default:
+                throw new ArgumentException("unsupported scheme: " + uri.Scheme);
             }
         }
 

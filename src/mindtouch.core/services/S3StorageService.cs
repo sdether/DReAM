@@ -26,6 +26,7 @@ using System.Linq;
 using Autofac;
 using Autofac.Builder;
 using log4net;
+using MindTouch.dream;
 using MindTouch.Dream.AmazonS3;
 using MindTouch.Tasking;
 using MindTouch.Web;

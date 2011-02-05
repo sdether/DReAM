@@ -19,7 +19,6 @@
  * limitations under the License.
  */
 using System;
-using System.Threading;
 using Autofac;
 using log4net;
 using MindTouch.Tasking;
@@ -34,7 +33,7 @@ namespace MindTouch.Dream.Test {
 
         //--- Class Fields ---
         private static readonly ILog _log = LogUtils.CreateLog();
-        private static int _port = 1024;
+
         //--- Static Methods ---
 
         /// <summary>
@@ -44,7 +43,7 @@ namespace MindTouch.Dream.Test {
         /// <param name="container">IoC Container to use.</param>
         /// <returns>A <see cref="DreamHostInfo"/> instance for easy access to the host.</returns>
         public static DreamHostInfo CreateRandomPortHost(XDoc config, IContainer container) {
-            var port = GetPort();
+            var port = 1024 + new Random().Next(36000);
             var path = "/";
             if(!config["uri.public"].IsEmpty) {
                 path = config["uri.public"].AsText;
@@ -62,15 +61,6 @@ namespace MindTouch.Dream.Test {
             var host = container == null ? new DreamHost(config) : new DreamHost(config, container);
             host.Self.At("load").With("name", "mindtouch.dream.test").Post(DreamMessage.Ok());
             return new DreamHostInfo(Plug.New(localhost), host, apikey);
-        }
-
-        private static int GetPort() {
-            var port = Interlocked.Increment(ref _port);
-            if(port > 30000) {
-                Interlocked.CompareExchange(ref _port, 1024, port);
-                return GetPort();
-            }
-            return port;
         }
 
         /// <summary>

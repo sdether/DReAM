@@ -33,6 +33,7 @@ using Autofac;
 using Autofac.Builder;
 
 using MindTouch.Collections;
+using MindTouch.dream;
 using MindTouch.Dream.IO;
 using MindTouch.Tasking;
 using MindTouch.Threading;
@@ -255,10 +256,10 @@ namespace MindTouch.Dream {
         private long _responseCacheHits;
         private long _responseCacheMisses;
         private Plug _hostpubsub;
+        private string _queuePath;
+        private Plug _hostQueue;
         private readonly Dictionary<string, List<XUri>> _requests = new Dictionary<string, List<XUri>>();
         private int _reentrancyLimit;
-        private string _rootRedirect;
-        private string _debugMode;
 
         //--- Constructors ---
         public DreamHostService() : this(null) { }
@@ -271,19 +272,6 @@ namespace MindTouch.Dream {
         //--- Properties ---
         public Guid GlobalId { get { return _id; } }
         public bool IsRunning { get { return _running; } }
-        public bool IsDebugEnv {
-            get {
-                switch(_debugMode) {
-                case "on":
-                case "true":
-                    return true;
-                case "debugger-only":
-                    return Debugger.IsAttached;
-                }
-                return false;
-            }
-        }
-
         public XUri LocalMachineUri { get { return _localMachineUri; } }
 
         public Tuplet<DateTime, string>[] ActivityMessages {
@@ -446,7 +434,6 @@ namespace MindTouch.Dream {
         [DreamFeature("GET:services", "Retrieve list of running services. (requires API key)")]
         internal Yield GetServices(DreamContext context, DreamMessage request, Result<DreamMessage> response) {
             XDoc result = new XDoc("services");
-            result.WithXslTransform(context.AsPublicUri(context.Env.Self).At("resources", "services.xslt").Path);
             lock(_services) {
                 result.Attr("count", _services.Count);
                 foreach(KeyValuePair<string, ServiceEntry> entry in _services) {
@@ -475,7 +462,7 @@ namespace MindTouch.Dream {
             Type type;
             XDoc config = request.ToDocument();
             string path = config["path"].AsText;
-            XUri sid = config["sid"].AsUri;
+            XUri sid = config["sid"].AsUri();
             string typeName = config["class"].AsText;
             _log.InfoMethodCall("start", path, (sid != null) ? (object)sid : (object)(typeName ?? "<unknown>"));
 
@@ -504,7 +491,6 @@ namespace MindTouch.Dream {
                     }
                 }
                 blueprint = CreateServiceBlueprint(type);
-                yield return Coroutine.Invoke(RegisterBlueprint, (XDoc)null, type, new Result());
             } else {
 
                 // validate blueprints
@@ -552,7 +538,7 @@ namespace MindTouch.Dream {
 
             // process request
             XDoc doc = request.ToDocument();
-            StopService(doc["uri"].AsUri);
+            StopService(doc["uri"].AsUri());
             response.Return(DreamMessage.Ok());
             yield break;
         }
@@ -758,7 +744,7 @@ namespace MindTouch.Dream {
         internal Yield PostStatusAlias(DreamContext context, DreamMessage request, Result<DreamMessage> response) {
             lock(_aliases)
                 foreach(var alias in request.ToDocument()["uri.alias"]) {
-                    var uri = alias.AsUri;
+                    var uri = alias.AsUri();
                     if(uri == null) {
                         continue;
                     }
@@ -895,7 +881,7 @@ namespace MindTouch.Dream {
             if(!msg.IsSuccessful) {
                 throw new Exception("unexpected failure loading mindtouch.core");
             }
-            yield return Self.At("load").With("name", "mindtouch.dream").Post(new Result<DreamMessage>(TimeSpan.MaxValue)).Set(v => msg = v);
+            yield return Self.At("load").With("name", "mindtouch.web.server").Post(new Result<DreamMessage>(TimeSpan.MaxValue)).Set(v => msg = v);
             if(!msg.IsSuccessful) {
                 throw new Exception("unexpected failure loading mindtouch.core");
             }
@@ -904,6 +890,11 @@ namespace MindTouch.Dream {
                 "sid://mindtouch.com/dream/2008/10/pubsub",
                 new XDoc("config"),
                 new Result<Plug>()).Set(v => _hostpubsub = v);
+            yield return CreateService(
+                "$queue",
+                "sid://mindtouch.com/2009/12/dream/queue",
+                new XDoc("config").Elem("folder", _queuePath),
+                new Result<Plug>()).Set(v => _hostQueue = v);
             result.Return();
         }
 
@@ -992,8 +983,6 @@ namespace MindTouch.Dream {
                 _serviceActivator = _container.Resolve<IServiceActivator>();
                 _running = true;
                 _shutdown = new ManualResetEvent(false);
-                _rootRedirect = config["root-redirect"].AsText;
-                _debugMode = config["debug"].AsText.IfNullOrEmpty("false").ToLowerInvariant();
 
                 // add default prologues/epilogues
                 _defaultPrologues = new[] { 
@@ -1010,7 +999,7 @@ namespace MindTouch.Dream {
 
                 // initialize environment
                 string path = config["host-path"].AsText ?? "host";
-                _publicUri = config["uri.public"].AsUri ?? new XUri("http://localhost:8081");
+                _publicUri = config["uri.public"].AsUri() ?? new XUri("http://localhost:8081");
                 _aliases[_publicUri] = _publicUri;
                 _connectionLimit = config["connect-limit"].AsInt ?? 0;
                 if(_connectionLimit < 0) {
@@ -1036,6 +1025,10 @@ namespace MindTouch.Dream {
                     if(!Path.IsPathRooted(_storagePath)) {
                         throw new ArgumentException("missing or invalid storage-dir");
                     }
+                }
+                _queuePath = config["queue-dir"].AsText ?? Path.Combine(_storagePath, "__queue");
+                if(!Path.IsPathRooted(_queuePath)) {
+                    throw new ArgumentException("missing or invalid queue-dir");
                 }
 
                 // log initialization settings
@@ -1178,6 +1171,7 @@ namespace MindTouch.Dream {
 
             // ensure environment is still running
             if(!IsRunning) {
+                request.Close();
                 response.Return(DreamMessage.InternalError("host not running"));
                 return response;
             }
@@ -1188,6 +1182,7 @@ namespace MindTouch.Dream {
                 // check if connection limit was exceeded
                 DreamMessage failed = BeginRequest(external, uri, request);
                 if(failed != null) {
+                    request.Close();
                     response.Return(failed);
                     return response;
                 }
@@ -1250,15 +1245,6 @@ namespace MindTouch.Dream {
                     localFeatureUri = localFeatureUri.WithoutFirstSegments(transport.Segments.Length);
                 }
 
-                // check if the path is the application root and whether we have special behavior for that
-                if(localFeatureUri.Path.IfNullOrEmpty("/") == "/") {
-                    if(!string.IsNullOrEmpty(_rootRedirect)) {
-                        localFeatureUri = localFeatureUri.AtAbsolutePath(_rootRedirect);
-                    } else if(IsDebugEnv) {
-                        localFeatureUri = localFeatureUri.AtAbsolutePath("/host/services");
-                    }
-                }
-
                 // find the requested feature
                 List<DreamFeature> features;
                 lock(_features) {
@@ -1279,6 +1265,7 @@ namespace MindTouch.Dream {
 
                     // check if this is an OPTIONS request and there is no defined feature for it
                     if(verb.EqualsInvariant(Verb.OPTIONS) && ((feature == null) || feature.Verb.EqualsInvariant("*"))) {
+                        request.Close();
 
                         // list all allowed methods
                         List<string> methods = new List<string>();
@@ -1301,6 +1288,7 @@ namespace MindTouch.Dream {
                 // check if a feature was found
                 if(feature == null) {
                     DreamMessage result;
+                    request.Close();
 
                     // check if any feature was found
                     if((features == null) || (features.Count == 0)) {
@@ -1386,6 +1374,7 @@ namespace MindTouch.Dream {
                     // need to manually dispose of the context, since we're already attaching and detaching it by hand to TaskEnvs throughout the chain
                     if(response.IsCanceled) {
                         _log.DebugFormat("response for '{0}' has already returned", context.Uri.Path);
+                        message.Close();
                         response.ConfirmCancel();
                         ((ITaskLifespan)context).Dispose();
                     } else {
@@ -1537,12 +1526,12 @@ namespace MindTouch.Dream {
 
             // add fresh information
             Type type = service.GetType();
-            XUri sid = config["sid"].AsUri ?? blueprint["sid"].AsUri;
-            XUri owner = config["uri.owner"].AsUri;
+            XUri sid = config["sid"].AsUri();
+            XUri owner = config["uri.owner"].AsUri();
 
             // create directory of service features
             DreamFeatureDirectory features = CreateServiceFeatureDirectory(service, blueprint, config);
-            XUri uri = config["uri.self"].AsUri;
+            XUri uri = config["uri.self"].AsUri();
 
             // now that we have the uri, we can add the storage information (if we already started the host storage service!)
             Plug serviceStorage = null;
@@ -1605,6 +1594,17 @@ namespace MindTouch.Dream {
                 }
             }
 
+            // default build-in catalog connection string
+            if(config["use-service-data-catalog"].AsBool ?? false) {
+                if(config["data-catalog-connection-string"].IsEmpty) {
+                    string encodedPath = EncodedServicePath(uri);
+                    string dbPath = Path.Combine(_storagePath, encodedPath);
+                    Directory.CreateDirectory(dbPath);
+                    string dbFile = Path.Combine(dbPath, "_service.db");
+                    config.Elem("data-catalog-connection-string", string.Format("Data Source={0};Version=3;Pooling=False;Max Pool Size=10;", dbFile));
+                }
+            }
+
             //attach default pubsub service plug
             if(_hostpubsub != null) {
                 if(config["uri.pubsub"].ListLength == 0) {
@@ -1614,6 +1614,21 @@ namespace MindTouch.Dream {
                     DreamCookieJar cookies = Cookies;
                     lock(cookies) {
                         foreach(DreamCookie cookie in cookies.Fetch(_hostpubsub.Uri)) {
+                            config.Add(cookie.AsSetCookieDocument);
+                        }
+                    }
+                }
+            }
+
+            // inject default queue service plug
+            if(_hostQueue != null) {
+                if(config["uri.queue"].ListLength == 0) {
+                    config.Elem("uri.queue", _hostQueue);
+
+                    // get queue's internal access key
+                    var cookies = Cookies;
+                    lock(cookies) {
+                        foreach(var cookie in cookies.Fetch(_hostQueue.Uri)) {
                             config.Add(cookie.AsSetCookieDocument);
                         }
                     }
@@ -1746,7 +1761,7 @@ namespace MindTouch.Dream {
             if(blueprints != null) {
                 lock(blueprints) {
                     foreach(XDoc sid in blueprint["sid"]) {
-                        XUri uri = sid.AsUri;
+                        XUri uri = sid.AsUri();
                         _log.DebugMethodCall("register", uri);
                         ProxyPlugEndpoint.Add(uri, blueprint);
                         blueprints[XUri.EncodeSegment(uri.ToString())] = blueprint;

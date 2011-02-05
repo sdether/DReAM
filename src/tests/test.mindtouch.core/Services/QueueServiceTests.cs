@@ -26,7 +26,6 @@ using System.IO;
 using System.Threading;
 using log4net;
 using MindTouch.Dream;
-using MindTouch.Dream.Services;
 using MindTouch.Dream.Test;
 using MindTouch.Tasking;
 using MindTouch.Xml;

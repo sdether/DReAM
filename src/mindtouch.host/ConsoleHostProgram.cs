@@ -101,9 +101,6 @@ namespace MindTouch.Dream {
                         WriteError(key, "invalid collection interval (must be an integer representing seconds)");
                         return 1;
                     }
-                    if(interval > 0) {
-                        DebugUtil.SetCollectionInterval(TimeSpan.FromSeconds(interval));
-                    }
                     break;
                 default:
                     WriteError(key, "unknown setting");

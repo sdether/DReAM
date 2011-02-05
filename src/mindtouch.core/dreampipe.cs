@@ -20,6 +20,8 @@
  */
 
 using System;
+using MindTouch.dream;
+using MindTouch.Dream.Web.Client;
 using MindTouch.Tasking;
 using MindTouch.Web;
 
@@ -175,12 +177,22 @@ namespace MindTouch.Dream {
                     // invoke handler
                     Result<DreamMessage> inner = new Result<DreamMessage>(_response.Timeout, TaskEnv.Current).WhenDone(delegate(DreamMessage value) {
 
+                        // close request object if response object is a new message
+                        if(!ReferenceEquals(value, request)) {
+                            request.Close();
+                        }
+
                         // removing context from env so that shared context is not disposed
                         _context.DetachFromTaskEnv();
 
                         // forward result to recipient
                         _response.Return(value);
                     }, delegate(Exception exception) {
+
+                        // BUGBUGBUG (steveb): if the exception is a TimeOut or Cancel exception, we should NOT destroy the request object until we know that the feature has finished processing it!
+
+                        // always close the request on error
+                        request.Close();
 
                         // removing context from env so that shared context is not disposed
                         _context.DetachFromTaskEnv();

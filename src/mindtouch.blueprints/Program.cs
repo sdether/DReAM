@@ -319,7 +319,7 @@ namespace MindTouch.Tools {
                 if(!ArrayUtil.IsNullOrEmpty(dsa)) {
                     XDoc blueprint = DreamService.CreateServiceBlueprint(type);
                     foreach(XDoc sid in blueprint["sid"]) {
-                        SaveBlueprint(path, sid.AsUri, blueprint);
+                        SaveBlueprint(path, sid.AsUri(), blueprint);
                     }
                 }
             }

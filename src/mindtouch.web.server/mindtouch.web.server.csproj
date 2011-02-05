@@ -1,0 +1,152 @@
+﻿<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="3.5">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>9.0.30729</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{3E706653-69D1-4522-BEE8-ECEC1A1BF7DE}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>MindTouch.Dream.Web.Server</RootNamespace>
+    <AssemblyName>mindtouch.web.server</AssemblyName>
+    <SignAssembly>false</SignAssembly>
+    <FileUpgradeFlags>
+    </FileUpgradeFlags>
+    <OldToolsVersion>2.0</OldToolsVersion>
+    <UpgradeBackupLocation>
+    </UpgradeBackupLocation>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>..\bin\</OutputPath>
+    <DefineConstants>TRACE;DEBUG;DEBUG_DREAM</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <NoWarn>1911,1591</NoWarn>
+    <DocumentationFile>..\bin\mindtouch.web.server.xml</DocumentationFile>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>..\bin\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <NoWarn>1911,1591,0618</NoWarn>
+    <DocumentationFile>..\bin\mindtouch.web.server.xml</DocumentationFile>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Signed Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>..\bin\</OutputPath>
+    <DefineConstants>TRACE;SIGNED</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <NoWarn>1911,1591,0618,1699</NoWarn>
+    <DocumentationFile>..\bin\mindtouch.web.server.xml</DocumentationFile>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Documentation|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>..\bin\</OutputPath>
+    <DefineConstants>TRACE;DEBUG</DefineConstants>
+    <DocumentationFile>..\bin\mindtouch.web.server.xml</DocumentationFile>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <NoWarn>1911</NoWarn>
+    <DebugType>full</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Autofac, Version=1.4.3.536, Culture=neutral, PublicKeyToken=17863af14b0044da, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\redist\Autofac.dll</HintPath>
+    </Reference>
+    <Reference Include="log4net, Version=1.2.9.0, Culture=neutral, PublicKeyToken=b32731d11ce58905">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\redist\log4net.dll</HintPath>
+    </Reference>
+    <Reference Include="SgmlReaderDll, Version=1.5.2235.32957, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\redist\SgmlReaderDll.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.configuration" />
+    <Reference Include="System.Core">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Data" />
+    <Reference Include="System.Security" />
+    <Reference Include="System.Web" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="AssemblyInfo.cs" />
+    <Compile Include="Dream\AutoFacEx.cs" />
+    <Compile Include="Dream\DreamAccess.cs" />
+    <Compile Include="Dream\DreamContainerScope.cs" />
+    <Compile Include="Dream\DreamContextUriTranslator.cs" />
+    <Compile Include="Dream\DreamFeature.cs" />
+    <Compile Include="Dream\DreamFeatureStage.cs" />
+    <Compile Include="Dream\DreamMessageFactory.cs" />
+    <Compile Include="Dream\IDreamEnvironment.cs" />
+    <Compile Include="Dream\IDreamService.cs" />
+    <Compile Include="Dream\IDreamServiceLicense.cs" />
+    <Compile Include="Dream\Services\PubSub\Dispatcher.cs" />
+    <Compile Include="Dream\Services\PubSub\DispatcherConfig.cs" />
+    <Compile Include="Dream\Services\PubSub\DispatcherEvent.cs" />
+    <Compile Include="Dream\Services\PubSub\DispatcherRecipient.cs" />
+    <Compile Include="Dream\Services\PubSub\IPubSubDispatcher.cs" />
+    <Compile Include="Dream\Services\PubSub\PubSubSubscription.cs" />
+    <Compile Include="Dream\Services\PubSub\PubSubSubscriptionSet.cs" />
+    <Compile Include="Dream\XDocAutofacContainerConfigurator.cs" />
+    <Compile Include="Dream\attributes.cs" />
+    <Compile Include="plug\PlugEx.cs" />
+    <Compile Include="plug\DreamContextPlugInterceptor.cs" />
+    <Compile Include="Dream\dreamcontext.cs" />
+    <Compile Include="Dream\Services\PubSubService.cs" />
+    <Compile Include="Dream\servicebase.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Makefile" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\mindtouch.common\mindtouch.common.csproj">
+      <Project>{EA09760D-B1FC-4E5F-A5A8-B3BD16395378}</Project>
+      <Name>mindtouch.common</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\mindtouch.tasking\mindtouch.tasking.csproj">
+      <Project>{BFAF0A9D-8B7F-4225-B7CE-67C08F62AA94}</Project>
+      <Name>mindtouch.tasking</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\mindtouch.web.client\mindtouch.web.client.csproj">
+      <Project>{405573DD-20FB-4F51-9634-63646F1AE479}</Project>
+      <Name>mindtouch.web.client</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\mindtouch.xml\mindtouch.xml.csproj">
+      <Project>{78811CFB-C61D-4914-81D6-E43B33F44527}</Project>
+      <Name>mindtouch.xml</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="DreamContextAccessException.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Properties\" />
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+  <PropertyGroup>
+    <PostBuildEvent>
+    </PostBuildEvent>
+  </PropertyGroup>
+</Project>

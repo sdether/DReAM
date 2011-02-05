@@ -48,7 +48,7 @@ namespace MindTouch.Dream.Services {
         //--- Methods ---
         protected override Yield Start(XDoc config, Result result) {
             yield return Coroutine.Invoke(base.Start, config, new Result());
-            _redirect = Plug.New(config["proxy"].AsUri ?? config["redirect"].AsUri, TimeSpan.FromSeconds(config["timeout"].AsInt ?? (int)Plug.DEFAULT_TIMEOUT.TotalSeconds));
+            _redirect = Plug.New(config["proxy"].AsUri() ?? config["redirect"].AsUri(), TimeSpan.FromSeconds(config["timeout"].AsInt ?? (int)Plug.DEFAULT_TIMEOUT.TotalSeconds));
             if(_redirect == null) {
                 throw new ArgumentException("redirect URI missing or invalid");
             }

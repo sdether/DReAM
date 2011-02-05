@@ -24,6 +24,7 @@ using System.Collections.Generic;
 using System.IO;
 using log4net;
 using MindTouch.Collections;
+using MindTouch.Dream.Web.Client;
 using MindTouch.IO;
 using MindTouch.Tasking;
 using MindTouch.Xml;

@@ -53,7 +53,7 @@ using System.Runtime.InteropServices;
 //      Build Number
 //      Revision
 //
-[assembly: AssemblyVersion("2.2.0.24968")]
-[assembly: AssemblyFileVersion("2.2.0.24968")]
-[assembly: SvnRevision(24968)]
+[assembly: AssemblyVersion("2.1.1.20928")]
+[assembly: AssemblyFileVersion("2.1.1.20928")]
+[assembly: SvnRevision(20928)]
 [assembly: SvnBranch("trunk")]

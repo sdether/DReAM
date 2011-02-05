@@ -24,10 +24,8 @@ using System.Net;
 using System.Net.Mail;
 using System.Net.Mime;
 using System.Text;
-using Autofac;
-using Autofac.Builder;
 using log4net;
-
+using MindTouch.dream;
 using MindTouch.Tasking;
 using MindTouch.Xml;
 
@@ -36,7 +34,7 @@ namespace MindTouch.Dream.Services {
 
     [DreamService("MindTouch Email Sender", "Copyright (c) 2006-2009 MindTouch, Inc.",
         Info = "http://developer.mindtouch.com/Dream/Services/EmailService",
-        SID = new[] { "sid://mindtouch.com/2009/01/dream/email" }
+        SID = new string[] { "sid://mindtouch.com/2009/01/dream/email" }
     )]
     [DreamServiceConfig("smtp-host", "hostname", "")]
     [DreamServiceConfig("smtp-port", "port", "")]
@@ -46,6 +44,13 @@ namespace MindTouch.Dream.Services {
     internal class EmailService : DreamService {
 
         //--- Types ---
+        public class SmtpSettings {
+            public string Host;
+            public int? Port;
+            public string AuthUser;
+            public string AuthPassword;
+            public bool EnableSsl;
+        }
 
         //--- Class Fields ---
         private static readonly ILog _log = LogUtils.CreateLog();
@@ -54,7 +59,6 @@ namespace MindTouch.Dream.Services {
         private string _emailApikey;
         private readonly Dictionary<string, SmtpSettings> _smtpSettings = new Dictionary<string, SmtpSettings>();
         private SmtpSettings _defaultSettings;
-        private ISmtpClientFactory _clientFactory;
 
         //--- Features ---
         [DreamFeature("POST:message", "Send an email")]
@@ -67,7 +71,7 @@ namespace MindTouch.Dream.Services {
                     continue;
                 }
                 _log.DebugFormat("Adding TO address '{0}'", email);
-                mailMsg.To.Add(new MailAddress(email));
+                mailMsg.To.Add(email);
             }
             if(mailMsg.To.Count == 0) {
                 throw new DreamBadRequestException("message does not contains any TO email addresses");
@@ -95,8 +99,8 @@ namespace MindTouch.Dream.Services {
             foreach(XDoc header in mailDoc["headers/header"]) {
                 var name = header["name"].AsText;
                 var value = header["value"].AsText;
-                _log.DebugFormat("adding header '{0}': {1}", name, value);
-                mailMsg.Headers.Add(name, value);
+                _log.DebugFormat("adding header '{0}': {1}",name,value);
+                mailMsg.Headers.Add(name,value);
             }
             GetClient(mailDoc["@configuration"].AsText).Send(mailMsg);
             response.Return(DreamMessage.Ok());
@@ -108,24 +112,21 @@ namespace MindTouch.Dream.Services {
             string configuration = context.GetParam("configuration");
             XDoc settingsDoc = request.ToDocument();
             _log.DebugFormat("configuring settings for configuration '{0}'", configuration);
-            var host = settingsDoc["smtp-host"].AsText;
-            if(string.IsNullOrEmpty(host)) {
+            SmtpSettings settings = new SmtpSettings();
+            settings.Host = settingsDoc["smtp-host"].AsText;
+            if(string.IsNullOrEmpty(settings.Host)) {
                 response.Return(DreamMessage.BadRequest("must specify an smtp-host"));
                 yield break;
             }
-            _log.DebugFormat("Smtp Host: {0}", host);
-            var settings = new SmtpSettings {
-                Host = host,
-                AuthUser = settingsDoc["smtp-auth-user"].AsText,
-                AuthPassword = settingsDoc["smtp-auth-password"].AsText,
-                Apikey = settingsDoc["apikey"].AsText,
+            _log.DebugFormat("Smtp Host: {0}", settings.Host);
 
-                // Note (arnec): ssl requires mono 2.0 and likely root certificate import via 'mozroots --import --ask-remove --machine'
-                EnableSsl = settingsDoc["use-ssl"].AsBool ?? false
-            };
+            // Note (arnec): ssl requires mono 2.0 and likely root certificate import via 'mozroots --import --ask-remove --machine'
+            settings.EnableSsl = settingsDoc["use-ssl"].AsBool ?? false;
             if(settingsDoc["smtp-port"].AsInt.HasValue) {
                 settings.Port = settingsDoc["smtp-port"].AsInt.Value;
             }
+            settings.AuthUser = settingsDoc["smtp-auth-user"].AsText;
+            settings.AuthPassword = settingsDoc["smtp-auth-password"].AsText;
             lock(_smtpSettings) {
                 _smtpSettings[configuration] = settings;
             }
@@ -165,7 +166,7 @@ namespace MindTouch.Dream.Services {
         }
 
         //--- Methods ---
-        protected override Yield Start(XDoc config, IContainer container, Result result) {
+        protected override Yield Start(XDoc config, Result result) {
             yield return Coroutine.Invoke(base.Start, config, new Result());
             _defaultSettings = new SmtpSettings { Host = config["smtp-host"].AsText };
             if(string.IsNullOrEmpty(_defaultSettings.Host)) {
@@ -180,9 +181,6 @@ namespace MindTouch.Dream.Services {
             }
             _defaultSettings.AuthUser = config["smtp-auth-user"].AsText;
             _defaultSettings.AuthPassword = config["smtp-auth-password"].AsText;
-            _clientFactory = container.IsRegistered<ISmtpClientFactory>() 
-                ? container.Resolve<ISmtpClientFactory>()
-                : new SmtpClientFactory();
 
             // get an apikey for accessing the services without it's private/internal keys
             _emailApikey = config["apikey"].AsText;
@@ -196,109 +194,38 @@ namespace MindTouch.Dream.Services {
             result.Return();
         }
 
-        private ISmtpClient GetClient(string configuration) {
+        private SmtpClient GetClient(string configuration) {
             _log.DebugFormat("Getting smtp settings for configuration '{0}'", configuration);
             SmtpSettings settings;
-            lock(_smtpSettings) {
-                if(!_smtpSettings.TryGetValue(configuration, out settings)) {
-                    _log.DebugFormat("Using default settings");
-                    settings = _defaultSettings;
-                }
+            if(!_smtpSettings.TryGetValue(configuration, out settings)) {
+                _log.DebugFormat("Using default settings");
+                settings = _defaultSettings;
             }
-            return _clientFactory.CreateClient(settings);
+            SmtpClient smtpClient = new SmtpClient(settings.Host);
+            smtpClient.EnableSsl = settings.EnableSsl;
+            _log.DebugFormat("SSL enabled: {0}", smtpClient.EnableSsl);
+            if(settings.Port.HasValue) {
+                smtpClient.Port = settings.Port.Value;
+                _log.DebugFormat("using custom port: {0}", smtpClient.Port);
+            }
+            if(!string.IsNullOrEmpty(settings.AuthUser)) {
+                _log.DebugFormat("using authentication user: {0}", settings.AuthUser);
+                NetworkCredential credentials = new NetworkCredential(settings.AuthUser, settings.AuthPassword);
+                smtpClient.Credentials = credentials;
+            }
+            return smtpClient;
         }
 
         protected override DreamAccess DetermineAccess(DreamContext context, string key) {
-            if(!string.IsNullOrEmpty(key)) {
+            if(!string.IsNullOrEmpty(_emailApikey)) {
 
-                // Grant internal access for proper apikey
-                if(!string.IsNullOrEmpty(_emailApikey) && _emailApikey == key) {
+                //For features considered 'internal', having a correct api-key
+                if(!string.IsNullOrEmpty(key) && _emailApikey == key) {
                     return DreamAccess.Internal;
-                }
-
-                // Check whether we can test an apikey from the targeted configuration
-                var configuration = context.GetParam("configuration", null);
-                if(string.IsNullOrEmpty(configuration) && context.Request.HasDocument) {
-                    configuration = context.Request.ToDocument()["@configuration"].AsText;
-                }
-                if(!string.IsNullOrEmpty(configuration)) {
-                    SmtpSettings settings;
-                    lock(_smtpSettings) {
-                        _smtpSettings.TryGetValue(configuration, out settings);
-                    }
-                    if(settings != null && !string.IsNullOrEmpty(settings.Apikey) && settings.Apikey == key) {
-                        return DreamAccess.Internal;
-                    }
                 }
             }
             return base.DetermineAccess(context, key);
         }
+
     }
-
-    public class SmtpSettings {
-
-        //--- Fields ---
-        public string Host;
-        public int? Port;
-        public string AuthUser;
-        public string AuthPassword;
-        public bool EnableSsl;
-        public string Apikey;
-    }
-
-    public class SmtpClientFactory : ISmtpClientFactory {
-
-        //--- Class Fields ---
-        private static readonly ILog _log = LogUtils.CreateLog();
-
-        //--- Methods ---
-        public ISmtpClient CreateClient(SmtpSettings settings) {
-            var client = new SmtpClient {
-                Host = settings.Host,
-                EnableSsl = settings.EnableSsl
-            };
-            _log.DebugFormat("SSL enabled: {0}", client.EnableSsl);
-            if(settings.Port.HasValue) {
-                client.Port = settings.Port.Value;
-                _log.DebugFormat("using custom port: {0}", client.Port);
-            }
-            if(!string.IsNullOrEmpty(settings.AuthUser)) {
-                _log.DebugFormat("using authentication user: {0}", settings.AuthUser);
-                var credentials = new NetworkCredential(settings.AuthUser, settings.AuthPassword);
-                client.Credentials = credentials;
-            }
-            return new SmtpClientWrapper(client);
-        }
-    }
-
-    public interface ISmtpClientFactory {
-
-        //--- Methods ---
-        ISmtpClient CreateClient(SmtpSettings settings);
-    }
-
-    public class SmtpClientWrapper : ISmtpClient {
-
-        //--- Fields ---
-        private readonly SmtpClient _client;
-
-        //--- Constructors ---
-        public SmtpClientWrapper(SmtpClient client) {
-            _client = client;
-        }
-
-        //--- Methods ---
-        public void Send(MailMessage message) {
-            _client.Send(message);
-        }
-    }
-
-    public interface ISmtpClient {
-
-        //--- Methods ---
-        void Send(MailMessage message);
-    }
-
-
-
 }

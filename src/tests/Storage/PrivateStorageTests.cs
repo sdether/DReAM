@@ -119,8 +119,10 @@ namespace MindTouch.Dream.Storage.Test {
 
     [DreamService("TestServiceWithPrivateStorage", "Copyright (c) 2008 MindTouch, Inc.",
         Info = "",
-        SID = new[] { "sid://mindtouch.com/TestServiceWithPrivateStorage" }
-    )]
+        SID = new string[] { 
+                               "sid://mindtouch.com/TestServiceWithPrivateStorage"
+                           }
+        )]
     [DreamServiceBlueprint("setup/private-storage")]
     public class TestServiceWithPrivateStorage : DreamService {
 

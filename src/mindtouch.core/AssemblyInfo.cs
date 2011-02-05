@@ -53,9 +53,9 @@ using System.Runtime.InteropServices;
 //
 // You can specify all the values or you can default the Revision and Build Numbers 
 // by using the '*' as shown below:
-[assembly: AssemblyVersion("2.2.0.24968")]
-[assembly: AssemblyFileVersion("2.2.0.24968")]
-[assembly: SvnRevision(24968)]
+[assembly: AssemblyVersion("2.1.1.20928")]
+[assembly: AssemblyFileVersion("2.1.1.20928")]
+[assembly: SvnRevision(20928)]
 [assembly: SvnBranch("trunk")]
 
 //

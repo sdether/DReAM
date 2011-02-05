@@ -176,7 +176,7 @@ namespace MindTouch.Dream.Services {
         //--- Methods ---
         protected override Yield Start(XDoc config, Result result) {
             yield return Coroutine.Invoke(base.Start, config, new Result());
-            _parent = Plug.New(Config["parent"].AsUri);
+            _parent = Plug.New(Config["parent"].AsUri());
             yield return CreateService("events", "sid://mindtouch.com/2007/03/dream/events", null, new Result<Plug>()).Set(v => _events = v);
             LoadRecordsFromFileSystem();
             result.Return();

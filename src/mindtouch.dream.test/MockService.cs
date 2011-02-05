@@ -34,13 +34,20 @@ namespace MindTouch.Dream.Test {
     /// </summary>
     [DreamService("MockService", "Copyright (c) 2008 MindTouch, Inc.",
         Info = "",
-        SID = new[] { "http://services.mindtouch.com/dream/stable/2008/10/mock" }
+        SID = new[] { SID }
         )]
     public class MockService : DreamService {
 
+        //--- Constants ---
+
+        /// <summary>
+        /// Service Identifier of <see cref="MockService"/>.
+        /// </summary>
+        public new const string SID = "http://services.mindtouch.com/dream/stable/2008/10/mock";
+
         //--- Class Fields ---
         private static readonly ILog _log = LogUtils.CreateLog();
-        private static Dictionary<string, MockService> MockRegister = new Dictionary<string, MockService>();
+        internal static Dictionary<string, MockService> MockRegister = new Dictionary<string, MockService>();
 
         //--- Static Methods ---
 
@@ -51,24 +58,12 @@ namespace MindTouch.Dream.Test {
         /// <param name="extraConfig">Additional service configuration.</param>
         /// <returns>New mock service info instance.</returns>
         public static MockServiceInfo CreateMockService(DreamHostInfo hostInfo, XDoc extraConfig) {
-            return CreateMockService(hostInfo, extraConfig, false);
-        }
-
-        /// <summary>
-        /// Create a new mock service instance.
-        /// </summary>
-        /// <param name="hostInfo">Host info.</param>
-        /// <param name="extraConfig">Additional service configuration.</param>
-        /// <param name="privateStorage">Use private storage</param>
-        /// <returns>New mock service info instance.</returns>
-        public static MockServiceInfo CreateMockService(DreamHostInfo hostInfo, XDoc extraConfig, bool privateStorage) {
-            var path = StringUtil.CreateAlphaNumericKey(8);
-            var type = privateStorage ? typeof(MockServiceWithPrivateStorage) : typeof(MockService);
-            var config = new XDoc("config")
-                .Elem("class", type.FullName)
+            string path = StringUtil.CreateAlphaNumericKey(8);
+            XDoc config = new XDoc("config")
+                .Elem("class", typeof(MockService).FullName)
                 .Elem("path", path);
             if(extraConfig != null) {
-                foreach(var extra in extraConfig["*"]) {
+                foreach(XDoc extra in extraConfig["*"]) {
                     config.Add(extra);
                 }
             }
@@ -78,21 +73,12 @@ namespace MindTouch.Dream.Test {
         }
 
         /// <summary>
-        /// Create a new mock service instance with private storage.
-        /// </summary>
-        /// <param name="hostInfo">Host info.</param>
-        /// <returns>New mock service info instance.</returns>
-        public static MockServiceInfo CreateMockServiceWithPrivateStorage(DreamHostInfo hostInfo) {
-            return CreateMockService(hostInfo, null, true);
-        }
-
-        /// <summary>
         /// Create a new mock service instance.
         /// </summary>
         /// <param name="hostInfo">Host info.</param>
         /// <returns>New mock service info instance.</returns>
         public static MockServiceInfo CreateMockService(DreamHostInfo hostInfo) {
-            return CreateMockService(hostInfo, null, false);
+            return CreateMockService(hostInfo, null);
         }
 
         //--- Fields ---
@@ -100,12 +86,12 @@ namespace MindTouch.Dream.Test {
         /// <summary>
         /// Synchronous catch all callback (mutually exclusive with <see cref="CatchAllCallbackAsync"/>).
         /// </summary>
-        public Action<DreamContext, DreamMessage, Result<DreamMessage>> CatchAllCallback;
+        public Action<DreamContext,DreamMessage,Result<DreamMessage>> CatchAllCallback;
 
         /// <summary>
         /// Asynchronous catch all callback (mutually exclusive with <see cref="CatchAllCallback"/>).
         /// </summary>
-        public Func<DreamContext, DreamMessage, Result<DreamMessage>, Result<DreamMessage>> CatchAllCallbackAsync;
+        public Func<DreamContext,DreamMessage,Result<DreamMessage>,Result<DreamMessage>> CatchAllCallbackAsync;
 
         /// <summary>
         /// Service configuration.
@@ -150,16 +136,4 @@ namespace MindTouch.Dream.Test {
             result.Return();
         }
     }
-
-    /// <summary>
-    /// Provides an <see cref="IDreamService"/> skeleton implemenation with static instance accessor and callback mechanism to externally
-    /// intercept service behavior and private storage
-    /// </summary>
-    [DreamService("MockServiceWithPrivateStorage", "Copyright (c) 2008 MindTouch, Inc.",
-        Info = "",
-        SID = new[] { "http://services.mindtouch.com/dream/stable/2008/10/mock.private" }
-        )]
-    [DreamServiceBlueprint("setup/private-storage")]
-    public class MockServiceWithPrivateStorage : MockService { }
-
 }

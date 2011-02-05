@@ -349,7 +349,7 @@ namespace MindTouch.Dream.Storage.Test {
             // create storage service
             XDoc config = new XDoc("config");
             config.Elem("path", "storage");
-            config.Elem("sid", "sid://mindtouch.com/2007/03/dream/storage");
+            config.Elem("sid", "http://services.mindtouch.com/dream/stable/2007/03/storage");
             config.Elem("folder", _storageFolder);
             //DreamMessage result = _host.Self.At("services").PostAsync(config).Wait();          
             DreamMessage result = _hostInfo.LocalHost.At("host", "services").With("apikey", _hostInfo.ApiKey).PostAsync(config).Wait();
