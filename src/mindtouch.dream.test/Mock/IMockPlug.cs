@@ -135,7 +135,7 @@ namespace MindTouch.Dream.Test.Mock {
         /// Verify that the <see cref="MockPlug"/> was called as expected.
         /// </summary>
         /// <remarks>
-        /// Uses a 5 second timeout and will return immediately if <see cref="ExpectAtLeastOneCall"/> 
+        /// Uses a 5 second timeout and 2 second excess wait and will return immediately if <see cref="ExpectAtLeastOneCall"/> 
         /// or <see cref="ExpectCalls"/> was called previously.
         /// </remarks>
         void Verify();
@@ -143,7 +143,7 @@ namespace MindTouch.Dream.Test.Mock {
         /// <summary>
         /// Verify that the <see cref="MockPlug"/> was called the expected number of <see cref="Times"/>
         /// </summary>
-        /// <remarks>Uses a 5 second timeout.</remarks>
+        /// <remarks>Uses a 5 second timeout and 2 second excess wait.</remarks>
         /// <param name="times">Times instance to use for expectations.</param>
         void Verify(Times times);
 
@@ -157,11 +157,29 @@ namespace MindTouch.Dream.Test.Mock {
         void Verify(TimeSpan timeout);
 
         /// <summary>
+        /// Verify that the <see cref="MockPlug"/> was called as expected.
+        /// </summary>
+        /// <remarks>
+        /// Will return immediately if <see cref="ExpectAtLeastOneCall"/> or <see cref="ExpectCalls"/> was called previously.
+        /// </remarks>
+        /// <param name="timeout">The time to wait for expectations to be met.</param>
+        /// <param name="excessWait">The time to wait after acceptable expectations for excess calls.</param>
+        void Verify(TimeSpan timeout, TimeSpan excessWait);
+
+        /// <summary>
         /// Verify that the <see cref="MockPlug"/> was called the expected number of <see cref="Times"/>
         /// </summary>
         /// <param name="timeout">The time to wait for expectations to be met.</param>
         /// <param name="times">Times instance to use for expectations.</param>
         void Verify(TimeSpan timeout, Times times);
+
+        /// <summary>
+        /// Verify that the <see cref="MockPlug"/> was called the expected number of <see cref="Times"/>
+        /// </summary>
+        /// <param name="timeout">The time to wait for expectations to be met.</param>
+        /// <param name="times">Times instance to use for expectations.</param>
+        /// <param name="excessWait">The time to wait after acceptable expectations for excess calls.</param>
+        void Verify(TimeSpan timeout, TimeSpan excessWait, Times times);
 
         /// <summary>
         /// Set expectations to be at least one call.

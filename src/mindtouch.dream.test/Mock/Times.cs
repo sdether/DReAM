@@ -44,11 +44,15 @@ namespace MindTouch.Dream.Test.Mock {
             /// </summary>
             TooMany,
             /// <summary>
-            /// <see cref="Times.Verify(int)"/> was called with the expected number of occurences.
+            /// <see cref="Times.Verify(int)"/> was called the appropriate number of times, but future results may change this assessment.
+            /// </summary>
+            Acceptable,
+            /// <summary>
+            /// <see cref="Times.Verify(int)"/> was called the appropriate number of times and future results will not change this assessment.
             /// </summary>
             Ok
         }
-        
+
         private enum Type {
             AtLeast,
             AtMost,
@@ -135,51 +139,27 @@ namespace MindTouch.Dream.Test.Mock {
         /// <param name="count">Occurence count.</param>
         /// <returns>Verification result</returns>
         public Result Verify(int count) {
-            return Verify(count, TimeSpan.Zero);
-        }
-
-        /// <summary>
-        /// Verify the specified number of occurences against expectations.
-        /// </summary>
-        /// <param name="count">Occurence count.</param>
-        /// <param name="timeout">Time to wait if expectations have not yet been met.</param>
-        /// <returns>Verification result</returns>
-        public Result Verify(int count, TimeSpan timeout) {
-            while(true) {
-                Result? result = null;
-                switch(_type) {
-                case Type.Exactly:
-                    if(count > _times) {
-                        result = Result.TooMany;
-                        break;
-                    }
-                    if(count < _times) {
-                        result = Result.TooFew;
-                    }
-                    break;
-                case Type.AtLeast:
-                    if(count < _times) {
-                        result = Result.TooFew;
-                    }
-                    break;
-                case Type.AtMost:
-                    if(count > _times) {
-                        result = Result.TooMany;
-                    }
-                    break;
+            switch(_type) {
+            case Type.Exactly:
+                if(count > _times) {
+                    return Result.TooMany;
                 }
-                if(!result.HasValue) {
-                    result = Result.Ok;
+                if(count < _times) {
+                    return Result.TooFew;
                 }
-                if(timeout.TotalMilliseconds <= 0) {
-                    return result.Value;
+                break;
+            case Type.AtLeast:
+                if(count < _times) {
+                    return Result.TooFew;
                 }
-                if(result != Result.TooFew && (count != 0 || result != Result.Ok)) {
-                    return result.Value;
+                return Result.Ok;
+            case Type.AtMost:
+                if(count > _times) {
+                    return Result.TooMany;
                 }
-                Thread.Sleep(Math.Min(100, (int)timeout.TotalMilliseconds));
-                timeout = timeout.Subtract(TimeSpan.FromMilliseconds(100));
+                break;
             }
+            return Result.Acceptable;
         }
     }
 }

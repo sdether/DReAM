@@ -19,8 +19,6 @@
  * limitations under the License.
  */
 
-using System;
-using System.Diagnostics;
 using MindTouch.Dream.Test.Mock;
 using NUnit.Framework;
 
@@ -38,13 +36,13 @@ namespace MindTouch.Dream.Test {
         [Test]
         public void None_for_Never_is_Ok() {
             var t = Times.Never();
-            Assert.AreEqual(Times.Result.Ok, t.Verify(0));
+            Assert.AreEqual(Times.Result.Acceptable, t.Verify(0));
         }
 
         [Test]
         public void One_for_Once_is_Ok() {
             var t = Times.Once();
-            Assert.AreEqual(Times.Result.Ok, t.Verify(1));
+            Assert.AreEqual(Times.Result.Acceptable, t.Verify(1));
         }
         
         [Test]
@@ -62,19 +60,19 @@ namespace MindTouch.Dream.Test {
         [Test]
         public void None_for_AtMostOnce_is_Ok() {
             var t = Times.AtMostOnce();
-            Assert.AreEqual(Times.Result.Ok, t.Verify(0));
+            Assert.AreEqual(Times.Result.Acceptable, t.Verify(0));
         }
 
         [Test]
         public void Five_for_AtMost_5_is_Ok() {
             var t = Times.AtMost(5);
-            Assert.AreEqual(Times.Result.Ok, t.Verify(5));
+            Assert.AreEqual(Times.Result.Acceptable, t.Verify(5));
         }
 
         [Test]
         public void Four_for_AtMost_5_is_Ok() {
             var t = Times.AtMost(5);
-            Assert.AreEqual(Times.Result.Ok, t.Verify(4));
+            Assert.AreEqual(Times.Result.Acceptable, t.Verify(4));
         }
 
         [Test]
@@ -104,7 +102,7 @@ namespace MindTouch.Dream.Test {
         [Test]
         public void Five_for_Exactly_5_is_Ok() {
             var t = Times.Exactly(5);
-            Assert.AreEqual(Times.Result.Ok, t.Verify(5));
+            Assert.AreEqual(Times.Result.Acceptable, t.Verify(5));
         }
 
         [Test]
@@ -118,42 +116,5 @@ namespace MindTouch.Dream.Test {
             var t = Times.Exactly(5);
             Assert.AreEqual(Times.Result.TooFew, t.Verify(4));
         }
-
-        [Test]
-        public void Never_waits_for_timeout() {
-            var t = Times.Never();
-            var stopwatch = Stopwatch.StartNew();
-            Assert.AreEqual(Times.Result.Ok, t.Verify(0, TimeSpan.FromSeconds(1)));
-            stopwatch.Stop();
-            Assert.GreaterOrEqual(stopwatch.ElapsedMilliseconds,900);
-        }
-
-        [Test]
-        public void Once_does_not_wait_for_timeout() {
-            var t = Times.Once();
-            var stopwatch = Stopwatch.StartNew();
-            Assert.AreEqual(Times.Result.Ok, t.Verify(1, TimeSpan.FromSeconds(1)));
-            stopwatch.Stop();
-            Assert.LessOrEqual(stopwatch.ElapsedMilliseconds,100);
-        }
-
-        [Test]
-        public void TooFew_causes_timeout_wait() {
-            var t = Times.AtLeast(3);
-            var stopwatch = Stopwatch.StartNew();
-            Assert.AreEqual(Times.Result.TooFew, t.Verify(2, TimeSpan.FromSeconds(1)));
-            stopwatch.Stop();
-            Assert.GreaterOrEqual(stopwatch.ElapsedMilliseconds, 900);
-        }
-
-        [Test]
-        public void TooMany_does_not_cause_timeout_wait() {
-            var t = Times.AtMost(3);
-            var stopwatch = Stopwatch.StartNew();
-            Assert.AreEqual(Times.Result.TooMany, t.Verify(4, TimeSpan.FromSeconds(1)));
-            stopwatch.Stop();
-            Assert.LessOrEqual(stopwatch.ElapsedMilliseconds, 100);
-        }
-
     }
 }

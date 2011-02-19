@@ -28,6 +28,7 @@ using log4net;
 using MindTouch.Dream.Test.Mock;
 using MindTouch.Tasking;
 using MindTouch.Xml;
+using MindTouch.Extensions.Time;
 
 namespace MindTouch.Dream.Test {
     /// <summary>
@@ -164,17 +165,24 @@ namespace MindTouch.Dream.Test {
         /// Verify all <see cref="MockPlug"/> instances created with <see cref="Setup(MindTouch.Dream.XUri)"/> since the last <see cref="DeregisterAll"/> call.
         /// </summary>
         /// <remarks>
-        /// Uses a 10 second timeout.
+        /// Uses a 5 second timeout and a 2 second excess request wait time.
         /// </remarks>
         public static void VerifyAll() {
-            VerifyAll(TimeSpan.FromSeconds(10));
+            VerifyAll(10.Seconds());
         }
 
         /// <summary>
         /// Verify all <see cref="MockPlug"/> instances created with <see cref="Setup(MindTouch.Dream.XUri)"/> since the last <see cref="DeregisterAll"/> call.
         /// </summary>
+        /// <remarks>
+        /// Uses a 2 second excess request wait time.
+        /// </remarks>
         /// <param name="timeout">Time to wait for all expectations to be met.</param>
         public static void VerifyAll(TimeSpan timeout) {
+            VerifyAll(timeout, 2.Seconds());
+        }
+
+        public static void VerifyAll(TimeSpan timeout, TimeSpan excessWait) {
             var verifiable = (from mocks in _mocks.Values
                               from mock in mocks
                               where mock.IsVerifiable
@@ -210,12 +218,12 @@ namespace MindTouch.Dream.Test {
         }
 
         //--- Fields ---
-        
+
         /// <summary>
         /// Name for the Mock Plug for debug logging purposes.
         /// </summary>
         public readonly string Name;
-        
+
         private readonly AutoResetEvent _called = new AutoResetEvent(false);
         private readonly List<Tuplet<string, Predicate<string>>> _queryMatchers = new List<Tuplet<string, Predicate<string>>>();
         private readonly List<Tuplet<string, Predicate<string>>> _headerMatchers = new List<Tuplet<string, Predicate<string>>>();
@@ -394,11 +402,11 @@ namespace MindTouch.Dream.Test {
             if(_verifiable == null) {
                 return;
             }
-            ((IMockPlug)this).Verify(TimeSpan.FromSeconds(5), _verifiable);
+            ((IMockPlug)this).Verify(5.Seconds(), 2.Seconds(), _verifiable);
         }
 
         void IMockPlug.Verify(Times times) {
-            ((IMockPlug)this).Verify(TimeSpan.FromSeconds(5), times);
+            ((IMockPlug)this).Verify(5.Seconds(), 2.Seconds(), times);
         }
 
         IMockPlug IMockPlug.ExpectAtLeastOneCall() {
@@ -415,32 +423,52 @@ namespace MindTouch.Dream.Test {
             if(_verifiable == null) {
                 return;
             }
+            ((IMockPlug)this).Verify(timeout, 2.Seconds(), _verifiable);
+        }
+
+        void IMockPlug.Verify(TimeSpan timeout, Times called) {
+            _verifiable = called;
+            ((IMockPlug)this).Verify(timeout, 2.Seconds(), _verifiable);
+        }
+
+        void IMockPlug.Verify(TimeSpan timeout, TimeSpan excessWait) {
+            if(_verifiable == null) {
+                return;
+            }
             ((IMockPlug)this).Verify(timeout, _verifiable);
         }
 
-        void IMockPlug.Verify(TimeSpan timeout, Times times) {
+        void IMockPlug.Verify(TimeSpan timeout, TimeSpan excessWait, Times times) {
+            var stopwatch = Stopwatch.StartNew();
             while(true) {
-                var verified = times.Verify(_times, timeout);
-                if(verified == Times.Result.Ok) {
+                var verified = times.Verify(_times);
+
+                switch(verified) {
+                case Times.Result.Ok:
+
+                    // if Ok, we've succeeded, regardless of timeout
                     _log.DebugFormat("satisfied {0}", _uri);
                     return;
-                }
-                if(verified == Times.Result.TooMany) {
+                case Times.Result.TooMany:
+                    // if TooMany, we've failed regardless of timeout
+                    throw new MockPlugException(string.Format("[{0}] {1}:{2} was called {3} times (too often)", Name, _verb, _uri, _times));
+                case Times.Result.TooFew:
+                    if(stopwatch.Elapsed > timeout) {
+                        // if TooFew, we've failed if timeout time has passed
+                        throw new MockPlugException(string.Format("[{0}] {1}:{2} was called {3} times (too few) and timeout elapsed", Name, _verb, _uri, _times));
+                    }
                     break;
                 }
-
+                var left = stopwatch.Elapsed - (timeout + excessWait);
                 // check if we have any time left to wait
-                if(timeout.TotalMilliseconds < 0) {
+                if(left <= TimeSpan.Zero) {
+                    return;
+                }
+                _log.DebugFormat("waiting on {0}:{1} with {2:0}ms left in timeout", _verb, _uri, left.TotalMilliseconds);
+                if(!_called.WaitOne(left)) {
                     break;
                 }
-                _log.DebugFormat("waiting on {0}:{1} with {2:0.00}ms left in timeout", _verb, _uri, timeout.TotalMilliseconds);
-                var stopwatch = Stopwatch.StartNew();
-                if(!_called.WaitOne(timeout)) {
-                    break;
-                }
-                timeout = timeout.Subtract(stopwatch.Elapsed);
             }
-            throw new MockPlugException(string.Format("[{0}] {1}:{2} was called {3} times before timeout.", Name, _verb, _uri, _times));
         }
         #endregion
     }
