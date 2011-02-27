@@ -1,0 +1,125 @@
+﻿<Project DefaultTargets="Build" ToolsVersion="3.5" InitialTargets="ValidateToolsVersions" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <PropertyGroup>
+        <Configuration>Signed Release</Configuration>
+        <Platform >AnyCPU</Platform>
+        <MindTouchKey Condition=" '$(MindTouchKey)' == '' ">build\mindtouch.dream.public.snk</MindTouchKey>
+    </PropertyGroup>
+    <PropertyGroup>
+        <SolutionDir>$(MSBuildProjectDirectory)\src</SolutionDir>
+        <SolutionExt>.sln</SolutionExt>
+        <SolutionFileName>MindTouchDream.sln</SolutionFileName>
+        <SolutionName>MindTouchDream</SolutionName>
+        <SolutionPath>$(MSBuildProjectDirectory)\src\MindTouchDream.sln</SolutionPath>
+    </PropertyGroup>
+    <PropertyGroup>
+        <TargetFrameworkVersion Condition="'$(TargetFrameworkVersion)' == '' and '$(MSBuildToolsVersion)' == '2.0'">v2.0</TargetFrameworkVersion>
+        <TargetFrameworkVersion Condition="'$(TargetFrameworkVersion)' == '' and '$(MSBuildToolsVersion)' != '2.0'">v3.5</TargetFrameworkVersion>
+    </PropertyGroup>
+    <PropertyGroup>
+        <CurrentSolutionConfigurationContents>
+            <SolutionConfiguration xmlns="">
+                <ProjectConfiguration Project="{3E706653-69D1-4522-BEE8-ECEC1A1BF7DE}">Signed Release|AnyCPU</ProjectConfiguration>
+                <ProjectConfiguration Project="{CAAE6609-8532-4CCA-ABD5-186C43F77687}">Signed Release|AnyCPU</ProjectConfiguration>
+                <ProjectConfiguration Project="{914DF81A-03C0-4B57-BC93-27F287017057}">Signed Release|AnyCPU</ProjectConfiguration>
+                <ProjectConfiguration Project="{E23ADD96-5514-449A-8FD9-1BC0B0177146}">Signed Release|AnyCPU</ProjectConfiguration>
+                <ProjectConfiguration Project="{DCF830D7-F840-41B3-A89A-4145DAEB9744}">Signed Release|AnyCPU</ProjectConfiguration>
+                <ProjectConfiguration Project="{2E8FBF2E-AB73-43D9-B384-45DAD40597AF}">Signed Release|AnyCPU</ProjectConfiguration>
+                <ProjectConfiguration Project="{C612C4DC-E72C-4DFC-8F32-9DE1A45EBE8A}">Signed Release|AnyCPU</ProjectConfiguration>
+                <ProjectConfiguration Project="{909B67F2-F2D6-4B68-8401-A56747379995}">Signed Release|AnyCPU</ProjectConfiguration>
+                <ProjectConfiguration Project="{74182840-62F6-4587-8FA8-88C4D57598AE}">Signed Release|AnyCPU</ProjectConfiguration>
+                <ProjectConfiguration Project="{5FF573E2-A001-438D-984D-6DEE7B8A5F55}">Signed Release|AnyCPU</ProjectConfiguration>
+                <ProjectConfiguration Project="{C4CC19EB-8149-4F39-A6E6-753886309CF6}">Signed Release|AnyCPU</ProjectConfiguration>
+                <ProjectConfiguration Project="{66E62AB7-D8A5-494A-970F-AA6705E33361}">Signed Release|AnyCPU</ProjectConfiguration>
+            </SolutionConfiguration>
+        </CurrentSolutionConfigurationContents>
+    </PropertyGroup>
+    <UsingTask TaskName="MindTouch.Build.Tasks.PreBuild"
+               AssemblyFile="build/mindtouch.build.tasks.dll" />
+    <Target Name="Build">
+        <CallTarget Targets="PreBuild"/>
+        <CallTarget Targets="mindtouch_core;mindtouch_dream_test;mindtouch_dream;mindtouch_host;mindtouch_host_service"/>
+        <CallTarget Targets="PostBuild"/>
+    </Target>
+    <Target Name="Env">
+        <Message Text="MSBuildProjectDirectory: $(MSBuildProjectDirectory)"/>
+        <Message Text="Configuration: $(Configuration)"/>
+        <Message Text="MindTouchKey: $(MindTouchKey)"/>
+        <Message Text="SolutionDir: $(SolutionDir)"/>
+        <Message Text="SolutionExt: $(SolutionExt)"/>
+        <Message Text="SolutionFileName: $(SolutionFileName)"/>
+        <Message Text="SolutionName: $(SolutionName)"/>
+        <Message Text="SolutionPath: $(SolutionPath)"/>
+    </Target>
+    <Target Name="PreBuild">
+        <Message Text="Pre Build" />
+        <Copy SourceFiles="$(MindTouchKey)" DestinationFiles="$(SolutionDir)\mindtouch.snk"/>
+        <PreBuild SolutionDir="$(SolutionDir)"/>
+    </Target>
+    <Target Name="PostBuild">
+        <Message Text="Post Build" />
+    </Target>
+    <Target Name="ValidateToolsVersions">
+        <Error Text="The tools version &quot;$(MSBuildToolsVersion)&quot; of the solution does not support building projects with a different tools version." Code="MSB4149" HelpKeyword="MSBuild.SolutionToolsVersionDoesNotSupportProjectToolsVersion" Condition="'$(MSBuildToolsVersion)' == '2.0' and ('$(ProjectToolsVersion)' != '2.0' and '$(ProjectToolsVersion)' != '')" />
+    </Target>
+    <Target Name="mindtouch_dream" Outputs="@(mindtouch_dreamBuildOutput)">
+        <Message Text="Building DReAM" />
+        <MSBuild Targets="Rebuild" Projects="src\mindtouch.dream\mindtouch.dream.csproj" Properties="Configuration=Signed Release; Platform=AnyCPU; BuildingSolutionFile=true; CurrentSolutionConfigurationContents=$(CurrentSolutionConfigurationContents); SolutionDir=$(SolutionDir); SolutionExt=$(SolutionExt); SolutionFileName=$(SolutionFileName); SolutionName=$(SolutionName); SolutionPath=$(SolutionPath)" ToolsVersion="$(ProjectToolsVersion)" UnloadProjectsOnCompletion="$(UnloadProjectsOnCompletion)" UseResultsCache="$(UseResultsCache)">
+            <Output TaskParameter="TargetOutputs" ItemName="mindtouch_dreamBuildOutput" />
+        </MSBuild>
+    </Target>
+    <Target Name="mindtouch_core" DependsOnTargets="mindtouch_dream" Outputs="@(mindtouch_coreBuildOutput)">
+        <MSBuild Targets="Rebuild" Projects="src\mindtouch.core\mindtouch.core.csproj" Properties="Configuration=Signed Release; Platform=AnyCPU; BuildingSolutionFile=true; CurrentSolutionConfigurationContents=$(CurrentSolutionConfigurationContents); SolutionDir=$(SolutionDir); SolutionExt=$(SolutionExt); SolutionFileName=$(SolutionFileName); SolutionName=$(SolutionName); SolutionPath=$(SolutionPath)" ToolsVersion="$(ProjectToolsVersion)" UnloadProjectsOnCompletion="$(UnloadProjectsOnCompletion)" UseResultsCache="$(UseResultsCache)" >
+            <Output TaskParameter="TargetOutputs" ItemName="mindtouch_coreBuildOutput" />
+        </MSBuild>
+    </Target>
+    <Target Name="mindtouch_host" DependsOnTargets="mindtouch_dream;mindtouch_core" Outputs="@(mindtouch_hostBuildOutput)">
+        <MSBuild Targets="Rebuild" Projects="src\mindtouch.host\mindtouch.host.csproj" Properties="Configuration=Signed Release; Platform=AnyCPU; BuildingSolutionFile=true; CurrentSolutionConfigurationContents=$(CurrentSolutionConfigurationContents); SolutionDir=$(SolutionDir); SolutionExt=$(SolutionExt); SolutionFileName=$(SolutionFileName); SolutionName=$(SolutionName); SolutionPath=$(SolutionPath)" ToolsVersion="$(ProjectToolsVersion)" UnloadProjectsOnCompletion="$(UnloadProjectsOnCompletion)" UseResultsCache="$(UseResultsCache)" >
+            <Output TaskParameter="TargetOutputs" ItemName="mindtouch_hostBuildOutput" />
+        </MSBuild>
+    </Target>
+    <Target Name="mindtouch_host_service" DependsOnTargets="mindtouch_core;mindtouch_dream" Outputs="@(mindtouch_host_serviceBuildOutput)">
+        <MSBuild Targets="Rebuild" Projects="src\mindtouch.host.service\mindtouch.host.service.csproj" Properties="Configuration=Signed Release; Platform=AnyCPU; BuildingSolutionFile=true; CurrentSolutionConfigurationContents=$(CurrentSolutionConfigurationContents); SolutionDir=$(SolutionDir); SolutionExt=$(SolutionExt); SolutionFileName=$(SolutionFileName); SolutionName=$(SolutionName); SolutionPath=$(SolutionPath)" ToolsVersion="$(ProjectToolsVersion)" UnloadProjectsOnCompletion="$(UnloadProjectsOnCompletion)" UseResultsCache="$(UseResultsCache)" >
+            <Output TaskParameter="TargetOutputs" ItemName="mindtouch_host_serviceBuildOutput" />
+        </MSBuild>
+    </Target>
+    <Target Name="mindtouch_dream_test" DependsOnTargets="mindtouch_core;mindtouch_dream" Outputs="@(mindtouch_dream_testBuildOutput)">
+        <MSBuild Targets="Rebuild" Projects="src\mindtouch.dream.test\mindtouch.dream.test.csproj" Properties="Configuration=Signed Release; Platform=AnyCPU; BuildingSolutionFile=true; CurrentSolutionConfigurationContents=$(CurrentSolutionConfigurationContents); SolutionDir=$(SolutionDir); SolutionExt=$(SolutionExt); SolutionFileName=$(SolutionFileName); SolutionName=$(SolutionName); SolutionPath=$(SolutionPath)" ToolsVersion="$(ProjectToolsVersion)" UnloadProjectsOnCompletion="$(UnloadProjectsOnCompletion)" UseResultsCache="$(UseResultsCache)" >
+            <Output TaskParameter="TargetOutputs" ItemName="mindtouch_dream_testBuildOutput" />
+        </MSBuild>
+    </Target>
+    <Target Name="tools\mindtouch_apitest" DependsOnTargets="mindtouch_dream" Outputs="@(mindtouch_apitestBuildOutput)">
+        <MSBuild Targets="Rebuild" Projects="src\mindtouch.apitest\mindtouch.apitest.csproj" Properties="Configuration=Signed Release; Platform=AnyCPU; BuildingSolutionFile=true; CurrentSolutionConfigurationContents=$(CurrentSolutionConfigurationContents); SolutionDir=$(SolutionDir); SolutionExt=$(SolutionExt); SolutionFileName=$(SolutionFileName); SolutionName=$(SolutionName); SolutionPath=$(SolutionPath)" ToolsVersion="$(ProjectToolsVersion)" UnloadProjectsOnCompletion="$(UnloadProjectsOnCompletion)" UseResultsCache="$(UseResultsCache)" >
+            <Output TaskParameter="TargetOutputs" ItemName="mindtouch_apitestBuildOutput" />
+        </MSBuild>
+    </Target>
+    <Target Name="tools\mindtouch_blueprints" DependsOnTargets="mindtouch_dream" Outputs="@(mindtouch_blueprintsBuildOutput)">
+        <MSBuild Targets="Rebuild" Projects="src\mindtouch.blueprints\mindtouch.blueprints.csproj" Properties="Configuration=Signed Release; Platform=AnyCPU; BuildingSolutionFile=true; CurrentSolutionConfigurationContents=$(CurrentSolutionConfigurationContents); SolutionDir=$(SolutionDir); SolutionExt=$(SolutionExt); SolutionFileName=$(SolutionFileName); SolutionName=$(SolutionName); SolutionPath=$(SolutionPath)" ToolsVersion="$(ProjectToolsVersion)" UnloadProjectsOnCompletion="$(UnloadProjectsOnCompletion)" UseResultsCache="$(UseResultsCache)" >
+            <Output TaskParameter="TargetOutputs" ItemName="mindtouch_blueprintsBuildOutput" />
+        </MSBuild>
+    </Target>
+    <Target Name="tools\mindtouch_bench" Outputs="@(mindtouch_benchBuildOutput)">
+        <MSBuild Targets="Rebuild" Projects="src\mindtouch.bench\mindtouch.bench.csproj" Properties="Configuration=Signed Release; Platform=AnyCPU; BuildingSolutionFile=true; CurrentSolutionConfigurationContents=$(CurrentSolutionConfigurationContents); SolutionDir=$(SolutionDir); SolutionExt=$(SolutionExt); SolutionFileName=$(SolutionFileName); SolutionName=$(SolutionName); SolutionPath=$(SolutionPath)" ToolsVersion="$(ProjectToolsVersion)" UnloadProjectsOnCompletion="$(UnloadProjectsOnCompletion)" UseResultsCache="$(UseResultsCache)" >
+            <Output TaskParameter="TargetOutputs" ItemName="mindtouch_benchBuildOutput" />
+        </MSBuild>
+    </Target>
+    <Target Name="tests\test_mindtouch_dream" DependsOnTargets="mindtouch_core;mindtouch_dream_test;mindtouch_dream" Outputs="@(test_mindtouch_dreamBuildOutput)">
+        <MSBuild Targets="Rebuild" Projects="src\tests\DreamMisc\test.mindtouch.dream.csproj" Properties="Configuration=Signed Release; Platform=AnyCPU; BuildingSolutionFile=true; CurrentSolutionConfigurationContents=$(CurrentSolutionConfigurationContents); SolutionDir=$(SolutionDir); SolutionExt=$(SolutionExt); SolutionFileName=$(SolutionFileName); SolutionName=$(SolutionName); SolutionPath=$(SolutionPath)" ToolsVersion="$(ProjectToolsVersion)" UnloadProjectsOnCompletion="$(UnloadProjectsOnCompletion)" UseResultsCache="$(UseResultsCache)" >
+            <Output TaskParameter="TargetOutputs" ItemName="test_mindtouch_dreamBuildOutput" />
+        </MSBuild>
+    </Target>
+    <Target Name="tests\test_system_priorityqueue" DependsOnTargets="mindtouch_dream" Outputs="@(test_system_priorityqueueBuildOutput)">
+        <MSBuild Targets="Rebuild" Projects="src\tests\PriorityQueue\test.system.priorityqueue.csproj" Properties="Configuration=Signed Release; Platform=AnyCPU; BuildingSolutionFile=true; CurrentSolutionConfigurationContents=$(CurrentSolutionConfigurationContents); SolutionDir=$(SolutionDir); SolutionExt=$(SolutionExt); SolutionFileName=$(SolutionFileName); SolutionName=$(SolutionName); SolutionPath=$(SolutionPath)" ToolsVersion="$(ProjectToolsVersion)" UnloadProjectsOnCompletion="$(UnloadProjectsOnCompletion)" UseResultsCache="$(UseResultsCache)" >
+            <Output TaskParameter="TargetOutputs" ItemName="test_system_priorityqueueBuildOutput" />
+        </MSBuild>
+    </Target>
+    <Target Name="tests\test_mindtouch_storage" DependsOnTargets="mindtouch_core;mindtouch_dream_test;mindtouch_dream" Outputs="@(test_mindtouch_storageBuildOutput)">
+        <MSBuild Targets="Rebuild" Projects="src\tests\Storage\test.mindtouch.storage.csproj" Properties="Configuration=Signed Release; Platform=AnyCPU; BuildingSolutionFile=true; CurrentSolutionConfigurationContents=$(CurrentSolutionConfigurationContents); SolutionDir=$(SolutionDir); SolutionExt=$(SolutionExt); SolutionFileName=$(SolutionFileName); SolutionName=$(SolutionName); SolutionPath=$(SolutionPath)" ToolsVersion="$(ProjectToolsVersion)" UnloadProjectsOnCompletion="$(UnloadProjectsOnCompletion)" UseResultsCache="$(UseResultsCache)" >
+            <Output TaskParameter="TargetOutputs" ItemName="test_mindtouch_storageBuildOutput" />
+        </MSBuild>
+    </Target>
+    <Target Name="tests\test_mindtouch_core" DependsOnTargets="mindtouch_core;mindtouch_dream_test;mindtouch_dream" Outputs="@(test_mindtouch_coreBuildOutput)">
+        <MSBuild Targets="Rebuild" Projects="src\tests\test.mindtouch.core\test.mindtouch.core.csproj" Properties="Configuration=Signed Release; Platform=AnyCPU; BuildingSolutionFile=true; CurrentSolutionConfigurationContents=$(CurrentSolutionConfigurationContents); SolutionDir=$(SolutionDir); SolutionExt=$(SolutionExt); SolutionFileName=$(SolutionFileName); SolutionName=$(SolutionName); SolutionPath=$(SolutionPath)" ToolsVersion="$(ProjectToolsVersion)" UnloadProjectsOnCompletion="$(UnloadProjectsOnCompletion)" UseResultsCache="$(UseResultsCache)" >
+            <Output TaskParameter="TargetOutputs" ItemName="test_mindtouch_coreBuildOutput" />
+        </MSBuild>
+    </Target>
+</Project>
