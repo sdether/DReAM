@@ -58,36 +58,14 @@
                    AssemblyFile="build/mindtouch.build.tasks.dll" />
     <Target Name="Build">
         <CallTarget Targets="PreBuild"/>
-        <CallTarget Targets="mindtouch_core;mindtouch_dream_test;mindtouch_dream;mindtouch_host;mindtouch_host_service"/>
+        <CallTarget Targets="Dream"/>
+        <!--<CallTarget Targets="mindtouch_core;mindtouch_dream_test;mindtouch_dream;mindtouch_host;mindtouch_host_service"/>-->
         <CallTarget Targets="PostBuild"/>
-    </Target>
-    <Target Name="Env">
-        <CombinePath BasePath="$(DistDir)" Paths="$(Files)">
-            <Output TaskParameter="CombinedPaths" PropertyName="DistFiles"/>
-        </CombinePath>
-        <Message Text="DistFiles: $(DistFiles)"/>
-        <Message Text="Configuration: $(Configuration)"/>
-        <Message Text="MindTouchKey: $(MindTouchKey)"/>
-        <Message Text="SolutionDir: $(SolutionDir)"/>
-        <Message Text="SolutionExt: $(SolutionExt)"/>
-        <Message Text="SolutionFileName: $(SolutionFileName)"/>
-        <Message Text="SolutionName: $(SolutionName)"/>
-        <Message Text="SolutionPath: $(SolutionPath)"/>
     </Target>
     <Target Name="PostBuild">
         <Message Text="Post Build" />
-        <Delete Files="$(SolutionDir)\mindtouch.snk"/>
         <PostBuild SolutionDir="$(SolutionDir)" ConfigurationFilename="$(ConfigurationFilename)" IgnoreModified="$(IgnoreModified)"/>
         <MakeDir Directories="$(DistDir)"/>
-        <CombinePath BasePath="$(BinDir)" Paths="$(Files)">
-            <Output TaskParameter="CombinedPaths" PropertyName="SourceFiles"/>
-        </CombinePath>
-        <CombinePath BasePath="$(DistDir)" Paths="$(Files)">
-            <Output TaskParameter="CombinedPaths" PropertyName="DestFiles"/>
-        </CombinePath>
-        <Copy SourceFiles="$(SourceFiles)" DestinationFiles="$(DestFiles)"/>
-    </Target>
-    <Target Name="test">
         <CombinePath BasePath="$(BinDir)" Paths="$(Files)">
             <Output TaskParameter="CombinedPaths" PropertyName="SourceFiles"/>
         </CombinePath>
@@ -108,8 +86,27 @@
     <Target Name="ValidateToolsVersions">
         <Error Text="The tools version &quot;$(MSBuildToolsVersion)&quot; of the solution does not support building projects with a different tools version." Code="MSB4149" HelpKeyword="MSBuild.SolutionToolsVersionDoesNotSupportProjectToolsVersion" Condition="'$(MSBuildToolsVersion)' == '2.0' and ('$(ProjectToolsVersion)' != '2.0' and '$(ProjectToolsVersion)' != '')" />
     </Target>
-    <Target Name="mindtouch_dream" Outputs="@(mindtouch_dreamBuildOutput)">
+    <Target Name="Env">
+        <CombinePath BasePath="$(DistDir)" Paths="$(Files)">
+            <Output TaskParameter="CombinedPaths" PropertyName="DistFiles"/>
+        </CombinePath>
+        <Message Text="DistFiles: $(DistFiles)"/>
+        <Message Text="Configuration: $(Configuration)"/>
+        <Message Text="MindTouchKey: $(MindTouchKey)"/>
+        <Message Text="SolutionDir: $(SolutionDir)"/>
+        <Message Text="SolutionExt: $(SolutionExt)"/>
+        <Message Text="SolutionFileName: $(SolutionFileName)"/>
+        <Message Text="SolutionName: $(SolutionName)"/>
+        <Message Text="SolutionPath: $(SolutionPath)"/>
+    </Target>
+    <Target Name="Dream" Outputs="@(DreamBuildOutput)">
         <Message Text="Building DReAM" />
+        <MSBuild Targets="Rebuild" Projects="src\MindTouchDream.sln" Properties="Configuration=Signed Release; Platform=Any CPU; BuildingSolutionFile=true; SolutionDir=$(SolutionDir); SolutionExt=$(SolutionExt); SolutionFileName=$(SolutionFileName); SolutionName=$(SolutionName); SolutionPath=$(SolutionPath)" ToolsVersion="$(ProjectToolsVersion)" UnloadProjectsOnCompletion="$(UnloadProjectsOnCompletion)" UseResultsCache="$(UseResultsCache)">
+            <Output TaskParameter="TargetOutputs" ItemName="DreamBuildOutput" />
+        </MSBuild>
+        <Message Text="Done building DReAM" />
+    </Target>
+    <Target Name="mindtouch_dream" Outputs="@(mindtouch_dreamBuildOutput)">
         <MSBuild Targets="Rebuild" Projects="src\mindtouch.dream\mindtouch.dream.csproj" Properties="Configuration=Signed Release; Platform=AnyCPU; BuildingSolutionFile=true; CurrentSolutionConfigurationContents=$(CurrentSolutionConfigurationContents); SolutionDir=$(SolutionDir); SolutionExt=$(SolutionExt); SolutionFileName=$(SolutionFileName); SolutionName=$(SolutionName); SolutionPath=$(SolutionPath)" ToolsVersion="$(ProjectToolsVersion)" UnloadProjectsOnCompletion="$(UnloadProjectsOnCompletion)" UseResultsCache="$(UseResultsCache)">
             <Output TaskParameter="TargetOutputs" ItemName="mindtouch_dreamBuildOutput" />
         </MSBuild>

@@ -859,6 +859,7 @@ namespace MindTouch.Text {
                 }
                 stateloop_continue:
                 var x = 0;
+                x++;
             }
             stateloop_end:
             stateSave = state;
