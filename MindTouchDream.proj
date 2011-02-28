@@ -37,7 +37,6 @@
     <Target Name="Build">
         <CallTarget Targets="PreBuild"/>
         <CallTarget Targets="Dream"/>
-        <!--<CallTarget Targets="mindtouch_core;mindtouch_dream_test;mindtouch_dream;mindtouch_host;mindtouch_host_service"/>-->
         <CallTarget Targets="PostBuild"/>
     </Target>
     <Target Name="PostBuild">
