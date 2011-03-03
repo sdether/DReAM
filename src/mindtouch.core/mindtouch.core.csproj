@@ -83,6 +83,7 @@
   <ItemGroup>
     <Compile Include="AmazonS3\AmazonS3Client.cs" />
     <Compile Include="AmazonS3\AmazonS3DataInfo.cs" />
+    <Compile Include="AmazonS3\AmazonS3Endpoint.cs" />
     <Compile Include="AmazonS3\S3PlugEx.cs" />
     <Compile Include="AssemblyInfo.cs" />
     <Compile Include="DreamApplicationConfiguration.cs" />

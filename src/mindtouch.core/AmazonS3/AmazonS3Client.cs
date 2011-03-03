@@ -63,7 +63,7 @@ namespace MindTouch.Dream.AmazonS3 {
             _rootPlug = _bucketPlug;
             if(!string.IsNullOrEmpty(_config.RootPath)) {
                 _keyRootParts = _config.RootPath.Split(new[] { "/" }, StringSplitOptions.RemoveEmptyEntries);
-                if(_keyRootParts != null && _keyRootParts.Any()) {
+                if(_keyRootParts.Any()) {
                     _rootPlug = _rootPlug.At(_keyRootParts);
                 }
             }

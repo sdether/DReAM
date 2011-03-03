@@ -21,12 +21,15 @@
 using System;
 
 namespace MindTouch.Dream.AmazonS3 {
-
     /// <summary>
     /// Amazon S3 Client configuration
     /// </summary>
     public class AmazonS3ClientConfig {
 
+        //--- Constructors ---
+        public AmazonS3ClientConfig() {
+            WithEndpoint(AmazonS3Endpoint.Default);
+        }
         //--- Properties ---
 
         /// <summary>
@@ -53,7 +56,7 @@ namespace MindTouch.Dream.AmazonS3 {
         /// Root Path inside Bucket (can be null).
         /// </summary>
         public string RootPath { get; set; }
-        
+
         /// <summary>
         /// Path delimiter.
         /// </summary>
@@ -63,5 +66,16 @@ namespace MindTouch.Dream.AmazonS3 {
         /// Client call timeout.
         /// </summary>
         public TimeSpan Timeout { get; set; }
+
+        /// <summary>
+        /// Optional
+        /// </summary>
+        public string LocationConstraint { get; set; }
+
+        //--- Methods ---
+        public void WithEndpoint(AmazonS3Endpoint endpoint) {
+            S3BaseUri = endpoint.Uri;
+            LocationConstraint = endpoint.LocationConstraint;
+        }
     }
 }

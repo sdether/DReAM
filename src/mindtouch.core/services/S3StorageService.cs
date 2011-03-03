@@ -147,7 +147,6 @@ namespace MindTouch.Dream.Services {
 
             // set up S3 client
             var s3Config = new AmazonS3ClientConfig() {
-                S3BaseUri = new XUri(config["baseuri"].AsText.IfNullOrEmpty("http://s3.amazonaws.com")),
                 Bucket = config["bucket"].AsText,
                 Delimiter = "/",
                 RootPath = config["folder"].AsText,
@@ -155,6 +154,18 @@ namespace MindTouch.Dream.Services {
                 PublicKey = config["publickey"].AsText,
                 Timeout = TimeSpan.FromSeconds(config["timeout"].AsDouble ?? DEFAULT_S3_TIMEOUT)
             };
+            var endpoint = AmazonS3Endpoint.GetEndpoint(config["endpoint"].AsText);
+            if(endpoint != null) {
+                s3Config.WithEndpoint(endpoint);
+            }
+            var baseUri = config["baseuri"].AsUri;
+            if(baseUri != null)) {
+                s3Config.S3BaseUri = baseUri;
+            }
+            var locationConstraint = config["locationconstraint"].AsText;
+            if(!string.IsNullOrEmpty(locationConstraint)) {
+                s3Config.LocationConstraint = locationConstraint;
+            }
             if(string.IsNullOrEmpty(s3Config.Bucket)) {
                 throw new ArgumentException("missing configuration parameter 'bucket'");
             }
