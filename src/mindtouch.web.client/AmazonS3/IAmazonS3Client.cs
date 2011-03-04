@@ -19,12 +19,11 @@
  * limitations under the License.
  */
 using System;
-using MindTouch.Dream.Services;
 
 namespace MindTouch.Dream.AmazonS3 {
 
     /// <summary>
-    /// Amazon S3 Client abstraction for use by <see cref="S3StorageService"/>
+    /// Amazon S3 Client abstraction for use by DReAM's S3StorageService
     /// </summary>
     public interface IAmazonS3Client : IDisposable {
         

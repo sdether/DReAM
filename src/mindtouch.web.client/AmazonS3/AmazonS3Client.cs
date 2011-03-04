@@ -22,14 +22,13 @@ using System;
 using System.Linq;
 using log4net;
 using MindTouch.Collections;
-using MindTouch.Dream.Services;
 using MindTouch.Tasking;
 using MindTouch.Xml;
 
 namespace MindTouch.Dream.AmazonS3 {
 
     /// <summary>
-    /// Amazon S3 Client abstraction for use by <see cref="S3StorageService"/>
+    /// Amazon S3 Client abstraction for use by DReAM's S3StorageService
     /// </summary>
     public class AmazonS3Client : IAmazonS3Client {
 
@@ -63,7 +62,7 @@ namespace MindTouch.Dream.AmazonS3 {
             _rootPlug = _bucketPlug;
             if(!string.IsNullOrEmpty(_config.RootPath)) {
                 _keyRootParts = _config.RootPath.Split(new[] { "/" }, StringSplitOptions.RemoveEmptyEntries);
-                if(_keyRootParts != null && _keyRootParts.Any()) {
+                if(_keyRootParts.Any()) {
                     _rootPlug = _rootPlug.At(_keyRootParts);
                 }
             }

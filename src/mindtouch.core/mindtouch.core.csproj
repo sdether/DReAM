@@ -78,12 +78,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AmazonS3\AmazonS3Client.cs" />
-    <Compile Include="AmazonS3\AmazonS3ClientConfig.cs" />
-    <Compile Include="AmazonS3\AmazonS3DataInfo.cs" />
-    <Compile Include="AmazonS3\AmazonS3FileHandle.cs" />
-    <Compile Include="AmazonS3\IAmazonS3Client.cs" />
-    <Compile Include="AmazonS3\S3PlugEx.cs" />
     <Compile Include="AssemblyInfo.cs" />
     <Compile Include="DreamCoreUtil.cs" />
     <Compile Include="DreamHost.cs" />
@@ -102,9 +96,6 @@
     <Compile Include="services\RedirectService.cs" />
     <Compile Include="services\S3StorageService.cs" />
     <Compile Include="services\StorageService.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Makefile" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="resources\host\error.xslt" />
