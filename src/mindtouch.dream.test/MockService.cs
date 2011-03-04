@@ -1,6 +1,6 @@
 ﻿/*
  * MindTouch Dream - a distributed REST framework 
- * Copyright (C) 2006-2009 MindTouch, Inc.
+ * Copyright (C) 2006-2011 MindTouch, Inc.
  * www.mindtouch.com  oss@mindtouch.com
  *
  * For community documentation and downloads visit wiki.developer.mindtouch.com;
@@ -32,7 +32,7 @@ namespace MindTouch.Dream.Test {
     /// Provides an <see cref="IDreamService"/> skeleton implemenation with static instance accessor and callback mechanism to externally
     /// intercept service behavior.
     /// </summary>
-    [DreamService("MockService", "Copyright (c) 2008 MindTouch, Inc.",
+    [DreamService("MockService", "Copyright (c) 2006-2011 MindTouch, Inc.",
         Info = "",
         SID = new[] { SID }
         )]

@@ -10,7 +10,7 @@ if you have a patch you'd like to see in the next point release, please
 base your work on the release branch (currently 2.2).
 
 If you submit a pull request for master, your changes will not make it
-into an official releas until the next release branch is created
+into an official release until the next release branch is created
 (current target, 2.3)
 
 1. What is MindTouch DReAM?

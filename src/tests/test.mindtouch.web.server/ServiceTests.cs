@@ -1,6 +1,6 @@
 /*
  * MindTouch Dream - a distributed REST framework 
- * Copyright (C) 2006-2009 MindTouch, Inc.
+ * Copyright (C) 2006-2011 MindTouch, Inc.
  * www.mindtouch.com  oss@mindtouch.com
  *
  * For community documentation and downloads visit wiki.developer.mindtouch.com;
@@ -191,7 +191,7 @@ namespace MindTouch.Dream.Test {
         }
     }
 
-    [DreamService("TestParentService", "Copyright (c) 2008 MindTouch, Inc.",
+    [DreamService("TestParentService", "Copyright (c) 2006-2011 MindTouch, Inc.",
         Info = "",
         SID = new[] { "sid://mindtouch.com/TestParentService" }
     )]
@@ -241,7 +241,7 @@ namespace MindTouch.Dream.Test {
         }
     }
 
-    [DreamService("TestChildService", "Copyright (c) 2008 MindTouch, Inc.",
+    [DreamService("TestChildService", "Copyright (c) 2006-2011 MindTouch, Inc.",
         Info = "",
         SID = new[] { "sid://mindtouch.com/TestChildService" }
     )]
@@ -257,7 +257,7 @@ namespace MindTouch.Dream.Test {
         }
     }
 
-    [DreamService("TestBadStartService", "Copyright (c) 2009 MindTouch, Inc.",
+    [DreamService("TestBadStartService", "Copyright (c) 2006-2011 MindTouch, Inc.",
         Info = "",
         SID = new[] { "sid://mindtouch.com/TestBadStartService" }
     )]
@@ -277,7 +277,7 @@ namespace MindTouch.Dream.Test {
         }
     }
 
-    [DreamService("TestBadStopService", "Copyright (c) 2009 MindTouch, Inc.",
+    [DreamService("TestBadStopService", "Copyright (c) 2006-2011 MindTouch, Inc.",
         Info = "",
         SID = new[] { "sid://mindtouch.com/TestBadStopService" }
     )]
@@ -298,7 +298,7 @@ namespace MindTouch.Dream.Test {
         }
     }
 
-    [DreamService("TestEmptyService", "Copyright (c) 2009 MindTouch, Inc.",
+    [DreamService("TestEmptyService", "Copyright (c) 2006-2011 MindTouch, Inc.",
         Info = "",
         SID = new[] { "sid://mindtouch.com/TestEmptyService" }
     )]

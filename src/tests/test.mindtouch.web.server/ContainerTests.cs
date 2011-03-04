@@ -1,6 +1,6 @@
 ﻿/*
  * MindTouch Dream - a distributed REST framework 
- * Copyright (C) 2006-2009 MindTouch, Inc.
+ * Copyright (C) 2006-2011 MindTouch, Inc.
  * www.mindtouch.com  oss@mindtouch.com
  *
  * For community documentation and downloads visit wiki.developer.mindtouch.com;
@@ -289,7 +289,7 @@ namespace MindTouch.Dream.Test {
         }
     }
 
-    [DreamService("ContainerTestService", "Copyright (c) 2010 MindTouch, Inc.", SID = new string[] { "sid://mindtouch.com/ContainerTestService" })]
+    [DreamService("ContainerTestService", "Copyright (c) 2006-2011 MindTouch, Inc.", SID = new string[] { "sid://mindtouch.com/ContainerTestService" })]
     public class ContainerTestService : DreamService {
 
         public static LifetimeTest LifetimeTest;
