@@ -56,10 +56,11 @@ using MindTouch;
 //
 // You can specify all the values or you can default the Revision and Build Numbers 
 // by using the '*' as shown below:
-[assembly: AssemblyVersion("3.0.0.20928")]
-[assembly: AssemblyFileVersion("3.0.0.20928")]
-[assembly: SvnRevision(20928)]
-[assembly: SvnBranch("trunk")]
+[assembly: AssemblyVersion("3.0.0.6")]
+[assembly: AssemblyFileVersion("3.0.0.6")]
+[assembly: GitBranch("reorg")]
+[assembly: GitRevision("0c6dd231")]
+[assembly: GitUri("https://github.com/sdether/DReAM")]
 
 //
 // In order to sign your assembly you must specify a key to use. Refer to the 

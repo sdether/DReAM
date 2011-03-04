@@ -53,10 +53,11 @@ using System.Runtime.InteropServices;
 //
 // You can specify all the values or you can default the Revision and Build Numbers 
 // by using the '*' as shown below:
-[assembly: AssemblyVersion("2.1.1.20928")]
-[assembly: AssemblyFileVersion("2.1.1.20928")]
-[assembly: SvnRevision(20928)]
-[assembly: SvnBranch("trunk")]
+[assembly: AssemblyVersion("3.0.0.0")]
+[assembly: AssemblyFileVersion("3.0.0.0")]
+[assembly: GitBranch("master")]
+[assembly: GitRevision("HEAD")]
+[assembly: GitUri("https://github.com/sdether/DReAM")]
 
 //
 // In order to sign your assembly you must specify a key to use. Refer to the 

@@ -94,6 +94,9 @@
     <Compile Include="Equality.cs" />
     <Compile Include="Extensions\ReflectionEx.cs" />
     <Compile Include="Extensions\TimeExtensions.cs" />
+    <Compile Include="GitBranchAttribute.cs" />
+    <Compile Include="GitRevisionAttribute.cs" />
+    <Compile Include="GitUriAttribute.cs" />
     <Compile Include="IO\BinaryFormatterSerializer.cs" />
     <Compile Include="IO\ChunkedMemoryStream.cs" />
     <Compile Include="IO\IQueueItemSerializer.cs" />

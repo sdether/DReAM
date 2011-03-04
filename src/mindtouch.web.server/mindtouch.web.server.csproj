@@ -84,7 +84,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AssemblyInfo.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Dream\AutoFacEx.cs" />
     <Compile Include="Dream\DreamAccess.cs" />
     <Compile Include="Dream\DreamContainerScope.cs" />
@@ -111,9 +111,6 @@
     <Compile Include="Dream\servicebase.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Makefile" />
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\mindtouch.common\mindtouch.common.csproj">
       <Project>{EA09760D-B1FC-4E5F-A5A8-B3BD16395378}</Project>
       <Name>mindtouch.common</Name>
@@ -133,9 +130,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DreamContextAccessException.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Properties\" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
