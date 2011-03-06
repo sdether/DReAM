@@ -19,6 +19,7 @@
  * limitations under the License.
  */
 using System;
+using MindTouch.Extensions.Time;
 
 namespace MindTouch.Dream.AmazonS3 {
     /// <summary>
@@ -26,10 +27,21 @@ namespace MindTouch.Dream.AmazonS3 {
     /// </summary>
     public class AmazonS3ClientConfig {
 
+        //--- Class Fields ---
+        private static readonly TimeSpan DEFAULT_TIMEOUT = 30.Seconds();
+
         //--- Constructors ---
+        
+        /// <summary>
+        /// Create a new configuration instance
+        /// </summary>
         public AmazonS3ClientConfig() {
             WithEndpoint(AmazonS3Endpoint.Default);
+            Timeout = DEFAULT_TIMEOUT;
+            RootPath = "/";
+            Delimiter = "/";
         }
+
         //--- Properties ---
 
         /// <summary>
