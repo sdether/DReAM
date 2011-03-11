@@ -100,7 +100,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
-    <None Include="Makefile" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties\" />

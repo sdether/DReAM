@@ -85,7 +85,6 @@
     <Compile Include="DreamServiceInfo.cs" />
     <Compile Include="DreamServiceTestUtil.cs" />
     <Compile Include="DreamTestHelper.cs" />
-    <Compile Include="Data\MockDataCatalog.cs" />
     <Compile Include="MockService.cs" />
     <Compile Include="MockServiceInfo.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -119,9 +118,6 @@
       <Project>{78811CFB-C61D-4914-81D6-E43B33F44527}</Project>
       <Name>mindtouch.xml</Name>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Makefile" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
