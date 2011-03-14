@@ -85,7 +85,7 @@ namespace MindTouch.Dream.Http {
         private AuthenticationSchemes _authenticationSheme;
 
         //--- Constructors ---
-        public HttpTransport(IDreamEnvironment env, XUri uri, AuthenticationSchemes authenticationSheme){
+        public HttpTransport(IDreamEnvironment env, XUri uri, AuthenticationSchemes authenticationSheme) {
             if(env == null) {
                 throw new ArgumentNullException("env");
             }
@@ -111,7 +111,7 @@ namespace MindTouch.Dream.Http {
         }
 
         //--- Methods ---
-        public void Startup(){
+        public void Startup() {
             _log.InfoMethodCall("Startup", _uri);
 
             // create listener and make it listen to the uri
@@ -141,7 +141,7 @@ namespace MindTouch.Dream.Http {
             try {
                 _listener.Stop();
             } catch(Exception e) {
-                _log.Debug("Shutdown",e);
+                _log.Debug("Shutdown", e);
             }
         }
 
@@ -262,7 +262,16 @@ namespace MindTouch.Dream.Http {
 
                 // send message stream
                 long size = item.ContentLength;
+                _log.DebugFormat("content-length: {0}", size);
+                _log.DebugFormat("status: {0}", item.Status);
                 if(((size == -1) || (size > 0)) && (stream != Stream.Null)) {
+                    if(size == -1) {
+                        httpContext.Response.KeepAlive = true;
+                        httpContext.Response.ContentLength64 = -1;
+                        httpContext.Response.SendChunked = true;
+                        _log.DebugFormat("streaming, content-length:", httpContext.Response.ContentLength64);
+                        //httpContext.Response.OutputStream.Flush();
+                    }
                     activity(string.Format("pre CopyStream ({0} bytes)", size));
                     yield return CopyStream(activity, stream, httpContext.Response.OutputStream, size, new Result<long>(DreamHostService.MAX_REQUEST_TIME)).CatchAndLog(_log);
                     activity("post CopyStream");

@@ -21,6 +21,7 @@
 
 using System;
 using System.IO;
+using System.Text;
 using System.Threading;
 
 using MindTouch.IO;
@@ -137,6 +138,20 @@ namespace MindTouch.Dream.Test {
             reader.Close();
             Assert.AreEqual(write.Length, count);
             Assert.AreEqual(write, ArrayUtil.SubArray(read, 0, count));
+        }
+
+        [Test]
+        public void Can_read_from_pipe_while_writer_is_open() {
+            Stream writer;
+            Stream reader;
+            StreamUtil.CreatePipe( out writer, out reader);
+            var sent = Encoding.ASCII.GetBytes(StringUtil.CreateAlphaNumericKey(10));
+            writer.Write(sent);
+            writer.Flush();
+            var received = reader.ReadBytes(sent.Length);
+            Assert.AreEqual(sent, received);
+            writer.Close();
+            reader.Close();
         }
 
         [Ignore("xri stuff not working right")]

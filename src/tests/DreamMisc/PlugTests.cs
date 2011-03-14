@@ -23,6 +23,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Text;
 using System.Threading;
 using log4net;
 using MindTouch.IO;
@@ -704,6 +705,54 @@ namespace MindTouch.Dream.Test {
             Assert.AreEqual("http://foo/bar", plug.ToString());
         }
 
+        [Test]
+        public void Plug_InvokeEx_will_stream() {
+            using(var hostInfo = DreamTestHelper.CreateRandomPortHost()) {
+                Stream stream = null;
+                var mock = MockService.CreateMockService(hostInfo);
+                byte[] sent = null;
+                mock.Service.CatchAllCallback = delegate(DreamContext context, DreamMessage request, Result<DreamMessage> response) {
+                    DreamMessage msg;
+                    DreamMessage.ForStreaming(MimeType.TEXT, out msg, out stream);
+                    _log.Debug("priming stream");
+                    sent = Encoding.ASCII.GetBytes("foo");
+                    stream.Write(sent, 0, sent.Length);
+                    stream.Flush();
+                    _log.Debug("returning stream");
+                    response.Return(msg);
+                };
+                //var mockPlug = mock.AtLocalHost;
+                var mockPlug = Plug.New(mock.AtLocalHost.Uri.WithScheme("ext-http"));
+                _log.DebugFormat("requesting stream from {0}", mockPlug);
+                Thread.Sleep(10*60*1000);
+                var streamRequest = mockPlug.InvokeEx("GET", DreamMessage.Ok(), new Result<DreamMessage>()).Wait();
+                _log.DebugFormat("got response, content-length: {0}", streamRequest.ContentLength);
+                var incoming = streamRequest.ToStream();
+                Assert.IsNotNull(stream);
+                _log.DebugFormat("reading from stream");
+                var received = incoming.ReadBytes(sent.Length);
+                Assert.AreEqual(sent, received);
+                for(var i = 0; i < 10; i++) {
+                    _log.DebugFormat("writing to stream ({0})", i);
+                    sent = Encoding.ASCII.GetBytes("foo");
+                    stream.Write(sent, 0, sent.Length);
+                    stream.Flush();
+                    _log.DebugFormat("reading from stream ({0})", i);
+                    received = incoming.ReadBytes(sent.Length);
+                    Assert.AreEqual(sent, received);
+                }
+            }
+        }
+
+        [Test, Ignore("long running streaming test")]
+        public void Plug_InvokeEx_can_read_intermittent_stream() {
+
+        }
+
+        [Test, Ignore("long running streaming test")]
+        public void Plug_InvokeEx_can_read_with_intermittent_reader() {
+
+        }
 
         private void Upload_Files(bool local) {
             using(var hostInfo = DreamTestHelper.CreateRandomPortHost()) {
@@ -733,11 +782,11 @@ namespace MindTouch.Dream.Test {
                 while(total < request.ContentLength) {
                     Result<int> read;
                     yield return read = stream.Read(buffer, 0, buffer.Length, new Result<int>());
-                    //int read = stream.Read(buffer, 0, buffer.Length);
                     if(read.Value == 0) {
                         break;
                     }
                     total += read.Value;
+
                     //fake some latency
                     yield return Async.Sleep(TimeSpan.FromMilliseconds(1));
                 }
@@ -825,9 +874,6 @@ namespace MindTouch.Dream.Test {
         }
 
         public override int EndRead(IAsyncResult asyncResult) {
-
-            // some artificial latency
-            //Thread.Sleep(1);
             var result = (MockAsyncResult)asyncResult;
             var read = 0;
             for(var i = 0; i < result.Count; i++) {
