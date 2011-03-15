@@ -18,14 +18,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-using System.Collections.Generic;
+using System.Text;
 
 namespace MindTouch.Statsd {
+    public abstract class AStatistic {
 
-    public interface IStatsLogger {
+        //--- Fields ---
+        public string Name;
+
+        //--- Abstract Properties ---
+        protected abstract string Value { get; }
 
         //--- Methods ---
-        void UpdateCounter(IEnumerable<CountingStatistic> stats, double sampling);
-        void Timing(IEnumerable<TimingStatistic> stats, double sampling);
+        public byte[] ToBytes(double sampling) {
+            return Encoding.ASCII.GetBytes(string.Format("{0}:{1}{2}",
+                Name,
+                Value,
+                sampling == 1 ? "" : "|@" + sampling
+            ));
+        }
     }
 }

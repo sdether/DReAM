@@ -1,4 +1,4 @@
-﻿/*
+/*
  * MindTouch Dream - a distributed REST framework 
  * Copyright (C) 2006-2011 MindTouch, Inc.
  * www.mindtouch.com  oss@mindtouch.com
@@ -18,14 +18,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+using System;
+using log4net;
+
 namespace MindTouch.Statsd {
-    public class CountingStat : AStat {
-        public CountingStat() {}
-        public CountingStat(string name, int count) {
-            Name = name;
-            Count = count;
+    [AttributeUsage(AttributeTargets.Assembly)]
+    public class AppSettingsConfiguratorAttribute : Attribute {
+
+        //--- Class Fields ---
+        private static readonly ILog _log = LogUtils.CreateLog();
+
+        //--- Constructors ---
+        public AppSettingsConfiguratorAttribute() {
+            var e = AppSettingsStatsConfigurator.TryConfigure();
+            if(e == null) {
+                return;
+            }
+            _log.Warn("Unable to configure statsd logger", e);
         }
-        public int Count;
-        protected override string Value { get { return Count + "|c"; } }
+
     }
 }

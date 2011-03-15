@@ -1,4 +1,4 @@
-﻿/*
+/*
  * MindTouch Dream - a distributed REST framework 
  * Copyright (C) 2006-2011 MindTouch, Inc.
  * www.mindtouch.com  oss@mindtouch.com
@@ -18,16 +18,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-using System;
-
 namespace MindTouch.Statsd {
-    public class TimingStat : AStat {
-        public TimingStat() { }
-        public TimingStat(string name, TimeSpan time) {
-            Name = name;
-            Time = time;
+    public class StatsConfiguration {
+
+        //--- Constructors ---
+        public StatsConfiguration() { }
+
+        public StatsConfiguration(StatsConfiguration config) {
+            Host = config.Host;
+            Port = config.Port;
         }
-        public TimeSpan Time;
-        protected override string Value { get { return Time.TotalMilliseconds.ToString("0") + "|ms"; } }
+
+        //--- Properties ---
+        public string Host { get; set; }
+        public int Port { get; set; }
     }
 }

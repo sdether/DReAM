@@ -24,39 +24,26 @@ using System.Linq;
 using System.Net.Sockets;
 
 namespace MindTouch.Statsd {
-
-    public class StatsConfiguration {
-        public static readonly StatsConfiguration Empty = new StatsConfiguration();
-
-        public StatsConfiguration() { }
-
-        public StatsConfiguration(StatsConfiguration config) {
-            Host = config.Host;
-            Port = config.Port;
-        }
-
-        public string Host { get; set; }
-        public int Port { get; set; }
-    }
-
     public class StatsLogger : IStatsLogger {
 
         private readonly UdpClient _client;
         private readonly Random _random = new Random();
 
+        //--- Constructors ---
         public StatsLogger(StatsConfiguration configuration) {
             _client = new UdpClient(configuration.Host, configuration.Port);
         }
 
-        public void UpdateCounter(IEnumerable<CountingStat> stats, double sampling) {
-            Send(stats.Cast<AStat>(),sampling);
+        //--- Methods ---
+        public void UpdateCounter(IEnumerable<CountingStatistic> stats, double sampling) {
+            Send(stats.Cast<AStatistic>(),sampling);
         }
 
-        public void Timing(IEnumerable<TimingStat> stats, double sampling) {
-            Send(stats.Cast<AStat>(), sampling);
+        public void Timing(IEnumerable<TimingStatistic> stats, double sampling) {
+            Send(stats.Cast<AStatistic>(), sampling);
         }
 
-        private void Send(IEnumerable<AStat> stats, double sampling) {
+        private void Send(IEnumerable<AStatistic> stats, double sampling) {
             if(sampling < 1 && _random.Next(1) > sampling) {
                 return;
             }

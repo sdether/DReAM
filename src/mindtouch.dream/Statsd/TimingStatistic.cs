@@ -18,19 +18,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-using System.Text;
+using System;
 
 namespace MindTouch.Statsd {
-    public abstract class AStat {
-        public string Name;
-        public byte[] ToBytes(double sampling) {
-            return Encoding.ASCII.GetBytes(string.Format("{0}:{1}{2}",
-                Name,
-                Value,
-                sampling == 1 ? "" : "|@" + sampling
-            ));
+    public class TimingStatistic : AStatistic {
+
+        //--- Fields ---
+        public TimeSpan Time;
+
+        //--- Constructors ---
+        public TimingStatistic() { }
+        public TimingStatistic(string name, TimeSpan time) {
+            Name = name;
+            Time = time;
         }
 
-        protected abstract string Value { get; }
+        //--- Methods ---
+        protected override string Value { get { return Time.TotalMilliseconds.ToString("0") + "|ms"; } }
     }
 }

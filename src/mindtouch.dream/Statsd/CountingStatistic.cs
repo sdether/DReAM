@@ -18,14 +18,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-using System;
-using System.Collections.Generic;
-
 namespace MindTouch.Statsd {
-    public class NullStatsLogger : IStatsLogger {
-        public static readonly IStatsLogger Instance = new NullStatsLogger();
-        private NullStatsLogger() {}
-        public void UpdateCounter(IEnumerable<CountingStat> stats, double sampling) {}
-        public void Timing(IEnumerable<TimingStat> stats, double sampling) {}
+    public class CountingStatistic : AStatistic {
+
+        //--- Fields ---
+        public int Count;
+        
+        //--- Constructors ---
+        public CountingStatistic() {}
+
+        public CountingStatistic(string name, int count) {
+            Name = name;
+            Count = count;
+        }
+
+        //--- Methods ---
+        protected override string Value { get { return Count + "|c"; } }
     }
 }

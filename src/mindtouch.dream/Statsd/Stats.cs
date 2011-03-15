@@ -18,35 +18,49 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace MindTouch.Statsd {
     public class Stats {
+
+        //--- Types ---
+        private class NullStatsLogger : IStatsLogger {
+
+            //--- Methods ---
+            public void UpdateCounter(IEnumerable<CountingStatistic> stats, double sampling) { }
+            public void Timing(IEnumerable<TimingStatistic> stats, double sampling) { }
+        }
+
         private class ProxyStatsLogger : IStatsLogger {
 
-            public void UpdateCounter(IEnumerable<CountingStat> stats, double sampling) {
+            //--- Methods ---
+            public void UpdateCounter(IEnumerable<CountingStatistic> stats, double sampling) {
                 _global.UpdateCounter(stats, sampling);
             }
 
-            public void Timing(IEnumerable<TimingStat> stats, double sampling) {
+            public void Timing(IEnumerable<TimingStatistic> stats, double sampling) {
                 _global.Timing(stats, sampling);
             }
         }
+
         private class PrefixedStatsLogger : IStatsLogger {
+
+            //--- Fields ---
             private readonly string _prefix;
 
+            //--- Constructors ---
             public PrefixedStatsLogger(string prefix) {
                 _prefix = prefix;
             }
 
-            public void UpdateCounter(IEnumerable<CountingStat> stats, double sampling) {
-                _global.UpdateCounter(stats.Select(x => new CountingStat(PrefixedName(x.Name), x.Count)), sampling);
+            //--- Methods ---
+            public void UpdateCounter(IEnumerable<CountingStatistic> stats, double sampling) {
+                _global.UpdateCounter(stats.Select(x => new CountingStatistic(PrefixedName(x.Name), x.Count)), sampling);
             }
 
-            public void Timing(IEnumerable<TimingStat> stats, double sampling) {
-                _global.Timing(stats.Select(x => new TimingStat(PrefixedName(x.Name), x.Time)), sampling);
+            public void Timing(IEnumerable<TimingStatistic> stats, double sampling) {
+                _global.Timing(stats.Select(x => new TimingStatistic(PrefixedName(x.Name), x.Time)), sampling);
             }
 
             private string PrefixedName(string stat) {
@@ -54,11 +68,18 @@ namespace MindTouch.Statsd {
             }
         }
 
-        private static IStatsLogger _global = NullStatsLogger.Instance;
+        //--- Class Fields ---
+        public static readonly IStatsLogger Null = new NullStatsLogger();
+        private static IStatsLogger _global = Null;
+
+        //--- Class Properties ---
+        public static IStatsLogger Global { get { return _global; } }
+
+        //--- Class Methods ---
         public static void Configure(StatsConfiguration config) {
             _global = new StatsLogger(new StatsConfiguration(config));
         }
-        public static IStatsLogger Global { get { return _global; } }
+
         public static IStatsLogger CreateLogger() {
             return new ProxyStatsLogger();
         }
