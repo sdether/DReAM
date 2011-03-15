@@ -1,0 +1,68 @@
+﻿/*
+ * MindTouch Dream - a distributed REST framework 
+ * Copyright (C) 2006-2011 MindTouch, Inc.
+ * www.mindtouch.com  oss@mindtouch.com
+ *
+ * For community documentation and downloads visit wiki.developer.mindtouch.com;
+ * please review the licensing section.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net.Sockets;
+
+namespace MindTouch.Statsd {
+
+    public class StatsConfiguration {
+        public static readonly StatsConfiguration Empty = new StatsConfiguration();
+
+        public StatsConfiguration() { }
+
+        public StatsConfiguration(StatsConfiguration config) {
+            Host = config.Host;
+            Port = config.Port;
+        }
+
+        public string Host { get; set; }
+        public int Port { get; set; }
+    }
+
+    public class StatsLogger : IStatsLogger {
+
+        private readonly UdpClient _client;
+        private readonly Random _random = new Random();
+
+        public StatsLogger(StatsConfiguration configuration) {
+            _client = new UdpClient(configuration.Host, configuration.Port);
+        }
+
+        public void UpdateCounter(IEnumerable<CountingStat> stats, double sampling) {
+            Send(stats.Cast<AStat>(),sampling);
+        }
+
+        public void Timing(IEnumerable<TimingStat> stats, double sampling) {
+            Send(stats.Cast<AStat>(), sampling);
+        }
+
+        private void Send(IEnumerable<AStat> stats, double sampling) {
+            if(sampling < 1 && _random.Next(1) > sampling) {
+                return;
+            }
+            foreach(var bytes in stats.Select(stat => stat.ToBytes(sampling))) {
+                _client.Send(bytes, bytes.Length);
+            }
+        }
+    }
+}
