@@ -44,13 +44,13 @@ namespace MindTouch.Statsd {
             }
         }
 
-        private class PrefixedStatsLogger : IStatsLogger {
+        private class PrefixedProxyStatsLogger : IStatsLogger {
 
             //--- Fields ---
             private readonly string _prefix;
 
             //--- Constructors ---
-            public PrefixedStatsLogger(string prefix) {
+            public PrefixedProxyStatsLogger(string prefix) {
                 _prefix = prefix;
             }
 
@@ -85,7 +85,7 @@ namespace MindTouch.Statsd {
         }
 
         public static IStatsLogger CreateLogger(string prefix) {
-            return new PrefixedStatsLogger(prefix);
+            return new PrefixedProxyStatsLogger(prefix);
         }
 
     }
