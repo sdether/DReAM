@@ -111,25 +111,35 @@
     <Compile Include="Dream\servicebase.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\mindtouch.common\mindtouch.common.csproj">
-      <Project>{EA09760D-B1FC-4E5F-A5A8-B3BD16395378}</Project>
-      <Name>mindtouch.common</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\mindtouch.tasking\mindtouch.tasking.csproj">
-      <Project>{BFAF0A9D-8B7F-4225-B7CE-67C08F62AA94}</Project>
-      <Name>mindtouch.tasking</Name>
+    <ProjectReference Include="..\mindtouch.system\mindtouch.system.csproj">
+      <Project>{A64C7DB1-D193-4265-8799-F1F3C85E0424}</Project>
+      <Name>mindtouch.system</Name>
     </ProjectReference>
     <ProjectReference Include="..\mindtouch.web.client\mindtouch.web.client.csproj">
       <Project>{405573DD-20FB-4F51-9634-63646F1AE479}</Project>
       <Name>mindtouch.web.client</Name>
     </ProjectReference>
-    <ProjectReference Include="..\mindtouch.xml\mindtouch.xml.csproj">
-      <Project>{78811CFB-C61D-4914-81D6-E43B33F44527}</Project>
-      <Name>mindtouch.xml</Name>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DreamContextAccessException.cs" />
+    <Compile Include="DreamCoreUtil.cs" />
+    <Compile Include="DreamHost.cs" />
+    <Compile Include="DreamHostService.cs" />
+    <Compile Include="dreampipe.cs" />
+    <Compile Include="feature.cs" />
+    <Compile Include="http\httphandler.cs" />
+    <Compile Include="http\httptransport.cs" />
+    <Compile Include="ioformatter.cs" />
+    <Compile Include="serviceactivator.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="resources\favicon.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="resources\host\error.xslt" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="resources\host\status.xslt" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

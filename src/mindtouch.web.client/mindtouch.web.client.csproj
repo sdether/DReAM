@@ -45,10 +45,25 @@
     <PlatformTarget>AnyCPU</PlatformTarget>
     <ErrorReport>prompt</ErrorReport>
   </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Documentation|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\Documentation\</OutputPath>
+    <DefineConstants>TRACE;DEBUG;DEBUG_DREAM</DefineConstants>
+    <DocumentationFile>..\bin\mindtouch.web.client.xml</DocumentationFile>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <NoWarn>1911,1591</NoWarn>
+    <DebugType>full</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="log4net, Version=1.2.10.0, Culture=neutral, PublicKeyToken=1b44e1d426115821, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\redist\log4net.dll</HintPath>
+    </Reference>
+    <Reference Include="SgmlReaderDll, Version=1.8.7.14535, Culture=neutral, PublicKeyToken=46b2db9ca481831b, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\redist\SgmlReaderDll.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core">
@@ -76,6 +91,7 @@
     <Compile Include="DreamStatus.cs" />
     <Compile Include="dreamutil.cs" />
     <Compile Include="Exceptions.cs" />
+    <Compile Include="HtmlUtil.cs" />
     <Compile Include="phputils.cs" />
     <Compile Include="Plug\HttpPlugEndpoint.cs" />
     <Compile Include="Plug\IPlugEndpoint.cs" />
@@ -90,7 +106,6 @@
     <Compile Include="Web\HttpUtil.cs" />
     <Compile Include="XDocEx.cs" />
     <Compile Include="Xml\XAtom.cs" />
-    <Compile Include="Xml\XHtmlTextWriter.cs" />
     <Compile Include="Xml\XSoap.cs" />
     <Compile Include="Xml\XTypes.cs" />
     <Compile Include="XUri.cs" />
@@ -99,17 +114,9 @@
     <Compile Include="XUriMap.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\mindtouch.common\mindtouch.common.csproj">
-      <Project>{EA09760D-B1FC-4E5F-A5A8-B3BD16395378}</Project>
-      <Name>mindtouch.common</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\mindtouch.tasking\mindtouch.tasking.csproj">
-      <Project>{BFAF0A9D-8B7F-4225-B7CE-67C08F62AA94}</Project>
-      <Name>mindtouch.tasking</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\mindtouch.xml\mindtouch.xml.csproj">
-      <Project>{78811CFB-C61D-4914-81D6-E43B33F44527}</Project>
-      <Name>mindtouch.xml</Name>
+    <ProjectReference Include="..\mindtouch.system\mindtouch.system.csproj">
+      <Project>{A64C7DB1-D193-4265-8799-F1F3C85E0424}</Project>
+      <Name>mindtouch.system</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

@@ -76,10 +76,6 @@
       <Project>{EA09760D-B1FC-4E5F-A5A8-B3BD16395378}</Project>
       <Name>mindtouch.common</Name>
     </ProjectReference>
-    <ProjectReference Include="..\mindtouch.xml\mindtouch.xml.csproj">
-      <Project>{78811CFB-C61D-4914-81D6-E43B33F44527}</Project>
-      <Name>mindtouch.xml</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

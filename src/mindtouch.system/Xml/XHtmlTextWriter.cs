@@ -102,7 +102,7 @@ namespace MindTouch.Xml {
             } else {
 
                 // write contents of <script> elements inside a fake CDATA section
-                if(!_hasCData && !StringUtil.StartsWithInvariant(text, "/*<![CDATA[*/")) {
+                if(!_hasCData && !text.StartsWithInvariant("/*<![CDATA[*/")) {
                     _hasCData = true;
                     base.WriteRaw("/*<![CDATA[*/");
                 }

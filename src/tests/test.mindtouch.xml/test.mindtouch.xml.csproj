@@ -65,10 +65,6 @@
       <Project>{C4CC19EB-8149-4F39-A6E6-753886309CF6}</Project>
       <Name>mindtouch.dream.test</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\mindtouch.tasking\mindtouch.tasking.csproj">
-      <Project>{BFAF0A9D-8B7F-4225-B7CE-67C08F62AA94}</Project>
-      <Name>mindtouch.tasking</Name>
-    </ProjectReference>
     <ProjectReference Include="..\..\mindtouch.web.client\mindtouch.web.client.csproj">
       <Project>{405573DD-20FB-4F51-9634-63646F1AE479}</Project>
       <Name>mindtouch.web.client</Name>
@@ -76,10 +72,6 @@
     <ProjectReference Include="..\..\mindtouch.web.server\mindtouch.web.server.csproj">
       <Project>{3E706653-69D1-4522-BEE8-ECEC1A1BF7DE}</Project>
       <Name>mindtouch.web.server</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\mindtouch.xml\mindtouch.xml.csproj">
-      <Project>{78811CFB-C61D-4914-81D6-E43B33F44527}</Project>
-      <Name>mindtouch.xml</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

@@ -69,27 +69,12 @@
     <Compile Include="ServiceInheritanceTests.cs" />
     <Compile Include="ServiceTests.cs" />
     <Compile Include="XDocAutofacContainerConfiguratorTests.cs" />
+    <Compile Include="XDocTests.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\mindtouch.common\mindtouch.common.csproj">
-      <Project>{EA09760D-B1FC-4E5F-A5A8-B3BD16395378}</Project>
-      <Name>mindtouch.common</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\mindtouch.core\mindtouch.core.csproj">
-      <Project>{CAAE6609-8532-4CCA-ABD5-186C43F77687}</Project>
-      <Name>mindtouch.core</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\mindtouch.dream.test\mindtouch.dream.test.csproj">
-      <Project>{C4CC19EB-8149-4F39-A6E6-753886309CF6}</Project>
-      <Name>mindtouch.dream.test</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\mindtouch.tasking\mindtouch.tasking.csproj">
-      <Project>{BFAF0A9D-8B7F-4225-B7CE-67C08F62AA94}</Project>
-      <Name>mindtouch.tasking</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\mindtouch.web.client.test\mindtouch.web.client.test.csproj">
-      <Project>{828D7DD9-C2EF-4FA5-B548-82856B87C78A}</Project>
-      <Name>mindtouch.web.client.test</Name>
+    <ProjectReference Include="..\..\mindtouch.system\mindtouch.system.csproj">
+      <Project>{A64C7DB1-D193-4265-8799-F1F3C85E0424}</Project>
+      <Name>mindtouch.system</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\mindtouch.web.client\mindtouch.web.client.csproj">
       <Project>{405573DD-20FB-4F51-9634-63646F1AE479}</Project>
@@ -99,9 +84,9 @@
       <Project>{3E706653-69D1-4522-BEE8-ECEC1A1BF7DE}</Project>
       <Name>mindtouch.web.server</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\mindtouch.xml\mindtouch.xml.csproj">
-      <Project>{78811CFB-C61D-4914-81D6-E43B33F44527}</Project>
-      <Name>mindtouch.xml</Name>
+    <ProjectReference Include="..\..\mindtouch.web.test\mindtouch.web.test.csproj">
+      <Project>{C4CC19EB-8149-4F39-A6E6-753886309CF6}</Project>
+      <Name>mindtouch.web.test</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

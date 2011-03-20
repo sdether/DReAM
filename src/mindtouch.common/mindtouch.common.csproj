@@ -69,60 +69,35 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ArrayUtil.cs" />
-    <Compile Include="AssemblyUtil.cs" />
+    <Compile Include="Cache\IKeyValueCache.cs" />
+    <Compile Include="Cache\IKeyValueCacheFactory.cs" />
+    <Compile Include="Cache\InMemoryKeyValueCache.cs" />
+    <Compile Include="Cache\InMemoryKeyValueCacheFactory.cs" />
+    <Compile Include="Cache\KeyValueCacheEx.cs" />
+    <Compile Include="Cache\KeyValueCacheFactory.cs" />
     <Compile Include="Collections\BlockingQueue.cs" />
-    <Compile Include="Collections\ChunkedArray.cs" />
-    <Compile Include="Collections\IThreadsafeCollection.cs" />
-    <Compile Include="Collections\IThreadsafePriorityQueue.cs" />
-    <Compile Include="Collections\IThreadsafeQueue.cs" />
-    <Compile Include="Collections\IThreadsafeStack.cs" />
-    <Compile Include="Collections\ITransactionalQueue.cs" />
-    <Compile Include="Collections\LockFreeItemConsumerQueue.cs" />
-    <Compile Include="Collections\LockFreePriorityQueue.cs" />
-    <Compile Include="Collections\LockFreeQueue.cs" />
-    <Compile Include="Collections\LockFreeStack.cs" />
-    <Compile Include="Collections\LockFreeWorkStealingDeque.cs" />
-    <Compile Include="Collections\LockFreeXmlNameTable.cs" />
-    <Compile Include="Collections\PriorityQueue.cs" />
-    <Compile Include="Collections\SingleLinkNode.cs" />
     <Compile Include="Collections\TransactionalQueue.cs" />
-    <Compile Include="CultureUtil.cs" />
-    <Compile Include="DatetimeUtil.cs" />
-    <Compile Include="DebugUtil.cs" />
-    <Compile Include="Empty.cs" />
-    <Compile Include="Equality.cs" />
-    <Compile Include="Extensions\ReflectionEx.cs" />
-    <Compile Include="Extensions\TimeExtensions.cs" />
-    <Compile Include="GitBranchAttribute.cs" />
-    <Compile Include="GitRevisionAttribute.cs" />
-    <Compile Include="GitUriAttribute.cs" />
+    <Compile Include="Data\DataCatalog.cs" />
+    <Compile Include="Data\DataColumnAttribute.cs" />
+    <Compile Include="Data\DataCommand.cs" />
+    <Compile Include="Data\DataFactory.cs" />
+    <Compile Include="Data\IDataCommand.cs" />
     <Compile Include="IO\BinaryFormatterSerializer.cs" />
-    <Compile Include="IO\ChunkedMemoryStream.cs" />
     <Compile Include="IO\IQueueItemSerializer.cs" />
     <Compile Include="IO\IQueueStream.cs" />
     <Compile Include="IO\ISerializer.cs" />
     <Compile Include="IO\MultiFileQueueStream.cs" />
-    <Compile Include="IO\PipeStream.cs" />
     <Compile Include="IO\QueueStreamRecord.cs" />
     <Compile Include="IO\SerializerProxy.cs" />
     <Compile Include="IO\SingleFileQueueStream.cs" />
-    <Compile Include="IO\SkipWriteStream.cs" />
-    <Compile Include="IO\StreamUtil.cs" />
-    <Compile Include="IO\TrimmingStringReader.cs" />
-    <Compile Include="IO\TrimmingTextReader.cs" />
-    <Compile Include="IO\TrimmingTextReaderUtil.cs" />
-    <Compile Include="LogUtils.cs" />
-    <Compile Include="MimeType.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Security\Cryptography\CryptoEx.cs" />
-    <Compile Include="Security\Cryptography\RSAUtil.cs" />
-    <Compile Include="ShouldNeverHappenException.cs" />
-    <Compile Include="StringUtil.cs" />
-    <Compile Include="SvnInfoAttribute.cs" />
-    <Compile Include="SysUtil.cs" />
-    <Compile Include="Tuplet.cs" />
-    <Compile Include="TypeEx.cs" />
+    <Compile Include="Xml\XDocQueueItemSerializer.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\mindtouch.system\mindtouch.system.csproj">
+      <Project>{A64C7DB1-D193-4265-8799-F1F3C85E0424}</Project>
+      <Name>mindtouch.system</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

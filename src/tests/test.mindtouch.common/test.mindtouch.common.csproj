@@ -30,6 +30,14 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Documentation|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\Documentation\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="log4net, Version=1.2.10.0, Culture=neutral, PublicKeyToken=1b44e1d426115821, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -59,6 +67,7 @@
   <ItemGroup>
     <Compile Include="ArrayUtilTests.cs" />
     <Compile Include="BlockingQueueTests.cs" />
+    <Compile Include="Cache\InMemoryKeyValueCacheTests.cs" />
     <Compile Include="ChunkedArrayTests.cs" />
     <Compile Include="ChunkedMemoryStreamTest.cs" />
     <Compile Include="Collections\LockFreeItemConsumerQueueTests.cs" />
@@ -85,13 +94,9 @@
       <Project>{EA09760D-B1FC-4E5F-A5A8-B3BD16395378}</Project>
       <Name>mindtouch.common</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\mindtouch.tasking\mindtouch.tasking.csproj">
-      <Project>{BFAF0A9D-8B7F-4225-B7CE-67C08F62AA94}</Project>
-      <Name>mindtouch.tasking</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\mindtouch.xml\mindtouch.xml.csproj">
-      <Project>{78811CFB-C61D-4914-81D6-E43B33F44527}</Project>
-      <Name>mindtouch.xml</Name>
+    <ProjectReference Include="..\..\mindtouch.system\mindtouch.system.csproj">
+      <Project>{A64C7DB1-D193-4265-8799-F1F3C85E0424}</Project>
+      <Name>mindtouch.system</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

@@ -61,9 +61,9 @@
     <Compile Include="AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\mindtouch.common\mindtouch.common.csproj">
-      <Project>{EA09760D-B1FC-4E5F-A5A8-B3BD16395378}</Project>
-      <Name>mindtouch.common</Name>
+    <ProjectReference Include="..\..\mindtouch.system\mindtouch.system.csproj">
+      <Project>{A64C7DB1-D193-4265-8799-F1F3C85E0424}</Project>
+      <Name>mindtouch.system</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

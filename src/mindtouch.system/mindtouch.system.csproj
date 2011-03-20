@@ -1,0 +1,175 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="3.5" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>9.0.30729</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{A64C7DB1-D193-4265-8799-F1F3C85E0424}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>MindTouch.System</RootNamespace>
+    <AssemblyName>mindtouch.system</AssemblyName>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Signed Release|AnyCPU' ">
+    <OutputPath>..\bin\</OutputPath>
+    <DefineConstants>TRACE;SIGNED</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <NoWarn>1911,1591,0618,1699</NoWarn>
+    <DocumentationFile>..\bin\mindtouch.system.XML</DocumentationFile>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Documentation|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\Documentation\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="log4net, Version=1.2.10.0, Culture=neutral, PublicKeyToken=1b44e1d426115821, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\redist\log4net.dll</HintPath>
+    </Reference>
+    <Reference Include="SgmlReaderDll, Version=1.8.7.14535, Culture=neutral, PublicKeyToken=46b2db9ca481831b, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\redist\SgmlReaderDll.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.configuration" />
+    <Reference Include="System.Core">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Xml.Linq">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Data.DataSetExtensions">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="ArrayUtil.cs" />
+    <Compile Include="AssemblyUtil.cs" />
+    <Compile Include="Collections\ChunkedArray.cs" />
+    <Compile Include="Collections\ExpiringDictionary.cs" />
+    <Compile Include="Collections\ExpiringHashSet.cs" />
+    <Compile Include="Collections\ExpiringSet.cs" />
+    <Compile Include="Collections\IThreadsafeCollection.cs" />
+    <Compile Include="Collections\IThreadsafePriorityQueue.cs" />
+    <Compile Include="Collections\IThreadsafeQueue.cs" />
+    <Compile Include="Collections\IThreadsafeStack.cs" />
+    <Compile Include="Collections\ITransactionalQueue.cs" />
+    <Compile Include="Collections\LockFreeItemConsumerQueue.cs" />
+    <Compile Include="Collections\LockFreePriorityQueue.cs" />
+    <Compile Include="Collections\LockFreeQueue.cs" />
+    <Compile Include="Collections\LockFreeStack.cs" />
+    <Compile Include="Collections\LockFreeWorkStealingDeque.cs" />
+    <Compile Include="Collections\LockFreeXmlNameTable.cs" />
+    <Compile Include="Collections\PriorityQueue.cs" />
+    <Compile Include="Collections\ProcessingQueue.cs" />
+    <Compile Include="Collections\SingleLinkNode.cs" />
+    <Compile Include="CoroutineExceptionRenderer.cs" />
+    <Compile Include="CultureUtil.cs" />
+    <Compile Include="DatetimeUtil.cs" />
+    <Compile Include="DebugUtil.cs" />
+    <Compile Include="Empty.cs" />
+    <Compile Include="Equality.cs" />
+    <Compile Include="Extensions\ReflectionEx.cs" />
+    <Compile Include="Extensions\TimeExtensions.cs" />
+    <Compile Include="GitBranchAttribute.cs" />
+    <Compile Include="GitRevisionAttribute.cs" />
+    <Compile Include="GitUriAttribute.cs" />
+    <Compile Include="InsufficientResourcesException.cs" />
+    <Compile Include="IO\AsyncStreamUtil.cs" />
+    <Compile Include="IO\ChunkedMemoryStream.cs" />
+    <Compile Include="IO\PipeStream.cs" />
+    <Compile Include="IO\SkipWriteStream.cs" />
+    <Compile Include="IO\StreamUtil.cs" />
+    <Compile Include="IO\TrimmingStringReader.cs" />
+    <Compile Include="IO\TrimmingTextReader.cs" />
+    <Compile Include="IO\TrimmingTextReaderUtil.cs" />
+    <Compile Include="LogUtils.cs" />
+    <Compile Include="MimeType.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Security\Cryptography\CryptoEx.cs" />
+    <Compile Include="Security\Cryptography\RSAUtil.cs" />
+    <Compile Include="ShouldNeverHappenException.cs" />
+    <Compile Include="StringUtil.cs" />
+    <Compile Include="SvnInfoAttribute.cs" />
+    <Compile Include="systypes.cs" />
+    <Compile Include="SysUtil.cs" />
+    <Compile Include="Tasking\AResultEx.cs" />
+    <Compile Include="Tasking\async.cs" />
+    <Compile Include="Tasking\coroutine.cs" />
+    <Compile Include="Tasking\CoroutineMissingResultException.cs" />
+    <Compile Include="Tasking\CoroutineUtil.cs" />
+    <Compile Include="Tasking\HandlerUtil.cs" />
+    <Compile Include="Tasking\ITaskLifespan.cs" />
+    <Compile Include="Tasking\IYield.cs" />
+    <Compile Include="Tasking\lock.cs" />
+    <Compile Include="Tasking\Result.cs" />
+    <Compile Include="Tasking\ResultCancelException.cs" />
+    <Compile Include="Tasking\TaskEnv.cs" />
+    <Compile Include="Tasking\TaskTimerFactory.cs" />
+    <Compile Include="Tasking\timer.cs" />
+    <Compile Include="Threading\DispatchQueueEx.cs" />
+    <Compile Include="Threading\DispatchThread.cs" />
+    <Compile Include="Threading\DispatchThreadScheduler.cs" />
+    <Compile Include="Threading\DispatchThreadShutdownException.cs" />
+    <Compile Include="Threading\DispatchWorkItem.cs" />
+    <Compile Include="Threading\ElasticPriorityThreadPool.cs" />
+    <Compile Include="Threading\ElasticThreadPool.cs" />
+    <Compile Include="Threading\IDispatchHost.cs" />
+    <Compile Include="Threading\IDispatchQueue.cs" />
+    <Compile Include="Threading\ImmediateDispatchQueue.cs" />
+    <Compile Include="Threading\LegacyThreadPool.cs" />
+    <Compile Include="Threading\LockFreeCounter.cs" />
+    <Compile Include="Threading\MonitorSemaphore.cs" />
+    <Compile Include="Threading\ReaderWriterLockSlimEx.cs" />
+    <Compile Include="Threading\RendezVousEvent.cs" />
+    <Compile Include="Threading\SynchronizationDispatchQueue.cs" />
+    <Compile Include="Threading\Timer\GlobalClock.cs" />
+    <Compile Include="Tuplet.cs" />
+    <Compile Include="TypeEx.cs" />
+    <Compile Include="Tasking\Wait.cs" />
+    <Compile Include="Xml\XDoc.cs" />
+    <Compile Include="Xml\XDocCop.cs" />
+    <Compile Include="Xml\XDocDiff.cs" />
+    <Compile Include="Xml\XDocFactory.cs" />
+    <Compile Include="Xml\XDocRecursiveEnumerable.cs" />
+    <Compile Include="Xml\XDocRecursiveEnumerator.cs" />
+    <Compile Include="Xml\XHtmlTextWriter.cs" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

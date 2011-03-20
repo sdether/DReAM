@@ -66,17 +66,9 @@
     <Compile Include="Threading\ThreadPoolTests.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\mindtouch.common\mindtouch.common.csproj">
-      <Project>{EA09760D-B1FC-4E5F-A5A8-B3BD16395378}</Project>
-      <Name>mindtouch.common</Name>
-    </ProjectReference>
     <ProjectReference Include="..\..\mindtouch.dream.test\mindtouch.dream.test.csproj">
       <Project>{C4CC19EB-8149-4F39-A6E6-753886309CF6}</Project>
       <Name>mindtouch.dream.test</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\mindtouch.tasking\mindtouch.tasking.csproj">
-      <Project>{BFAF0A9D-8B7F-4225-B7CE-67C08F62AA94}</Project>
-      <Name>mindtouch.tasking</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\mindtouch.web.client.test\mindtouch.web.client.test.csproj">
       <Project>{828D7DD9-C2EF-4FA5-B548-82856B87C78A}</Project>

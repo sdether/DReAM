@@ -21,6 +21,7 @@
 
 using System;
 using MindTouch.Web;
+using MindTouch.Xml;
 using NUnit.Framework;
 
 using MindTouch.Dream;
@@ -748,5 +749,14 @@ namespace MindTouch.Dream.Test {
             XUri parsedUri = HttpUtil.FromHttpContextComponents(baduri, rawPath);
             Assert.AreEqual("http://foo.com/we%20have%20spaces%20and%20illegal%20chars:%20%22%27%60%3c%3e.jpg", parsedUri.ToString());
         }
+
+        [Test]
+        public void XmlAsUri() {
+            XUri uri = new XUri("http://foo.com/bar");
+            XDoc doc = new XDoc("test").Elem("uri", uri.ToString());
+            Assert.AreEqual(uri.ToString(), doc["uri"].AsText);
+            Assert.AreEqual(uri, doc["uri"].AsUri());
+        }
+
     }
 }
