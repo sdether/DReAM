@@ -41,6 +41,8 @@ namespace MindTouch.Dream.Test {
 
         [SetUp]
         public void Init() {
+            Console.WriteLine("setup");
+            _log.Debug("setup up test host");
             _hostinfo = DreamTestHelper.CreateRandomPortHost();
             _host = _hostinfo.LocalHost.At("host").With("apikey", _hostinfo.ApiKey);
         }

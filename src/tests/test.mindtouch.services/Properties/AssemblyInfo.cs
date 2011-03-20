@@ -1,17 +1,16 @@
-﻿using System;
-using System.Reflection;
+﻿using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("mindtouch.web.client.test")]
+[assembly: AssemblyTitle("test.mindtouch.services")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("mindtouch.web.client.test")]
-[assembly: AssemblyCopyright("Copyright (c) 2006-2011 MindTouch, Inc.")]
+[assembly: AssemblyProduct("test.mindtouch.services")]
+[assembly: AssemblyCopyright("Copyright ©  2011")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -21,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("9c2c803f-e8b7-4b6d-a46e-67c24e78df86")]
+[assembly: Guid("8714e718-19d7-4c87-8dfe-0c388de14e7c")]
 
 // Version information for an assembly consists of the following four values:
 //
@@ -33,13 +32,7 @@ using System.Runtime.InteropServices;
 // You can specify all the values or you can default the Build and Revision Numbers 
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("3.0.0.0")]
-[assembly: AssemblyFileVersion("3.0.0.0")]
-[assembly: GitBranch("master")]
-[assembly: GitRevision("HEAD")]
-[assembly: GitUri("https://github.com/sdether/DReAM")]
+[assembly: AssemblyVersion("1.0.0.0")]
+[assembly: AssemblyFileVersion("1.0.0.0")]
 
-#if SIGNED
-[assembly: AssemblyDelaySign(false)]
-[assembly: AssemblyKeyFile(@"..\mindtouch.snk")]
-#endif
+[assembly: log4net.Config.XmlConfigurator(Watch = true)]

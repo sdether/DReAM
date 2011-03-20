@@ -38,3 +38,5 @@ using System.Runtime.InteropServices;
 [assembly: GitBranch("master")]
 [assembly: GitRevision("HEAD")]
 [assembly: GitUri("https://github.com/sdether/DReAM")]
+
+[assembly: log4net.Config.XmlConfigurator(Watch = true)]

@@ -17,7 +17,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
+    <OutputPath>..\..\bin\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -25,7 +25,7 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
+    <OutputPath>..\..\bin\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -60,22 +60,25 @@
     <Compile Include="StorageTests.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\mindtouch.system\mindtouch.system.csproj">
+    <ProjectReference Include="..\..\mindtouch.system\mindtouch.system.csproj">
       <Project>{A64C7DB1-D193-4265-8799-F1F3C85E0424}</Project>
       <Name>mindtouch.system</Name>
     </ProjectReference>
-    <ProjectReference Include="..\mindtouch.web.client\mindtouch.web.client.csproj">
+    <ProjectReference Include="..\..\mindtouch.web.client\mindtouch.web.client.csproj">
       <Project>{405573DD-20FB-4F51-9634-63646F1AE479}</Project>
       <Name>mindtouch.web.client</Name>
     </ProjectReference>
-    <ProjectReference Include="..\mindtouch.web.server\mindtouch.web.server.csproj">
+    <ProjectReference Include="..\..\mindtouch.web.server\mindtouch.web.server.csproj">
       <Project>{3E706653-69D1-4522-BEE8-ECEC1A1BF7DE}</Project>
       <Name>mindtouch.web.server</Name>
     </ProjectReference>
-    <ProjectReference Include="..\mindtouch.web.test\mindtouch.web.test.csproj">
+    <ProjectReference Include="..\..\mindtouch.web.test\mindtouch.web.test.csproj">
       <Project>{C4CC19EB-8149-4F39-A6E6-753886309CF6}</Project>
       <Name>mindtouch.web.test</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
