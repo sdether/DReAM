@@ -19,11 +19,9 @@
  * limitations under the License.
  */
 
-using System;
 using System.Collections.Generic;
 using System.Threading;
 using log4net;
-
 using MindTouch.Tasking;
 using MindTouch.Web;
 using MindTouch.Xml;
@@ -41,7 +39,6 @@ namespace MindTouch.Dream.Test {
 
         [SetUp]
         public void Init() {
-            Console.WriteLine("setup");
             _log.Debug("setup up test host");
             _hostinfo = DreamTestHelper.CreateRandomPortHost();
             _host = _hostinfo.LocalHost.At("host").With("apikey", _hostinfo.ApiKey);
@@ -62,6 +59,7 @@ namespace MindTouch.Dream.Test {
 
         [Test]
         public void TestHost() {
+            _log.Debug("Y U No log?");
             Plug test = _host.At("test");
             DreamMessage response = test.Get();
             Assert.AreEqual(DreamStatus.Ok, response.Status);
