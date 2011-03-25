@@ -39,6 +39,7 @@ using System.Runtime.InteropServices;
 [assembly: GitRevision("HEAD")]
 [assembly: GitUri("https://github.com/sdether/DReAM")]
 
+[assembly: log4net.Config.XmlConfigurator(Watch = true)]
 
 #if SIGNED
 [assembly: AssemblyDelaySign(false)]
