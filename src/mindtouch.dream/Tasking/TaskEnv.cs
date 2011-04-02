@@ -348,7 +348,7 @@ namespace MindTouch.Tasking {
             IEnumerable<object> values = null;
             lock(_syncRoot) {
                 if(_referenceCount > 0) {
-                    return null;
+                    _log.WarnFormat("resetting task environment with a ref count of {0}", _referenceCount);
                 }
                 _referenceCount = 0;
                 if(Count == 0) {
