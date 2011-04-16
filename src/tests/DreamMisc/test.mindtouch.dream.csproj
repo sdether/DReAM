@@ -133,6 +133,10 @@
     <Compile Include="ServiceExceptionMapTests.cs" />
     <Compile Include="ServiceInheritanceTests.cs" />
     <Compile Include="ServiceTests.cs" />
+    <Compile Include="Statsd\CountingStatisticTests.cs" />
+    <Compile Include="Statsd\LiveStatsLoggerTests.cs" />
+    <Compile Include="Statsd\StatsTestEx.cs" />
+    <Compile Include="Statsd\TimingStatisticTests.cs" />
     <Compile Include="StreamUtilTests.cs" />
     <Compile Include="StringUtilTests.cs" />
     <Compile Include="SysUtilTests.cs" />
