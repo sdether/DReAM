@@ -83,9 +83,6 @@ namespace MindTouch {
         /// <param name="b">right hand side of addtion</param>
         /// <returns>Signed integer</returns>
         public static int SafeAdd(this int a, int b) {
-            if(a == int.MaxValue || b == int.MaxValue) {
-                return int.MaxValue;
-            }
             var x = (long)a + b;
             if(x > int.MaxValue) {
                 return int.MaxValue;
@@ -103,9 +100,6 @@ namespace MindTouch {
         /// <param name="b">right hand side of addtion</param>
         /// <returns>Unsigned integer</returns>
         public static uint SafeAdd(this uint a, uint b) {
-            if(a == uint.MaxValue || b == uint.MaxValue) {
-                return uint.MaxValue;
-            }
             var x = (ulong)a + b;
             if(x > uint.MaxValue) {
                 return uint.MaxValue;
