@@ -45,7 +45,7 @@ namespace MindTouch.Dream.AmazonS3 {
         //--- Properties ---
 
         /// <summary>
-        /// Base uri for Amazon (default: http://s3.amazonaws.com).
+        /// Base uri for Amazon (usually set via <see cref="WithEndpoint"/>, default: http://s3.amazonaws.com).
         /// </summary>
         public XUri S3BaseUri { get; set; }
 
@@ -65,12 +65,12 @@ namespace MindTouch.Dream.AmazonS3 {
         public string Bucket { get; set; }
 
         /// <summary>
-        /// Root Path inside Bucket (can be null).
+        /// Root Path inside Bucket (can be null, default: "/").
         /// </summary>
         public string RootPath { get; set; }
 
         /// <summary>
-        /// Path delimiter.
+        /// Path delimiter (default: "/").
         /// </summary>
         public string Delimiter { get; set; }
 
@@ -80,7 +80,7 @@ namespace MindTouch.Dream.AmazonS3 {
         public TimeSpan Timeout { get; set; }
 
         /// <summary>
-        /// Optional
+        /// Optional Location constraint (usually set via <see cref="WithEndpoint"/>, default: null).
         /// </summary>
         public string LocationConstraint { get; set; }
 

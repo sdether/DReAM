@@ -159,7 +159,7 @@ namespace MindTouch.Dream.Services {
                 s3Config.WithEndpoint(endpoint);
             }
             var baseUri = config["baseuri"].AsUri;
-            if(baseUri != null)) {
+            if(baseUri != null) {
                 s3Config.S3BaseUri = baseUri;
             }
             var locationConstraint = config["locationconstraint"].AsText;
