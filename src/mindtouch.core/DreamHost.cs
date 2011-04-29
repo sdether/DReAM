@@ -22,6 +22,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using Autofac;
@@ -110,11 +111,6 @@ namespace MindTouch.Dream {
             foreach(XDoc ip in config["host|ip"]) {
                 addresses.Add(ip.AsText);
             }
-            if(addresses.Count == 0) {
-
-                // if no addresses were supplied listen to all
-                addresses.Add("*:" + httpPort);
-            }
 
             // use default servername
             XUri publicUri = config["uri.public"].AsUri;
@@ -123,9 +119,18 @@ namespace MindTouch.Dream {
                 // backwards compatibility
                 publicUri = config["server-name"].AsUri;
                 if(publicUri == null) {
-                    foreach(IPAddress addr in Dns.GetHostAddresses(Dns.GetHostName())) {
-                        if(addr.AddressFamily == AddressFamily.InterNetwork) {
-                            XUri.TryParse("http://" + addr, out publicUri);
+                    foreach(var addr in addresses) {
+                        if(!addr.EqualsInvariantIgnoreCase("localhost") && XUri.TryParse("http://" + addr, out publicUri)) {
+                            break;
+                        }
+                    }
+                    if(publicUri == null) {
+                        foreach(IPAddress addr in Dns.GetHostAddresses(Dns.GetHostName())) {
+                            if(addr.AddressFamily == AddressFamily.InterNetwork) {
+                                if(XUri.TryParse("http://" + addr + ":" + httpPort, out publicUri)) {
+                                    break;
+                                }
+                            }
                         }
                     }
                     if(publicUri == null) {
@@ -186,7 +191,7 @@ namespace MindTouch.Dream {
                 AddListener(new XUri(String.Format("http://{0}:{1}/", "localhost", httpPort)), authenticationScheme);
 
                 // check if user prescribed a set of IP addresses to use
-                if(addresses != null) {
+                if(addresses.Any()) {
 
                     // listen to custom addresses (don't use the supplied port info, we expect that to be part of the address)
                     foreach(string address in addresses) {
