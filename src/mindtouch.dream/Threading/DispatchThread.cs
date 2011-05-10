@@ -55,7 +55,7 @@ namespace MindTouch.Threading {
         internal DispatchThread() {
 
             // create new thread
-            Thread thread = new Thread(DispatchLoop) { IsBackground = true };
+            Thread thread = new Thread(DispatchLoop,1024*1024) { IsBackground = true };
 
             //  assign ID
             _id = thread.ManagedThreadId;
