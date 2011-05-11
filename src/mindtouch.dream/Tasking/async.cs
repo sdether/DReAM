@@ -63,9 +63,11 @@ namespace MindTouch.Tasking {
         private static readonly int _minPorts;
         private static readonly int _maxPorts;
         private static readonly AvailableThreadsDelegate _availableThreadsCallback;
+        private static readonly int? _maxStackSize;
 
         [ThreadStatic]
         private static IDispatchQueue _currentDispatchQueue;
+
 
         //--- Constructors ---
         static Async() {
@@ -74,6 +76,10 @@ namespace MindTouch.Tasking {
             }
             if(!int.TryParse(System.Configuration.ConfigurationManager.AppSettings["threadpool-max"], out _maxThreads)) {
                 _maxThreads = 200;
+            }
+            int maxStackSize;
+            if(int.TryParse(System.Configuration.ConfigurationManager.AppSettings["max-stacksize"], out maxStackSize)) {
+                _maxStackSize = maxStackSize;
             }
 
             // check which global dispatch queue implementation to use
@@ -117,6 +123,14 @@ namespace MindTouch.Tasking {
             set {
                 _currentDispatchQueue = value;
             }
+        }
+
+        /// <summary>
+        /// The maximum stack size that Threads created by Dream (<see cref="ElasticThreadPool"/>, <see cref="Fork(System.Action)"/>, <see cref="ForkThread(System.Action)"/>, etc.)
+        /// should use. If null, uses process default stack size.
+        /// </summary>
+        public static int? MaxStackSize {
+            get { return _maxStackSize; }
         }
 
         //--- Class Methods ---
@@ -212,7 +226,9 @@ namespace MindTouch.Tasking {
         /// </summary>
         /// <param name="handler">Action to enqueue for execution.</param>
         private static void ForkThread(Action handler) {
-            var t = new Thread(() => handler()) { IsBackground = true };
+            var t = Async.MaxStackSize.HasValue
+                ? new Thread(() => handler(), MaxStackSize.Value) { IsBackground = true }
+                : new Thread(() => handler()) { IsBackground = true };
             t.Start();
         }
 
