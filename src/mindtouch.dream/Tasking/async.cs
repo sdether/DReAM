@@ -68,7 +68,6 @@ namespace MindTouch.Tasking {
         [ThreadStatic]
         private static IDispatchQueue _currentDispatchQueue;
 
-
         //--- Constructors ---
         static Async() {
             if(!int.TryParse(System.Configuration.ConfigurationManager.AppSettings["threadpool-min"], out _minThreads)) {
@@ -226,7 +225,7 @@ namespace MindTouch.Tasking {
         /// </summary>
         /// <param name="handler">Action to enqueue for execution.</param>
         private static void ForkThread(Action handler) {
-            var t = Async.MaxStackSize.HasValue
+            var t = MaxStackSize.HasValue
                 ? new Thread(() => handler(), MaxStackSize.Value) { IsBackground = true }
                 : new Thread(() => handler()) { IsBackground = true };
             t.Start();
