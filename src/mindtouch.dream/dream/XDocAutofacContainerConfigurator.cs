@@ -24,7 +24,7 @@ using System.Collections.Generic;
 using System.Text;
 using Autofac;
 using Autofac.Builder;
-using Autofac.Registrars;
+using Autofac.Core;
 using log4net;
 using MindTouch.Xml;
 
@@ -105,17 +105,21 @@ namespace MindTouch.Dream {
                 var componentDebug = new DebugStringBuilder(_log.IsDebugEnabled);
                 var implementationTypename = component["@implementation"].AsText;
                 var type = LoadType(component["@type"]);
-                IReflectiveRegistrar registrar;
+                IRegistrationBuilder<object, ConcreteReflectionActivatorData, SingleRegistrationStyle> registrar;
+                var name = component["@name"].AsText;
                 if(string.IsNullOrEmpty(implementationTypename)) {
                     componentDebug.AppendFormat("registering concrete type '{0}'", type.FullName);
-                    registrar = builder.Register(type);
+                    registrar = builder.RegisterType(type);
                 } else {
                     var concreteType = LoadType(implementationTypename);
-                    registrar = builder.Register(concreteType);
-                    registrar.As(new TypedService(type));
-                    componentDebug.AppendFormat("registering concrete type '{0}' as '{1}'", concreteType.FullName, type.FullName);
+                        componentDebug.AppendFormat("registering concrete type '{0}' as '{1}'", concreteType.FullName, type.FullName);
+                    registrar = builder.RegisterType(concreteType).As(new TypedService(type));
                 }
-                registrar.WithArguments(GetParameters(component));
+                if(!string.IsNullOrEmpty(name)) {
+                    registrar.Named(name, type);
+                    componentDebug.AppendFormat("named '{0}'", name);
+                }
+                registrar.WithParameters(GetParameters(component));
 
                 // set scope
                 DreamContainerScope scope = _defaultScope;
@@ -125,13 +129,6 @@ namespace MindTouch.Dream {
                 }
                 componentDebug.AppendFormat(" in '{0}' scope", scope);
                 registrar.InScope(scope);
-
-                // set up name
-                var name = component["@name"].AsText;
-                if(!string.IsNullOrEmpty(name)) {
-                    componentDebug.AppendFormat(" named '{0}'", name);
-                    registrar.Named(name);
-                }
                 if(_log.IsDebugEnabled) {
                     _log.Debug(componentDebug.ToString());
                 }
