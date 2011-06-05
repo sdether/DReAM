@@ -21,6 +21,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using Autofac;
 using Autofac.Builder;
@@ -112,7 +113,7 @@ namespace MindTouch.Dream {
                     registrar = builder.RegisterType(type);
                 } else {
                     var concreteType = LoadType(implementationTypename);
-                        componentDebug.AppendFormat("registering concrete type '{0}' as '{1}'", concreteType.FullName, type.FullName);
+                    componentDebug.AppendFormat("registering concrete type '{0}' as '{1}'", concreteType.FullName, type.FullName);
                     registrar = builder.RegisterType(concreteType).As(new TypedService(type));
                 }
                 if(!string.IsNullOrEmpty(name)) {
@@ -136,9 +137,13 @@ namespace MindTouch.Dream {
         }
 
         private IEnumerable<Parameter> GetParameters(XDoc component) {
-            foreach(var parameter in component["parameters/parameter"]) {
-                yield return new NamedParameter(parameter["@name"].AsText, parameter["@value"].AsText);
-            }
+            return (from parameter in component["parameters/parameter"]
+                    let name = parameter["@name"].AsText
+                    let value = parameter["@value"].AsText
+                    select new ResolvedParameter(
+                        (pi, c) => pi.Name == name,
+                        (pi, c) => SysUtil.ChangeType(value, pi.ParameterType)
+                    )).Cast<Parameter>();
         }
 
         private Type LoadType(XDoc type) {
@@ -149,7 +154,7 @@ namespace MindTouch.Dream {
             if(string.IsNullOrEmpty(typeName)) {
                 throw new ArgumentNullException("typeName");
             }
-            Type type = Type.GetType(typeName);
+            var type = Type.GetType(typeName);
             if(type == null) {
                 throw new ArgumentException(string.Format("Type {0} could not be loaded", typeName));
             }

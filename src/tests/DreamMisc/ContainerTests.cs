@@ -22,6 +22,7 @@
 using System;
 using System.Collections.Generic;
 using Autofac;
+using log4net;
 using MindTouch.Dream.Test.ContainerTestClasses;
 using MindTouch.Tasking;
 using MindTouch.Xml;
@@ -32,6 +33,8 @@ namespace MindTouch.Dream.Test {
 
     [TestFixture]
     public class ContainerTests {
+
+        private static readonly ILog _log = LogUtils.CreateLog();
 
         [Test]
         public void Can_set_request_scope_registration_on_provided_container() {
@@ -260,7 +263,7 @@ namespace MindTouch.Dream.Test {
             var serviceScoped2 = ContainerTestService.ServiceScope[service2.AtLocalHost.Uri.Path];
             Assert.IsNotNull(serviceScoped1);
             Assert.IsNotNull(serviceScoped2);
-            Assert.AreNotSame(serviceScoped1,serviceScoped2);
+            Assert.AreNotSame(serviceScoped1, serviceScoped2);
             Assert.IsFalse(serviceScoped1.IsDisposed);
             Assert.IsFalse(serviceScoped2.IsDisposed);
         }
@@ -277,6 +280,38 @@ namespace MindTouch.Dream.Test {
                     .End()
                 .End());
             CheckResponse(service.AtLocalHost.At("contextinjection").Get(new Result<DreamMessage>()).Wait());
+        }
+
+        [Test]
+        public void IsRegistered_checks_base_container_and_does_not_override() {
+            var builder = new ContainerBuilder();
+            builder.RegisterType<Foo>().As<IFoo>().RequestScoped();
+            var hostInfo = DreamTestHelper.CreateRandomPortHost(new XDoc("config"), builder.Build());
+            var service = hostInfo.CreateService(typeof(ComponentRegistrationTestService), "test");
+            var msg = service.AtLocalHost.At("checkfoo").Get(new Result<DreamMessage>()).Wait();
+            CheckResponse(msg);
+            Assert.AreEqual("Foo", msg.ToText());
+        }
+
+        [Test]
+        public void IsRegistered_checks_base_container_and_registers_missing() {
+            var builder = new ContainerBuilder();
+            var hostInfo = DreamTestHelper.CreateRandomPortHost(new XDoc("config"), builder.Build());
+            var service = hostInfo.CreateService(typeof(ComponentRegistrationTestService), "test");
+            var msg = service.AtLocalHost.At("checkfoo").Get(new Result<DreamMessage>()).Wait();
+            CheckResponse(msg);
+            Assert.AreEqual("Fu", msg.ToText());
+        }
+
+        [Test]
+        public void Can_override_registration_in_base() {
+            var builder = new ContainerBuilder();
+            builder.RegisterType<Foo>().As<IFoo>().RequestScoped();
+            var hostInfo = DreamTestHelper.CreateRandomPortHost(new XDoc("config"), builder.Build());
+            var service = hostInfo.CreateService(typeof(ComponentRegistrationTestService), "test", new XDoc("config").Elem("override", "true"));
+            var msg = service.AtLocalHost.At("checkfoo").Get(new Result<DreamMessage>()).Wait();
+            CheckResponse(msg);
+            Assert.AreEqual("Fu", msg.ToText());
         }
 
         private void CheckResponse(DreamMessage message) {
@@ -349,6 +384,38 @@ namespace MindTouch.Dream.Test {
             LifetimeTest = null;
             Shadowed = null;
             result.Return();
+        }
+    }
+
+    [DreamService(
+        "ComponentRegistrationTestService",
+        "Copyright (c) 2010 MindTouch, Inc.",
+        SID = new string[] { "sid://mindtouch.com/ComponentRegistrationTestService" }
+    )]
+    public class ComponentRegistrationTestService : DreamService {
+
+        private static readonly ILog _log = LogUtils.CreateLog();
+
+        [DreamFeature("GET:checkfoo", "test")]
+        public Yield CheckFoo(DreamContext context, DreamMessage request, Result<DreamMessage> response) {
+            IFoo foo;
+            if(!context.Container.TryResolve(out foo)) {
+                throw new DreamInternalErrorException("foo didn't resolve");
+            }
+            response.Return(DreamMessage.Ok(MimeType.TEXT, foo.GetType().Name));
+            yield break;
+        }
+
+        protected override void InitializeLifetimeScope(IContainer rootContainer, ContainerBuilder lifetimeScopeBuilder, XDoc config) {
+            if(config["override"].AsBool ?? false) {
+                _log.Debug("forcing IFoo override");
+                lifetimeScopeBuilder.RegisterType<Fu>().As<IFoo>().RequestScoped();
+            } else {
+                if(!rootContainer.IsRegistered<IFoo>()) {
+                    _log.Debug("registering IFoo");
+                    lifetimeScopeBuilder.RegisterType<Fu>().As<IFoo>().RequestScoped();
+                }
+            }
         }
     }
 }
