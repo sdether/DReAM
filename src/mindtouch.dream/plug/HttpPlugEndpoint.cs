@@ -129,7 +129,7 @@ namespace MindTouch.Dream.Http {
         }
 
         private Yield HandleInvoke(Action<string> activity, Plug plug, string verb, XUri uri, DreamMessage request, Result<DreamMessage> response) {
-            Result<IAsyncResult> async;
+            Result<IAsyncResult> asyncResult;
 
             // remove internal headers
             request.Headers.DreamTransport = null;
@@ -268,10 +268,10 @@ namespace MindTouch.Dream.Http {
 
             // send message stream
             if((request.ContentLength != 0) || (verb == Verb.POST)) {
-                async = new Result<IAsyncResult>();
+                asyncResult = new Result<IAsyncResult>();
                 try {
                     activity("pre BeginGetRequestStream");
-                    httpRequest.BeginGetRequestStream(async.Return, null);
+                    httpRequest.BeginGetRequestStream(asyncResult.Return, null);
                     activity("post BeginGetRequestStream");
                 } catch(Exception e) {
                     activity("pre HandleResponse 1");
@@ -284,14 +284,14 @@ namespace MindTouch.Dream.Http {
                     yield break;
                 }
                 activity("pre yield BeginGetRequestStream");
-                yield return async.Catch();
+                yield return asyncResult.Catch();
                 activity("post yield BeginGetRequestStream");
 
                 // send request
                 Stream outStream;
                 try {
                     activity("pre EndGetRequestStream");
-                    outStream = httpRequest.EndGetRequestStream(async.Value);
+                    outStream = httpRequest.EndGetRequestStream(asyncResult.Value);
                     activity("pre EndGetRequestStream");
                 } catch(Exception e) {
                     activity("pre HandleResponse 2");
@@ -325,10 +325,10 @@ namespace MindTouch.Dream.Http {
             request = null;
 
             // wait for response
-            async = new Result<IAsyncResult>(response.Timeout);
+            asyncResult = new Result<IAsyncResult>(response.Timeout);
             try {
                 activity("pre BeginGetResponse");
-                httpRequest.BeginGetResponse(async.Return, null);
+                httpRequest.BeginGetResponse(asyncResult.Return, null);
                 activity("post BeginGetResponse");
             } catch(Exception e) {
                 activity("pre HandleResponse 4");
@@ -341,14 +341,14 @@ namespace MindTouch.Dream.Http {
                 yield break;
             }
             activity("pre yield BeginGetResponse");
-            yield return async.Catch();
+            yield return asyncResult.Catch();
             activity("post yield BeginGetResponse");
 
             // check if an error occurred
-            if(async.HasException) {
+            if(asyncResult.HasException) {
                 activity("pre HandleResponse 5");
-                if(!HandleResponse(activity, async.Exception, null, response)) {
-                    _log.ErrorExceptionMethodCall(async.Exception, "HandleInvoke@BeginGetResponse", verb, uri);
+                if(!HandleResponse(activity, asyncResult.Exception, null, response)) {
+                    _log.ErrorExceptionMethodCall(asyncResult.Exception, "HandleInvoke@BeginGetResponse", verb, uri);
                     try {
                         httpRequest.Abort();
                     } catch { }
@@ -358,7 +358,7 @@ namespace MindTouch.Dream.Http {
 
                 // handle response
                 try {
-                    HttpWebResponse httpResponse = (HttpWebResponse)httpRequest.EndGetResponse(async.Value);
+                    HttpWebResponse httpResponse = (HttpWebResponse)httpRequest.EndGetResponse(asyncResult.Value);
                     activity("pre HandleResponse 6");
                     if(!HandleResponse(activity, null, httpResponse, response)) {
                         try {

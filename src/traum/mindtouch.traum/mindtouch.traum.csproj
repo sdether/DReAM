@@ -5,17 +5,18 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>9.0.30729</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{C4CC19EB-8149-4F39-A6E6-753886309CF6}</ProjectGuid>
+    <ProjectGuid>{405573DD-20FB-4F51-9634-63646F1AE479}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>MindTouch.Dream.Test</RootNamespace>
-    <AssemblyName>mindtouch.dream.test</AssemblyName>
-    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <RootNamespace>MindTouch.Traum</RootNamespace>
+    <AssemblyName>mindtouch.traum</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <FileUpgradeFlags>
     </FileUpgradeFlags>
     <OldToolsVersion>3.5</OldToolsVersion>
     <UpgradeBackupLocation />
+    <TargetFrameworkProfile />
     <PublishUrl>publish\</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Disk</InstallFrom>
@@ -41,8 +42,8 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <NoWarn>1591</NoWarn>
-    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-    <DocumentationFile>..\bin\mindtouch.dream.test.xml</DocumentationFile>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <DocumentationFile>..\bin\mindtouch.traum.xml</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -51,84 +52,67 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <NoWarn>1591</NoWarn>
-    <DocumentationFile>..\bin\mindtouch.dream.test.xml</DocumentationFile>
-    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <DocumentationFile>..\bin\mindtouch.traum.xml</DocumentationFile>
+    <NoWarn>1911,1591,0618</NoWarn>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Signed Release|AnyCPU' ">
     <OutputPath>..\bin\</OutputPath>
     <DefineConstants>TRACE;SIGNED</DefineConstants>
-    <DocumentationFile>..\bin\mindtouch.dream.test.xml</DocumentationFile>
+    <DocumentationFile>..\bin\mindtouch.traum.xml</DocumentationFile>
     <Optimize>true</Optimize>
-    <NoWarn>0618,1591,1699</NoWarn>
+    <NoWarn>1911,1591,0618,1699</NoWarn>
     <DebugType>pdbonly</DebugType>
     <PlatformTarget>AnyCPU</PlatformTarget>
     <ErrorReport>prompt</ErrorReport>
-    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-    <WarningLevel>0</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Documentation|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
-    <OutputPath>..\bin\</OutputPath>
-    <DefineConstants>TRACE;DEBUG</DefineConstants>
-    <DocumentationFile>..\bin\mindtouch.dream.test.xml</DocumentationFile>
-    <NoWarn>
-    </NoWarn>
+    <OutputPath>bin\Documentation\</OutputPath>
+    <DefineConstants>TRACE;DEBUG;DEBUG_DREAM</DefineConstants>
+    <DocumentationFile>..\bin\mindtouch.web.client.xml</DocumentationFile>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <NoWarn>1911,1591</NoWarn>
     <DebugType>full</DebugType>
     <PlatformTarget>AnyCPU</PlatformTarget>
     <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <Optimize>false</Optimize>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="AsyncCtpLibrary">
+      <HintPath>..\..\..\..\..\Users\Administrator\Documents\Microsoft Visual Studio Async CTP\Samples\AsyncCtpLibrary.dll</HintPath>
+    </Reference>
+    <Reference Include="log4net">
+      <HintPath>..\..\redist\log4net.dll</HintPath>
+    </Reference>
+    <Reference Include="SgmlReaderDll">
+      <HintPath>..\..\redist\SgmlReaderDll.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
+    <Reference Include="System.configuration" />
     <Reference Include="System.Core">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Web" />
+    <Reference Include="System.Xml.Linq">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Data.DataSetExtensions">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
-    <Reference Include="Autofac, Version=1.4.5.676, Culture=neutral, PublicKeyToken=17863af14b0044da">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\redist\Autofac.dll</HintPath>
-    </Reference>
-    <Reference Include="log4net, Version=1.2.10.0, Culture=neutral, PublicKeyToken=1b44e1d426115821">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\redist\log4net.dll</HintPath>
-    </Reference>
-    <Reference Include="nunit.framework, Version=2.4.8.0, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\redist\nunit.framework.dll</HintPath>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="DreamHostInfo.cs" />
-    <Compile Include="DreamMessageEx.cs" />
-    <Compile Include="DreamServiceInfo.cs" />
-    <Compile Include="DreamServiceTestUtil.cs" />
-    <Compile Include="DreamTestHelper.cs" />
-    <Compile Include="Data\MockDataCatalog.cs" />
-    <Compile Include="Mock\IMockPlug.cs" />
-    <Compile Include="Mock\MockEndpoint.cs" />
-    <Compile Include="MockPlug.cs" />
-    <Compile Include="Mock\MockPlugException.cs" />
-    <Compile Include="Mock\MockPlugInvocation.cs" />
-    <Compile Include="MockService.cs" />
-    <Compile Include="MockServiceInfo.cs" />
+    <Compile Include="DreamMessage2.cs" />
+    <Compile Include="Exceptions.cs" />
+    <Compile Include="Plug\HttpPlugEndpoint.cs" />
+    <Compile Include="Plug\IPlugEndpoint2.cs" />
+    <Compile Include="Plug\Plug2.cs" />
+    <Compile Include="Plug\ProxyPlugEndpoint.cs" />
+    <Compile Include="Plug\ResourcePlugEndpoint.cs" />
+    <Compile Include="Plug\XriPlugEndpoint.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Mock\Times.cs" />
-    <Compile Include="ResultTestEx.cs" />
-    <Compile Include="Wait.cs" />
-    <Compile Include="AssertEx.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\mindtouch.core\mindtouch.core.csproj">
-      <Project>{CAAE6609-8532-4CCA-ABD5-186C43F77687}</Project>
-      <Name>mindtouch.core</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\mindtouch.dream\mindtouch.dream.csproj">
-      <Project>{3E706653-69D1-4522-BEE8-ECEC1A1BF7DE}</Project>
-      <Name>mindtouch.dream</Name>
-    </ProjectReference>
+    <Compile Include="Test.cs" />
+    <Compile Include="Xml\XTypes.cs" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
@@ -146,6 +130,12 @@
       <ProductName>Windows Installer 3.1</ProductName>
       <Install>true</Install>
     </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\mindtouch.dream\mindtouch.dream.csproj">
+      <Project>{3E706653-69D1-4522-BEE8-ECEC1A1BF7DE}</Project>
+      <Name>mindtouch.dream</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

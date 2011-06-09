@@ -1,8 +1,16 @@
-Microsoft Visual Studio Solution File, Format Version 10.00
-# Visual Studio 2008
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{F1DF3358-C4F9-4AC4-8121-7FDF662E75B9}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tools", "tools", "{41171E81-8617-4B1A-AA60-5E45F60BDC6B}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{298A8F5F-EC9D-4CF9-A29E-A1B4F6976EFC}"
+	ProjectSection(SolutionItems) = preProject
+		..\LICENSE = ..\LICENSE
+		..\mindtouch.build.xml = ..\mindtouch.build.xml
+		..\MindTouchDream.proj = ..\MindTouchDream.proj
+		..\README.md = ..\README.md
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "mindtouch.dream", "mindtouch.dream\mindtouch.dream.csproj", "{3E706653-69D1-4522-BEE8-ECEC1A1BF7DE}"
 EndProject
@@ -28,13 +36,13 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "mindtouch.dream.test", "min
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "test.mindtouch.core", "tests\test.mindtouch.core\test.mindtouch.core.csproj", "{66E62AB7-D8A5-494A-970F-AA6705E33361}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{298A8F5F-EC9D-4CF9-A29E-A1B4F6976EFC}"
-	ProjectSection(SolutionItems) = preProject
-		..\LICENSE = ..\LICENSE
-		..\mindtouch.build.xml = ..\mindtouch.build.xml
-		..\MindTouchDream.proj = ..\MindTouchDream.proj
-		..\README.md = ..\README.md
-	EndProjectSection
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "traum", "traum", "{95CA6E5D-FA59-4A55-94D9-E974807EC9BD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "mindtouch.traum", "traum\mindtouch.traum\mindtouch.traum.csproj", "{405573DD-20FB-4F51-9634-63646F1AE479}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "mindtouch.traum.test", "traum\mindtouch.traum.test\mindtouch.traum.test.csproj", "{5CA9A301-D935-4518-A04C-E97A50BFBBE5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "test.mindtouch.traum", "traum\test.mindtouch.traum\test.mindtouch.traum.csproj", "{472FE14C-8142-4950-A2EF-91C58E6FAABF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -140,6 +148,30 @@ Global
 		{66E62AB7-D8A5-494A-970F-AA6705E33361}.Release|Any CPU.Build.0 = Release|Any CPU
 		{66E62AB7-D8A5-494A-970F-AA6705E33361}.Signed Release|Any CPU.ActiveCfg = Signed Release|Any CPU
 		{66E62AB7-D8A5-494A-970F-AA6705E33361}.Signed Release|Any CPU.Build.0 = Signed Release|Any CPU
+		{405573DD-20FB-4F51-9634-63646F1AE479}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{405573DD-20FB-4F51-9634-63646F1AE479}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{405573DD-20FB-4F51-9634-63646F1AE479}.Documentation|Any CPU.ActiveCfg = Documentation|Any CPU
+		{405573DD-20FB-4F51-9634-63646F1AE479}.Documentation|Any CPU.Build.0 = Documentation|Any CPU
+		{405573DD-20FB-4F51-9634-63646F1AE479}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{405573DD-20FB-4F51-9634-63646F1AE479}.Release|Any CPU.Build.0 = Release|Any CPU
+		{405573DD-20FB-4F51-9634-63646F1AE479}.Signed Release|Any CPU.ActiveCfg = Signed Release|Any CPU
+		{405573DD-20FB-4F51-9634-63646F1AE479}.Signed Release|Any CPU.Build.0 = Signed Release|Any CPU
+		{5CA9A301-D935-4518-A04C-E97A50BFBBE5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5CA9A301-D935-4518-A04C-E97A50BFBBE5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5CA9A301-D935-4518-A04C-E97A50BFBBE5}.Documentation|Any CPU.ActiveCfg = Documentation|Any CPU
+		{5CA9A301-D935-4518-A04C-E97A50BFBBE5}.Documentation|Any CPU.Build.0 = Documentation|Any CPU
+		{5CA9A301-D935-4518-A04C-E97A50BFBBE5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5CA9A301-D935-4518-A04C-E97A50BFBBE5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5CA9A301-D935-4518-A04C-E97A50BFBBE5}.Signed Release|Any CPU.ActiveCfg = Signed Release|Any CPU
+		{5CA9A301-D935-4518-A04C-E97A50BFBBE5}.Signed Release|Any CPU.Build.0 = Signed Release|Any CPU
+		{472FE14C-8142-4950-A2EF-91C58E6FAABF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{472FE14C-8142-4950-A2EF-91C58E6FAABF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{472FE14C-8142-4950-A2EF-91C58E6FAABF}.Documentation|Any CPU.ActiveCfg = Debug|Any CPU
+		{472FE14C-8142-4950-A2EF-91C58E6FAABF}.Documentation|Any CPU.Build.0 = Debug|Any CPU
+		{472FE14C-8142-4950-A2EF-91C58E6FAABF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{472FE14C-8142-4950-A2EF-91C58E6FAABF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{472FE14C-8142-4950-A2EF-91C58E6FAABF}.Signed Release|Any CPU.ActiveCfg = Signed Release|Any CPU
+		{472FE14C-8142-4950-A2EF-91C58E6FAABF}.Signed Release|Any CPU.Build.0 = Signed Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -152,5 +184,8 @@ Global
 		{E23ADD96-5514-449A-8FD9-1BC0B0177146} = {41171E81-8617-4B1A-AA60-5E45F60BDC6B}
 		{DCF830D7-F840-41B3-A89A-4145DAEB9744} = {41171E81-8617-4B1A-AA60-5E45F60BDC6B}
 		{74182840-62F6-4587-8FA8-88C4D57598AE} = {41171E81-8617-4B1A-AA60-5E45F60BDC6B}
+		{405573DD-20FB-4F51-9634-63646F1AE479} = {95CA6E5D-FA59-4A55-94D9-E974807EC9BD}
+		{5CA9A301-D935-4518-A04C-E97A50BFBBE5} = {95CA6E5D-FA59-4A55-94D9-E974807EC9BD}
+		{472FE14C-8142-4950-A2EF-91C58E6FAABF} = {95CA6E5D-FA59-4A55-94D9-E974807EC9BD}
 	EndGlobalSection
 EndGlobal

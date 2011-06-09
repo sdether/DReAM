@@ -5,17 +5,18 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>9.0.30729</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{CAAE6609-8532-4CCA-ABD5-186C43F77687}</ProjectGuid>
+    <ProjectGuid>{472FE14C-8142-4950-A2EF-91C58E6FAABF}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>MindTouch.Dream</RootNamespace>
-    <AssemblyName>mindtouch.core</AssemblyName>
+    <RootNamespace>MindTouch.Traum.Test</RootNamespace>
+    <AssemblyName>test.mindtouch.traum</AssemblyName>
     <FileUpgradeFlags>
     </FileUpgradeFlags>
     <OldToolsVersion>3.5</OldToolsVersion>
     <UpgradeBackupLocation>
     </UpgradeBackupLocation>
-    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkProfile />
     <PublishUrl>publish\</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Disk</InstallFrom>
@@ -36,115 +37,84 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>..\bin\</OutputPath>
+    <OutputPath>..\..\bin\</OutputPath>
     <DefineConstants>TRACE;DEBUG;DEBUG_DREAM</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <NoWarn>1591</NoWarn>
-    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-    <DocumentationFile>..\bin\mindtouch.core.xml</DocumentationFile>
+    <DocumentationFile>
+    </DocumentationFile>
+    <NoWarn>1911,0618,0067</NoWarn>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>..\bin\</OutputPath>
+    <OutputPath>..\..\bin\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <NoWarn>0618,1591</NoWarn>
-    <DocumentationFile>..\bin\mindtouch.core.xml</DocumentationFile>
+    <NoWarn>1911,0618,0067</NoWarn>
+    <DocumentationFile>
+    </DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Signed Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>..\bin\</OutputPath>
+    <OutputPath>..\..\bin\</OutputPath>
     <DefineConstants>TRACE;SIGNED</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <NoWarn>0618,1591,1699</NoWarn>
-    <DocumentationFile>..\bin\mindtouch.core.xml</DocumentationFile>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Documentation|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <OutputPath>..\bin\</OutputPath>
-    <DefineConstants>TRACE;DEBUG</DefineConstants>
-    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
-    <NoWarn>
-    </NoWarn>
-    <DebugType>full</DebugType>
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <ErrorReport>prompt</ErrorReport>
-    <DocumentationFile>..\bin\mindtouch.core.xml</DocumentationFile>
+    <WarningLevel>1</WarningLevel>
+    <NoWarn>1911,0618,0067</NoWarn>
+    <DocumentationFile>
+    </DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Autofac, Version=1.4.3.536, Culture=neutral, PublicKeyToken=17863af14b0044da, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\redist\Autofac.dll</HintPath>
+    <Reference Include="AsyncCtpLibrary">
+      <HintPath>..\..\..\..\..\Users\Administrator\Documents\Microsoft Visual Studio Async CTP\Samples\AsyncCtpLibrary.dll</HintPath>
     </Reference>
-    <Reference Include="log4net, Version=1.2.9.0, Culture=neutral, PublicKeyToken=b32731d11ce58905">
+    <Reference Include="log4net, Version=1.2.10.0, Culture=neutral, PublicKeyToken=1b44e1d426115821, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\redist\log4net.dll</HintPath>
+      <HintPath>..\..\redist\log4net.dll</HintPath>
+    </Reference>
+    <Reference Include="Moq, Version=4.0.812.4, Culture=neutral, PublicKeyToken=69f491c39445e920, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\redist\Moq.dll</HintPath>
+    </Reference>
+    <Reference Include="nunit.framework, Version=2.4.8.0, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\redist\nunit.framework.dll</HintPath>
     </Reference>
     <Reference Include="System" />
-    <Reference Include="System.configuration" />
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
     <Reference Include="System.Data" />
-    <Reference Include="System.Web" />
-    <Reference Include="System.Web.Routing">
-      <RequiredTargetFramework>3.5</RequiredTargetFramework>
-    </Reference>
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AmazonS3\AmazonS3Client.cs" />
-    <Compile Include="AmazonS3\AmazonS3DataInfo.cs" />
-    <Compile Include="AmazonS3\S3PlugEx.cs" />
+    <Compile Include="DreamMessageTests.cs" />
     <Compile Include="AssemblyInfo.cs" />
-    <Compile Include="DreamApplicationConfiguration.cs" />
-    <Compile Include="DreamApplicationConfigurationBuilder.cs" />
-    <Compile Include="DreamCoreUtil.cs" />
-    <Compile Include="DreamHost.cs" />
-    <Compile Include="dreampipe.cs" />
-    <Compile Include="DreamHostService.cs" />
-    <Compile Include="feature.cs" />
-    <Compile Include="DreamApplication.cs" />
-    <Compile Include="http\DreamRouteHandler.cs" />
-    <Compile Include="http\RoutedHttpHandler.cs" />
-    <Compile Include="http\httphandler.cs" />
-    <Compile Include="http\httptransport.cs" />
-    <Compile Include="ioformatter.cs" />
-    <Compile Include="serviceactivator.cs" />
-    <Compile Include="AmazonS3\AmazonS3ClientConfig.cs" />
-    <Compile Include="AmazonS3\AmazonS3FileHandle.cs" />
-    <Compile Include="services\atomservice.cs" />
-    <Compile Include="AmazonS3\IAmazonS3Client.cs" />
-    <Compile Include="services\S3StorageService.cs" />
-    <Compile Include="services\directoryservice.cs" />
-    <Compile Include="services\EmailService.cs" />
-    <Compile Include="services\MountService.cs" />
-    <Compile Include="services\QueueService.cs" />
-    <Compile Include="services\RedirectService.cs" />
-    <Compile Include="services\StorageService.cs" />
+    <Compile Include="MockPlugTests.cs" />
+    <Compile Include="PlugTests.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\mindtouch.dream\mindtouch.dream.csproj">
-      <Project>{3E706653-69D1-4522-BEE8-ECEC1A1BF7DE}</Project>
-      <Name>mindtouch.dream</Name>
-    </ProjectReference>
+    <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="resources\host\error.xslt" />
+    <EmbeddedResource Include="Resources\html-bom-utf16be.txt" />
+    <EmbeddedResource Include="Resources\html-bom-utf16le.txt" />
+    <EmbeddedResource Include="Resources\html-bom-utf8.txt" />
+    <EmbeddedResource Include="Resources\xml-big5.txt" />
+    <EmbeddedResource Include="Resources\xml-gb2312.txt" />
+    <EmbeddedResource Include="Resources\xml-utf8-chinese.txt" />
+    <EmbeddedResource Include="Resources\resource-test.txt" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="resources\favicon.ico" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="resources\host\status.xslt" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="resources\host\services.xslt" />
+    <EmbeddedResource Include="Resources\xml-euc-jp.txt" />
+    <EmbeddedResource Include="Resources\xml-iso-2022-jp.txt" />
+    <EmbeddedResource Include="Resources\xml-little-endian-jp.txt" />
+    <EmbeddedResource Include="Resources\xml-shift-jis.txt" />
+    <EmbeddedResource Include="Resources\xml-utf-16-jp.txt" />
+    <EmbeddedResource Include="Resources\xml-utf-8-jp.txt" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties\" />
@@ -166,6 +136,24 @@
       <Install>true</Install>
     </BootstrapperPackage>
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\mindtouch.dream.test\mindtouch.dream.test.csproj">
+      <Project>{C4CC19EB-8149-4F39-A6E6-753886309CF6}</Project>
+      <Name>mindtouch.dream.test</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\mindtouch.dream\mindtouch.dream.csproj">
+      <Project>{3E706653-69D1-4522-BEE8-ECEC1A1BF7DE}</Project>
+      <Name>mindtouch.dream</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\mindtouch.traum.test\mindtouch.traum.test.csproj">
+      <Project>{5CA9A301-D935-4518-A04C-E97A50BFBBE5}</Project>
+      <Name>mindtouch.traum.test</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\mindtouch.traum\mindtouch.traum.csproj">
+      <Project>{405573DD-20FB-4F51-9634-63646F1AE479}</Project>
+      <Name>mindtouch.traum</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
@@ -175,6 +163,8 @@
   </Target>
   -->
   <PropertyGroup>
+    <PreBuildEvent>
+    </PreBuildEvent>
     <PostBuildEvent>
     </PostBuildEvent>
   </PropertyGroup>
