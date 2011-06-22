@@ -53,7 +53,7 @@ namespace MindTouch.Traum {
             // build new plug
             List<PlugHandler2> preHandlers = (plug.PreHandlers != null) ? new List<PlugHandler2>(plug.PreHandlers) : null;
             List<PlugHandler2> postHandlers = (plug.PostHandlers != null) ? new List<PlugHandler2>(plug.PostHandlers) : null;
-            Plug2 xri = new Plug2(new XUri("http", null, null, "xri.net", 80, segments.ToArray(), uri.TrailingSlash, uri.Params, uri.Fragment), plug.Timeout, request.Headers, preHandlers, postHandlers, plug.Credentials, plug.CookieJar);
+            Plug2 xri = new Plug2(new XUri("http", null, null, "xri.net", 80, segments.ToArray(), uri.TrailingSlash, uri.Params, uri.Fragment), plug.Timeout, request.Headers, preHandlers, postHandlers, plug.Credentials, plug.CookieJar, plug.MaxAutoRedirects);
 
             // add 'Accept' header for 'application/xrds+xml' mime-type
             if((xri.Headers == null) || (xri.Headers.Accept == null)) {

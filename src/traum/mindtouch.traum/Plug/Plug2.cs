@@ -49,17 +49,17 @@ namespace MindTouch.Traum {
     /// </summary>
     public class Plug2 {
 
-        //--- Types ---
-        internal interface IPlugInterceptor {
-            DreamMessage2 PreProcess(string verb, XUri uri, XUri normalizedUri, DreamMessage2 message, DreamCookieJar cookies);
-            DreamMessage2 PostProcess(string verb, XUri uri, XUri normalizedUri, DreamMessage2 message, DreamCookieJar cookies);
-        }
-
-        internal interface ICookieJarSource {
-            DreamCookieJar CookieJar { get; }
-        }
-
         //--- Constants ---
+
+        /// <summary>
+        /// Default number of redirects plug uses when no value is specified.
+        /// </summary>
+        public const ushort DEFAULT_MAX_AUTO_REDIRECTS = 50;
+
+        /// <summary>
+        /// Base score normal priorty <see cref="IPlugEndpoint"/> implementations should use to signal a successful match.
+        /// </summary>
+        public const int BASE_ENDPOINT_SCORE = int.MaxValue / 2;
 
         /// <summary>
         /// Default timeout of 60 seconds for <see cref="Plug2"/> invocations.
@@ -75,20 +75,17 @@ namespace MindTouch.Traum {
 
         private static log4net.ILog _log = LogUtils.CreateLog();
         private static readonly List<IPlugEndpoint2> _endpoints = new List<IPlugEndpoint2>();
-        private static IPlugInterceptor _interceptor;
-        private static ICookieJarSource _cookieJarSource;
 
         //--- Class Constructors ---
         static Plug2() {
 
             // let's find all IPlugEndpoint derived, concrete classes
-            foreach(Type type in typeof(Plug2).Assembly.GetTypes()) {
-                if(!typeof(IPlugEndpoint2).IsAssignableFrom(type) || !type.IsClass || type.IsAbstract || type.IsGenericTypeDefinition) {
-                    continue;
-                }
-                var ctor = type.GetConstructor(Type.EmptyTypes);
-                if(ctor != null) {
-                    AddEndpoint((IPlugEndpoint2)ctor.Invoke(null));
+            foreach(Type type in typeof(Plug).Assembly.GetTypes()) {
+                if(typeof(IPlugEndpoint).IsAssignableFrom(type) && type.IsClass && !type.IsAbstract && !type.IsGenericTypeDefinition) {
+                    ConstructorInfo ctor = type.GetConstructor(System.Type.EmptyTypes);
+                    if(ctor != null) {
+                        AddEndpoint((IPlugEndpoint2)ctor.Invoke(null));
+                    }
                 }
             }
         }
@@ -123,7 +120,7 @@ namespace MindTouch.Traum {
         /// <returns>New plug instance.</returns>
         public static Plug2 New(string uri, TimeSpan timeout) {
             if(uri != null) {
-                return new Plug2(new XUri(uri), timeout, null, null, null, null, null);
+                return new Plug2(new XUri(uri), timeout, null, null, null, null, null, DEFAULT_MAX_AUTO_REDIRECTS);
             }
             return null;
         }
@@ -145,7 +142,7 @@ namespace MindTouch.Traum {
         /// <returns>New plug instance.</returns>
         public static Plug2 New(Uri uri, TimeSpan timeout) {
             if(uri != null) {
-                return new Plug2(new XUri(uri), timeout, null, null, null, null, null);
+                return new Plug2(new XUri(uri), timeout, null, null, null, null, null, DEFAULT_MAX_AUTO_REDIRECTS);
             }
             return null;
         }
@@ -167,7 +164,7 @@ namespace MindTouch.Traum {
         /// <returns>New plug instance.</returns>
         public static Plug2 New(XUri uri, TimeSpan timeout) {
             if(uri != null) {
-                return new Plug2(uri, timeout, null, null, null, null, null);
+                return new Plug2(uri, timeout, null, null, null, null, null, DEFAULT_MAX_AUTO_REDIRECTS);
             }
             return null;
         }
@@ -212,6 +209,60 @@ namespace MindTouch.Traum {
             return message;
         }
 
+        private static DreamMessage2 PreProcess(string verb, XUri uri, XUri normalizedUri, DreamHeaders headers, DreamCookieJar cookies, DreamMessage2 message) {
+
+            // check if plug is running in the context of a service
+            DreamContext context = DreamContext.CurrentOrNull;
+            if(context != null) {
+
+                // set request id header
+                message.Headers.DreamRequestId = context.GetState<string>(DreamHeaders.DREAM_REQUEST_ID);
+
+                // set dream service header
+                if(context.Service.Self != null) {
+                    message.Headers.DreamService = context.AsPublicUri(context.Service.Self).ToString();
+                }
+
+                // check if uri is local://
+                // TODO: Dream related plumbing cleanup
+                //if(normalizedUri.Scheme.EqualsInvariant("local")) {
+                //    DreamUtil.AppendHeadersToInternallyForwardedMessage(context.Request, message);
+                //}
+            }
+
+            if(cookies != null) {
+                lock(cookies) {
+                    message.Cookies.AddRange(cookies.Fetch(uri));
+                }
+            }
+
+            // transfer plug headers
+            message.Headers.AddRange(headers);
+            return message;
+        }
+
+        private static DreamMessage2 PostProcess(string verb, XUri uri, XUri normalizedUri, DreamHeaders headers, DreamCookieJar cookies, DreamMessage2 message) {
+
+            // check if we received cookies
+            if(message.HasCookies) {
+                DreamContext context = DreamContext.CurrentOrNull;
+
+                // add matching cookies to service or to global cookie jar
+                if(cookies != null) {
+                    lock(cookies) {
+                        if(!uri.Scheme.EqualsInvariant("local") && normalizedUri.Scheme.EqualsInvariant("local")) {
+
+                            // need to translate cookies as they leave the dreamcontext
+                            cookies.Update(DreamCookie.ConvertToPublic(message.Cookies), uri);
+                        } else {
+                            cookies.Update(message.Cookies, uri);
+                        }
+                    }
+                }
+            }
+            return message;
+        }
+
         private static int FindPlugEndpoint(XUri uri, out IPlugEndpoint2 match, out XUri normalizedUri) {
             match = null;
             normalizedUri = null;
@@ -232,14 +283,6 @@ namespace MindTouch.Traum {
                 }
             }
             return maxScore;
-        }
-
-        internal static void SetInterceptor(IPlugInterceptor interceptor) {
-            _interceptor = interceptor;
-        }
-
-        internal static void SetCookieJarSource(ICookieJarSource cookieJarSource) {
-            _cookieJarSource = cookieJarSource;
         }
 
         //--- Fields ---
@@ -267,6 +310,7 @@ namespace MindTouch.Traum {
         private readonly List<PlugHandler2> _postHandlers;
 
         private readonly DreamCookieJar _cookieJarOverride = null;
+        private readonly ushort _maxAutoRedirects = 0;
 
         //--- Constructors ---
 
@@ -280,7 +324,8 @@ namespace MindTouch.Traum {
         /// <param name="postHandlers">Optional post-invocation handlers.</param>
         /// <param name="credentials">Optional request credentials.</param>
         /// <param name="cookieJarOverride">Optional cookie jar to override global jar shared by <see cref="Plug2"/> instances.</param>
-        public Plug2(XUri uri, TimeSpan timeout, DreamHeaders headers, List<PlugHandler2> preHandlers, List<PlugHandler2> postHandlers, ICredentials credentials, DreamCookieJar cookieJarOverride) {
+        /// <param name="maxAutoRedirects">Maximum number of redirects to follow, 0 if non redirects should be followed.</param>
+        public Plug2(XUri uri, TimeSpan timeout, DreamHeaders headers, List<PlugHandler2> preHandlers, List<PlugHandler2> postHandlers, ICredentials credentials, DreamCookieJar cookieJarOverride, ushort maxAutoRedirects) {
             if(uri == null) {
                 throw new ArgumentNullException("uri");
             }
@@ -291,6 +336,7 @@ namespace MindTouch.Traum {
             _preHandlers = preHandlers;
             _postHandlers = postHandlers;
             _cookieJarOverride = cookieJarOverride;
+            _maxAutoRedirects = maxAutoRedirects;
         }
 
         //--- Properties ---
@@ -315,13 +361,26 @@ namespace MindTouch.Traum {
         /// </summary>
         public DreamCookieJar CookieJar {
             get {
+
                 // Note (arnec): In order for the override to not block the environment, we always run this logic to get at the
                 // plug's cookie jar rather than assigning the resulting value to _cookieJarOverride
-                return _cookieJarOverride
-                    ?? ((_cookieJarSource != null) ? _cookieJarSource.CookieJar : null)
-                    ?? GlobalCookies;
+                if(_cookieJarOverride != null) {
+                    return _cookieJarOverride;
+                }
+                DreamContext context = DreamContext.CurrentOrNull;
+                return ((context != null) && (context.Service.Cookies != null)) ? context.Service.Cookies : GlobalCookies;
             }
         }
+
+        /// <summary>
+        /// True if this plug will automatically follow redirects (301,302 &amp; 307).
+        /// </summary>
+        public bool AutoRedirect { get { return _maxAutoRedirects > 0; } }
+
+        /// <summary>
+        /// Maximum number of redirect to follow before giving up.
+        /// </summary>
+        public ushort MaxAutoRedirects { get { return _maxAutoRedirects; } }
 
         //--- Methods ---
 
@@ -334,7 +393,7 @@ namespace MindTouch.Traum {
             if(segments.Length == 0) {
                 return this;
             }
-            return new Plug2(Uri.At(segments), Timeout, _headers, _preHandlers, _postHandlers, Credentials, _cookieJarOverride);
+            return new Plug2(Uri.At(segments), Timeout, _headers, _preHandlers, _postHandlers, Credentials, _cookieJarOverride, MaxAutoRedirects);
         }
 
         /// <summary>
@@ -343,7 +402,7 @@ namespace MindTouch.Traum {
         /// <param name="path">Path/Query/fragment string.</param>
         /// <returns>New instance.</returns>
         public Plug2 AtPath(string path) {
-            return new Plug2(Uri.AtPath(path), Timeout, _headers, _preHandlers, _postHandlers, Credentials, _cookieJarOverride);
+            return new Plug2(Uri.AtPath(path), Timeout, _headers, _preHandlers, _postHandlers, Credentials, _cookieJarOverride, MaxAutoRedirects);
         }
 
         /// <summary>
@@ -353,7 +412,7 @@ namespace MindTouch.Traum {
         /// <param name="value">Query value.</param>
         /// <returns>New instance.</returns>
         public Plug2 With(string key, string value) {
-            return new Plug2(Uri.With(key, value), Timeout, _headers, _preHandlers, _postHandlers, Credentials, _cookieJarOverride);
+            return new Plug2(Uri.With(key, value), Timeout, _headers, _preHandlers, _postHandlers, Credentials, _cookieJarOverride, MaxAutoRedirects);
         }
 
         /// <summary>
@@ -363,7 +422,7 @@ namespace MindTouch.Traum {
         /// <param name="value">Query value.</param>
         /// <returns>New instance.</returns>
         public Plug2 With(string key, bool value) {
-            return new Plug2(Uri.With(key, value.ToString()), Timeout, _headers, _preHandlers, _postHandlers, Credentials, _cookieJarOverride);
+            return new Plug2(Uri.With(key, value.ToString()), Timeout, _headers, _preHandlers, _postHandlers, Credentials, _cookieJarOverride, MaxAutoRedirects);
         }
 
         /// <summary>
@@ -373,7 +432,7 @@ namespace MindTouch.Traum {
         /// <param name="value">Query value.</param>
         /// <returns>New instance.</returns>
         public Plug2 With(string key, int value) {
-            return new Plug2(Uri.With(key, value.ToString()), Timeout, _headers, _preHandlers, _postHandlers, Credentials, _cookieJarOverride);
+            return new Plug2(Uri.With(key, value.ToString()), Timeout, _headers, _preHandlers, _postHandlers, Credentials, _cookieJarOverride, MaxAutoRedirects);
         }
 
         /// <summary>
@@ -383,7 +442,7 @@ namespace MindTouch.Traum {
         /// <param name="value">Query value.</param>
         /// <returns>New instance.</returns>
         public Plug2 With(string key, long value) {
-            return new Plug2(Uri.With(key, value.ToString()), Timeout, _headers, _preHandlers, _postHandlers, Credentials, _cookieJarOverride);
+            return new Plug2(Uri.With(key, value.ToString()), Timeout, _headers, _preHandlers, _postHandlers, Credentials, _cookieJarOverride, MaxAutoRedirects);
         }
 
         /// <summary>
@@ -393,7 +452,7 @@ namespace MindTouch.Traum {
         /// <param name="value">Query value.</param>
         /// <returns>New instance.</returns>
         public Plug2 With(string key, decimal value) {
-            return new Plug2(Uri.With(key, value.ToString()), Timeout, _headers, _preHandlers, _postHandlers, Credentials, _cookieJarOverride);
+            return new Plug2(Uri.With(key, value.ToString()), Timeout, _headers, _preHandlers, _postHandlers, Credentials, _cookieJarOverride, MaxAutoRedirects);
         }
 
         /// <summary>
@@ -403,7 +462,7 @@ namespace MindTouch.Traum {
         /// <param name="value">Query value.</param>
         /// <returns>New instance.</returns>
         public Plug2 With(string key, double value) {
-            return new Plug2(Uri.With(key, value.ToString()), Timeout, _headers, _preHandlers, _postHandlers, Credentials, _cookieJarOverride);
+            return new Plug2(Uri.With(key, value.ToString()), Timeout, _headers, _preHandlers, _postHandlers, Credentials, _cookieJarOverride, MaxAutoRedirects);
         }
 
         /// <summary>
@@ -413,7 +472,7 @@ namespace MindTouch.Traum {
         /// <param name="value">Query value.</param>
         /// <returns>New instance.</returns>
         public Plug2 With(string key, DateTime value) {
-            return new Plug2(Uri.With(key, value.ToUniversalTime().ToString("R")), Timeout, _headers, _preHandlers, _postHandlers, Credentials, _cookieJarOverride);
+            return new Plug2(Uri.With(key, value.ToUniversalTime().ToString("R")), Timeout, _headers, _preHandlers, _postHandlers, Credentials, _cookieJarOverride, MaxAutoRedirects);
         }
 
         /// <summary>
@@ -422,7 +481,7 @@ namespace MindTouch.Traum {
         /// <param name="args">Array of query key/value pairs.</param>
         /// <returns>New instance.</returns>
         public Plug2 WithParams(KeyValuePair<string, string>[] args) {
-            return new Plug2(Uri.WithParams(args), Timeout, _headers, _preHandlers, _postHandlers, Credentials, _cookieJarOverride);
+            return new Plug2(Uri.WithParams(args), Timeout, _headers, _preHandlers, _postHandlers, Credentials, _cookieJarOverride, MaxAutoRedirects);
         }
 
         /// <summary>
@@ -431,7 +490,7 @@ namespace MindTouch.Traum {
         /// <param name="query">Query string.</param>
         /// <returns>New instance.</returns>
         public Plug2 WithQuery(string query) {
-            return new Plug2(Uri.WithQuery(query), Timeout, _headers, _preHandlers, _postHandlers, Credentials, _cookieJarOverride);
+            return new Plug2(Uri.WithQuery(query), Timeout, _headers, _preHandlers, _postHandlers, Credentials, _cookieJarOverride, MaxAutoRedirects);
         }
 
         /// <summary>
@@ -440,17 +499,21 @@ namespace MindTouch.Traum {
         /// <param name="uri">Uri to extract parameters from.</param>
         /// <returns>New instance.</returns>
         public Plug2 WithParamsFrom(XUri uri) {
-            return new Plug2(Uri.WithParamsFrom(uri), Timeout, _headers, _preHandlers, _postHandlers, Credentials, _cookieJarOverride);
+            return new Plug2(Uri.WithParamsFrom(uri), Timeout, _headers, _preHandlers, _postHandlers, Credentials, _cookieJarOverride, MaxAutoRedirects);
         }
 
         /// <summary>
         /// Create a copy of the instance with the given credentials
         /// </summary>
+        /// <remarks>
+        /// Using the user/password signature will always try to send a basic auth header. If negotiation of auth method is desired
+        /// (i.e. digest auth may be an option), use <see cref="WithCredentials(System.Net.ICredentials)"/> instead.
+        /// </remarks>
         /// <param name="user">User.</param>
         /// <param name="password">Password.</param>
         /// <returns>New instance.</returns>
         public Plug2 WithCredentials(string user, string password) {
-            return new Plug2(Uri.WithCredentials(user, password), Timeout, _headers, _preHandlers, _postHandlers, Credentials, _cookieJarOverride);
+            return new Plug2(Uri.WithCredentials(user, password), Timeout, _headers, _preHandlers, _postHandlers, Credentials, _cookieJarOverride, MaxAutoRedirects);
         }
 
         /// <summary>
@@ -459,7 +522,7 @@ namespace MindTouch.Traum {
         /// <param name="credentials">Credential instance.</param>
         /// <returns>New instance.</returns>
         public Plug2 WithCredentials(ICredentials credentials) {
-            return new Plug2(Uri, Timeout, _headers, _preHandlers, _postHandlers, credentials, _cookieJarOverride);
+            return new Plug2(Uri, Timeout, _headers, _preHandlers, _postHandlers, credentials, _cookieJarOverride, MaxAutoRedirects);
         }
 
         /// <summary>
@@ -467,7 +530,7 @@ namespace MindTouch.Traum {
         /// </summary>
         /// <returns>New instance.</returns>
         public Plug2 WithoutCredentials() {
-            return new Plug2(Uri.WithoutCredentials(), Timeout, _headers, _preHandlers, _postHandlers, null, _cookieJarOverride);
+            return new Plug2(Uri.WithoutCredentials(), Timeout, _headers, _preHandlers, _postHandlers, null, _cookieJarOverride, MaxAutoRedirects);
         }
 
         /// <summary>
@@ -476,18 +539,42 @@ namespace MindTouch.Traum {
         /// <param name="cookieJar">Cookie jar to use.</param>
         /// <returns>New instance.</returns>
         public Plug2 WithCookieJar(DreamCookieJar cookieJar) {
-            return new Plug2(Uri, Timeout, _headers, _preHandlers, _postHandlers, Credentials, cookieJar);
+            return new Plug2(Uri, Timeout, _headers, _preHandlers, _postHandlers, Credentials, cookieJar, MaxAutoRedirects);
         }
 
         /// <summary>
         /// Create a copy of the instance with any override cookie jar removed.
         /// </summary>
-        /// <remarks>Will fall back on service or global jar.</remarks>
+        /// <remarks>Will fall back on <see cref="DreamContext"/> or global jar.</remarks>
         /// <returns>New instance.</returns>
         public Plug2 WithoutCookieJar() {
-            return new Plug2(Uri, Timeout, _headers, _preHandlers, _postHandlers, Credentials, null);
+            return new Plug2(Uri, Timeout, _headers, _preHandlers, _postHandlers, Credentials, null, MaxAutoRedirects);
         }
 
+        /// <summary>
+        /// Turn on auto redirect behavior with the <see cref="DEFAULT_MAX_AUTO_REDIRECTS"/> number of redirects to follow.
+        /// </summary>
+        /// <returns>New instance.</returns>
+        public Plug2 WithAutoRedirects() {
+            return new Plug2(Uri, Timeout, _headers, _preHandlers, _postHandlers, Credentials, _cookieJarOverride, DEFAULT_MAX_AUTO_REDIRECTS);
+        }
+
+        /// <summary>
+        /// Turn on auto redirect behavior with the specified number of redirects.
+        /// </summary>
+        /// <param name="maxRedirects">Maximum number of redirects to follow before giving up.</param>
+        /// <returns>New instance.</returns>
+        public Plug2 WithAutoRedirects(ushort maxRedirects) {
+            return new Plug2(Uri, Timeout, _headers, _preHandlers, _postHandlers, Credentials, _cookieJarOverride, maxRedirects);
+        }
+
+        /// <summary>
+        /// Turn off auto-redirect behavior.
+        /// </summary>
+        /// <returns>New instance.</returns>
+        public Plug2 WithoutAutoRedirects() {
+            return new Plug2(Uri, Timeout, _headers, _preHandlers, _postHandlers, Credentials, _cookieJarOverride, 0);
+        }
         /// <summary>
         /// Create a copy of the instance with a header added.
         /// </summary>
@@ -501,9 +588,8 @@ namespace MindTouch.Traum {
             if(value == null) {
                 throw new ArgumentNullException("value");
             }
-            DreamHeaders newHeaders = new DreamHeaders(_headers);
-            newHeaders.Add(name, value);
-            return new Plug2(Uri, Timeout, newHeaders, _preHandlers, _postHandlers, Credentials, _cookieJarOverride);
+            var newHeaders = new DreamHeaders(_headers) { { name, value } };
+            return new Plug2(Uri, Timeout, newHeaders, _preHandlers, _postHandlers, Credentials, _cookieJarOverride, MaxAutoRedirects);
         }
 
         /// <summary>
@@ -513,9 +599,9 @@ namespace MindTouch.Traum {
         /// <returns>New instance.</returns>
         public Plug2 WithHeaders(DreamHeaders headers) {
             if(headers != null) {
-                DreamHeaders newHeaders = new DreamHeaders(_headers);
+                var newHeaders = new DreamHeaders(_headers);
                 newHeaders.AddRange(headers);
-                return new Plug2(Uri, Timeout, newHeaders, _preHandlers, _postHandlers, Credentials, _cookieJarOverride);
+                return new Plug2(Uri, Timeout, newHeaders, _preHandlers, _postHandlers, Credentials, _cookieJarOverride, MaxAutoRedirects);
             }
             return this;
         }
@@ -534,7 +620,7 @@ namespace MindTouch.Traum {
                     newHeaders = null;
                 }
             }
-            return new Plug2(Uri, Timeout, newHeaders, _preHandlers, _postHandlers, Credentials, _cookieJarOverride);
+            return new Plug2(Uri, Timeout, newHeaders, _preHandlers, _postHandlers, Credentials, _cookieJarOverride, MaxAutoRedirects);
         }
 
         /// <summary>
@@ -542,7 +628,7 @@ namespace MindTouch.Traum {
         /// </summary>
         /// <returns>New instance.</returns>
         public Plug2 WithoutHeaders() {
-            return new Plug2(Uri, Timeout, null, _preHandlers, _postHandlers, Credentials, _cookieJarOverride);
+            return new Plug2(Uri, Timeout, null, _preHandlers, _postHandlers, Credentials, _cookieJarOverride, MaxAutoRedirects);
         }
 
         /// <summary>
@@ -553,7 +639,7 @@ namespace MindTouch.Traum {
         public Plug2 WithPreHandler(params PlugHandler2[] preHandlers) {
             List<PlugHandler2> list = (_preHandlers != null) ? new List<PlugHandler2>(_preHandlers) : new List<PlugHandler2>();
             list.AddRange(preHandlers);
-            return new Plug2(Uri, Timeout, _headers, list, _postHandlers, Credentials, _cookieJarOverride);
+            return new Plug2(Uri, Timeout, _headers, list, _postHandlers, Credentials, _cookieJarOverride, MaxAutoRedirects);
         }
 
         /// <summary>
@@ -562,11 +648,11 @@ namespace MindTouch.Traum {
         /// <param name="postHandlers">Post-invocation handler.</param>
         /// <returns>New instance.</returns>
         public Plug2 WithPostHandler(params PlugHandler2[] postHandlers) {
-            List<PlugHandler2> list = new List<PlugHandler2>(postHandlers);
+            var list = new List<PlugHandler2>(postHandlers);
             if(_postHandlers != null) {
                 list.AddRange(_postHandlers);
             }
-            return new Plug2(Uri, Timeout, _headers, _preHandlers, list, Credentials, _cookieJarOverride);
+            return new Plug2(Uri, Timeout, _headers, _preHandlers, list, Credentials, _cookieJarOverride, MaxAutoRedirects);
         }
 
         /// <summary>
@@ -574,7 +660,7 @@ namespace MindTouch.Traum {
         /// </summary>
         /// <returns>New instance.</returns>
         public Plug2 WithoutHandlers() {
-            return new Plug2(Uri, Timeout, _headers, null, null, Credentials, _cookieJarOverride);
+            return new Plug2(Uri, Timeout, _headers, null, null, Credentials, _cookieJarOverride, MaxAutoRedirects);
         }
 
         /// <summary>
@@ -583,7 +669,39 @@ namespace MindTouch.Traum {
         /// <param name="timeout">Invocation timeout.</param>
         /// <returns>New instance.</returns>
         public Plug2 WithTimeout(TimeSpan timeout) {
-            return new Plug2(Uri, timeout, _headers, _preHandlers, _postHandlers, Credentials, _cookieJarOverride);
+            return new Plug2(Uri, timeout, _headers, _preHandlers, _postHandlers, Credentials, _cookieJarOverride, MaxAutoRedirects);
+        }
+
+        /// <summary>
+        /// Create a copy of the instance with a trailing slash.
+        /// </summary>
+        /// <returns>New instance.</returns>
+        public Plug2 WithTrailingSlash() {
+            return new Plug2(Uri.WithTrailingSlash(), Timeout, _headers, _preHandlers, _postHandlers, Credentials, _cookieJarOverride, MaxAutoRedirects);
+        }
+
+        /// <summary>
+        /// Create a copy of the instance without a trailing slash.
+        /// </summary>
+        /// <returns>New instance.</returns>
+        public Plug2 WithoutTrailingSlash() {
+            return new Plug2(Uri.WithoutTrailingSlash(), Timeout, _headers, _preHandlers, _postHandlers, Credentials, _cookieJarOverride, MaxAutoRedirects);
+        }
+
+        /// <summary>
+        /// Turn on double-encoding of segments when the Plug's <see cref="Uri"/> is converted to a <see cref="System.Uri"/>.
+        /// </summary>
+        /// <returns>New instance.</returns>
+        public Plug2 WithSegmentDoubleEncoding() {
+            return new Plug2(Uri.WithSegmentDoubleEncoding(), Timeout, _headers, _preHandlers, _postHandlers, Credentials, _cookieJarOverride, MaxAutoRedirects);
+        }
+
+        /// <summary>
+        /// Turn off double-encoding of segments when the Plug's <see cref="Uri"/> is converted to a <see cref="System.Uri"/>.
+        /// </summary>
+        /// <returns>New instance.</returns>
+        public Plug2 WithoutSegmentDoubleEncoding() {
+            return new Plug2(Uri.WithoutSegmentDoubleEncoding(), Timeout, _headers, _preHandlers, _postHandlers, Credentials, _cookieJarOverride, MaxAutoRedirects);
         }
 
         /// <summary>
@@ -641,7 +759,7 @@ namespace MindTouch.Traum {
         public DreamMessage2 PostAsForm() {
             DreamMessage2 message = DreamMessage2.Ok(Uri.Params);
             XUri uri = Uri.WithoutParams();
-            return WaitAndConfirm(new Plug2(uri, Timeout, _headers, _preHandlers, _postHandlers, Credentials, _cookieJarOverride).Invoke(Verb.POST, message, TimeSpan.MaxValue));
+            return WaitAndConfirm(new Plug2(uri, Timeout, _headers, _preHandlers, _postHandlers, Credentials, _cookieJarOverride, MaxAutoRedirects).Invoke(Verb.POST, message, TimeSpan.MaxValue));
         }
 
         /// <summary>
@@ -825,7 +943,7 @@ namespace MindTouch.Traum {
         public Task<DreamMessage2> PostAsForm(TimeSpan timeout) {
             DreamMessage2 message = DreamMessage2.Ok(Uri.Params);
             XUri uri = Uri.WithoutParams();
-            return new Plug2(uri, Timeout, Headers, _preHandlers, _postHandlers, Credentials, _cookieJarOverride).Invoke(Verb.POST, message, timeout);
+            return new Plug2(uri, Timeout, Headers, _preHandlers, _postHandlers, Credentials, _cookieJarOverride, MaxAutoRedirects).Invoke(Verb.POST, message, timeout);
         }
 
         /// <summary>
@@ -975,6 +1093,7 @@ namespace MindTouch.Traum {
 
             // check if we found a match
             if(match == null) {
+                request.Close();
                 return new DreamMessage2(DreamStatus.NoEndpointFound, null, XDoc.Empty);
             }
 
@@ -983,17 +1102,9 @@ namespace MindTouch.Traum {
 
             // prepare request
             try {
+                request = PreProcess(verb, Uri, normalizedUri, _headers, cookies, request);
 
                 // check if custom pre-processing handlers are registered
-                if(cookies != null) {
-                    lock(cookies) {
-                        request.Cookies.AddRange(cookies.Fetch(Uri));
-                    }
-                }
-
-                // transfer plug headers
-                request.Headers.AddRange(_headers);
-
                 if(_preHandlers != null) {
                     foreach(PlugHandler2 handler in _preHandlers) {
                         request = handler(verb, Uri, normalizedUri, request) ?? new DreamMessage2(DreamStatus.RequestIsNull, null, XDoc.Empty);
@@ -1003,6 +1114,7 @@ namespace MindTouch.Traum {
                     }
                 }
             } catch(Exception e) {
+                request.Close();
                 return new DreamMessage2(DreamStatus.RequestFailed, null, new XException2(e));
             }
 
@@ -1031,29 +1143,29 @@ namespace MindTouch.Traum {
 
             }
             try {
-                if(response.IsSuccessful && response.HasCookies) {
+                var message = PostProcess(verb, Uri, normalizedUri, _headers, cookies, response);
 
-                    // add matching cookies to service or to global cookie jar
-                    if(cookies != null) {
-                        lock(cookies) {
-                            if(!Uri.Scheme.EqualsInvariant("local") && normalizedUri.Scheme.EqualsInvariant("local")) {
-
-                                // need to translate cookies as they leave the dreamcontext
-                                cookies.Update(DreamCookie.ConvertToPublic(response.Cookies), Uri);
-                            } else {
-                                cookies.Update(response.Cookies, Uri);
-                            }
+                // check if custom post-processing handlers are registered
+                if((message.Status == DreamStatus.MovedPermanently ||
+                    message.Status == DreamStatus.Found ||
+                    message.Status == DreamStatus.TemporaryRedirect) &&
+                   AutoRedirect &&
+                   request.IsCloneable
+                ) {
+                    var redirectPlug = new Plug2(message.Headers.Location, Timeout, Headers, null, null, null, CookieJar, (ushort)(MaxAutoRedirects - 1));
+                    var redirectMessage = request.Clone();
+                    request.Close();
+                    await redirectPlug.InvokeEx(verb, redirectMessage, Timeout);
+                } else {
+                    request.Close();
+                    if(_postHandlers != null) {
+                        foreach(PlugHandler2 handler in _postHandlers) {
+                            response = handler(verb, Uri, normalizedUri, response) ?? new DreamMessage2(DreamStatus.ResponseIsNull, null, XDoc.Empty);
                         }
                     }
                 }
-
-                // check if custom post-processing handlers are registered
-                if(_postHandlers != null) {
-                    foreach(PlugHandler2 handler in _postHandlers) {
-                        response = handler(verb, Uri, normalizedUri, response) ?? new DreamMessage2(DreamStatus.ResponseIsNull, null, XDoc.Empty);
-                    }
-                }
             } catch(Exception e) {
+                request.Close();
                 return new DreamMessage2(DreamStatus.ResponseFailed, null, new XException2(e));
             }
             return response;
