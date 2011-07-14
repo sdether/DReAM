@@ -245,10 +245,10 @@ namespace MindTouch.Traum.Test {
                         }
                         if(bestMatch == null) {
                             _log.Debug("no match");
-                            return TaskUtil.Result(DreamMessage2.Ok(new XDoc("empty")));
+                            return DreamMessage2.Ok(new XDoc("empty")).AsTask();
                         } else {
                             _log.DebugFormat("[{0}] matched", bestMatch.Name);
-                            return TaskUtil.Result(bestMatch.Invoke(verb, uri, request));
+                            return bestMatch.Invoke(verb, uri, request).AsTask();
                         }
                     };
                     MockEndpoint.Instance.Register(new MockInvokee(baseUri, callback, endPointScore));
@@ -759,7 +759,7 @@ namespace MindTouch.Traum.Test {
             lock(this) {
                 if(_failed) {
                     _log.DebugFormat("we've already failed, no point checking more expectations");
-                    return TaskUtil.Result(DreamMessage2.InternalError());
+                    return DreamMessage2.InternalError().AsTask();
                 }
                 _log.DebugFormat("{0}={1}", verb, uri);
                 XDoc requestDoc = request.HasDocument ? request.ToDocument() : null;
@@ -767,7 +767,7 @@ namespace MindTouch.Traum.Test {
                     _log.DebugFormat("excess");
                     var excess = new ExcessInterception();
                     _excess.Add(excess);
-                    return TaskUtil.Result(excess.Call(verb, uri, requestDoc));
+                    return excess.Call(verb, uri, requestDoc).AsTask();
                 }
                 AutoMockInvokeExpectation expectation = _expectations[_current];
                 expectation.Call(verb, uri, request);
@@ -776,7 +776,7 @@ namespace MindTouch.Traum.Test {
                     _log.DebugFormat("got failure, setting reset event ({0})", _current);
                     _failed = true;
                     _resetEvent.Set();
-                    return TaskUtil.Result(DreamMessage2.BadRequest("expectation failure"));
+                    return DreamMessage2.BadRequest("expectation failure").AsTask();
                 }
                 _current++;
                 _log.DebugFormat("expected");
@@ -784,7 +784,7 @@ namespace MindTouch.Traum.Test {
                     _log.DebugFormat("setting reset event");
                     _resetEvent.Set();
                 }
-                return TaskUtil.Result(expectation.GetResponse());
+                return expectation.GetResponse().AsTask();
             }
         }
 

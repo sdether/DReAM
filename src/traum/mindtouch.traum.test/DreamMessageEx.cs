@@ -21,6 +21,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using MindTouch.Dream;
+using NUnit.Framework;
 
 namespace MindTouch.Traum.Test {
     
@@ -43,6 +45,66 @@ namespace MindTouch.Traum.Test {
                 return document["message"].Contents.IfNullOrEmpty(document.ToPrettyString());
             }
             return message.ToText();
+        }
+
+        /// <summary>
+        /// Assert that the status of the message is equal to an expected value.
+        /// </summary>
+        /// <param name="response">Response message.</param>
+        /// <param name="status">Status to assert.</param>
+        public static void AssertStatus(this DreamMessage2 response, DreamStatus status) {
+            AssertStatus(response, status, null);
+        }
+
+        /// <summary>
+        /// Assert that the status of the message is equal to an expected value.
+        /// </summary>
+        /// <param name="response">Response message.</param>
+        /// <param name="status">Status to assert.</param>
+        /// <param name="failureMessage">Failure message.</param>
+        public static void AssertStatus(this DreamMessage2 response, DreamStatus status, string failureMessage) {
+            if(response.Status == status) {
+                return;
+            }
+            if(!string.IsNullOrEmpty(failureMessage)) {
+                failureMessage = failureMessage + "\r\n";
+            }
+            Assert.Fail(
+                string.Format("{0}Request status was {1} instead of {2}:\r\n{3}",
+                failureMessage,
+                response.Status,
+                status,
+                (response.HasDocument
+                ? string.Format("{0}: {1}", response.Status, response.ToDocument()["message"].AsText)
+                : response.Status.ToString())));
+        }
+
+        /// <summary>
+        /// Assert that the response indicates a successful request.
+        /// </summary>
+        /// <param name="response">Response message.</param>
+        public static void AssertSuccess(this DreamMessage2 response) {
+            AssertSuccess(response, null);
+        }
+
+        /// <summary>
+        /// Assert that the response indicates a successful request.
+        /// </summary>
+        /// <param name="response">Response message.</param>
+        /// <param name="failureMessage">Failure message.</param>
+        public static void AssertSuccess(this DreamMessage2 response, string failureMessage) {
+            if(response.IsSuccessful) {
+                return;
+            }
+            if(!string.IsNullOrEmpty(failureMessage)) {
+                failureMessage = failureMessage + "\r\n";
+            }
+            Assert.Fail(
+                failureMessage +
+                "Request failed:\r\n" +
+                (response.HasDocument
+                ? string.Format("{0}: {1}", response.Status, response.ToDocument()["message"].AsText)
+                : response.Status.ToString()));
         }
     }
 }

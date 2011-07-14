@@ -25,15 +25,12 @@ using System.Threading;
 using System.Threading.Tasks;
 using MindTouch.Dream;
 using log4net;
-using MindTouch.Dream.Test.Mock;
 using MindTouch.Extensions.Time;
 using MindTouch.Xml;
-
+using MindTouch.Traum.Test.Mock;
 using NUnit.Framework;
 
 namespace MindTouch.Traum.Test {
-
-    using Tsk = TaskUtil;
 
     [TestFixture]
     public class MockPlugTests {
@@ -61,9 +58,9 @@ namespace MindTouch.Traum.Test {
         [Test]
         public void Register_twice_throws() {
             var uri = new XUri("http://www.mindtouch.com/foo");
-            MockPlug2.Register(uri, (p, v, u, r) => Tsk.Result(DreamMessage2.Ok()));
+            MockPlug2.Register(uri, (p, v, u, r) => DreamMessage2.Ok().AsTask());
             try {
-                MockPlug2.Register(uri, (p, v, u, r) => Tsk.Result(DreamMessage2.Ok()));
+                MockPlug2.Register(uri, (p, v, u, r) => DreamMessage2.Ok().AsTask());
             } catch(ArgumentException) {
                 return;
             } catch(Exception e) {
@@ -78,7 +75,7 @@ namespace MindTouch.Traum.Test {
             int firstCalled = 0;
             MockPlug2.Register(uri, (p, v, u, r) => {
                 firstCalled++;
-                return Tsk.Result(DreamMessage2.Ok());
+                return DreamMessage2.Ok().AsTask();
             });
             Assert.IsTrue(Plug2.New(uri).Get(TimeSpan.MaxValue).Result.IsSuccessful);
             Assert.AreEqual(1, firstCalled);
@@ -86,7 +83,7 @@ namespace MindTouch.Traum.Test {
             int secondCalled = 0;
             MockPlug2.Register(uri, (p, v, u, r) => {
                 secondCalled++;
-                return Tsk.Result(DreamMessage2.Ok());
+                return DreamMessage2.Ok().AsTask();
             });
             Assert.IsTrue(Plug2.New(uri).Get(TimeSpan.MaxValue).Result.IsSuccessful);
             Assert.AreEqual(1, firstCalled);
@@ -99,18 +96,18 @@ namespace MindTouch.Traum.Test {
             XUri uri = new XUri("http://www.mindtouch.com/foo");
             MockPlug2.Register(uri, (p, v, u, r) => {
                 firstCalled++;
-                return Tsk.Result(DreamMessage2.Ok());
+                return DreamMessage2.Ok().AsTask();
             });
-            MockPlug2.Register(new XUri("http://www.mindtouch.com/bar"), (p, v, u, r) => Tsk.Result(DreamMessage2.Ok()));
+            MockPlug2.Register(new XUri("http://www.mindtouch.com/bar"), (p, v, u, r) => DreamMessage2.Ok().AsTask());
             Assert.IsTrue(Plug2.New(uri).Get(TimeSpan.MaxValue).Result.IsSuccessful);
             Assert.AreEqual(1, firstCalled);
             MockPlug2.DeregisterAll();
             int secondCalled = 0;
             MockPlug2.Register(uri, (p, v, u, r) => {
                 secondCalled++;
-                return Tsk.Result(DreamMessage2.Ok());
+                return DreamMessage2.Ok().AsTask();
             });
-            MockPlug2.Register(new XUri("http://www.mindtouch.com/bar"), (p, v, u, r) => Tsk.Result(DreamMessage2.Ok()));
+            MockPlug2.Register(new XUri("http://www.mindtouch.com/bar"), (p, v, u, r) => DreamMessage2.Ok().AsTask());
             Assert.IsTrue(Plug2.New(uri).Get(TimeSpan.MaxValue).Result.IsSuccessful);
             Assert.AreEqual(1, firstCalled);
             Assert.AreEqual(1, secondCalled);
@@ -129,7 +126,7 @@ namespace MindTouch.Traum.Test {
                 calledUri = u;
                 calledRequest = r;
                 called++;
-                return Tsk.Result(DreamMessage2.Ok());
+                return DreamMessage2.Ok().AsTask();
             });
 
             DreamMessage2 response = Plug2.New("http://www.mindtouch.com").At("foo").Get(TimeSpan.MaxValue).Result;
@@ -152,7 +149,7 @@ namespace MindTouch.Traum.Test {
                 calledUri = u;
                 calledRequest = r;
                 called++;
-                return Tsk.Result(DreamMessage2.Ok());
+                return DreamMessage2.Ok().AsTask();
             });
 
             Plug2 plug = Plug2.New("http://www.mindtouch.com").At("foo");
@@ -161,7 +158,7 @@ namespace MindTouch.Traum.Test {
             Assert.AreEqual(1, called);
             Assert.AreEqual("GET", calledVerb);
             Assert.AreEqual(new XUri("http://www.mindtouch.com").At("foo"), calledUri);
-            Assert.AreEqual(plug, calledPlug);
+            Assert.AreEqual(plug, calledPlug2);
         }
 
         [Test]
@@ -177,7 +174,7 @@ namespace MindTouch.Traum.Test {
                 calledUri = u;
                 calledRequest = r;
                 called++;
-                return Tsk.Result(DreamMessage2.Ok());
+                return DreamMessage2.Ok().AsTask();
             });
             XDoc doc = new XDoc("message").Elem("foo");
             DreamMessage2 response = Plug2.New("http://www.mindtouch.com").At("foo").Post(doc,TimeSpan.MaxValue).Result;
@@ -202,7 +199,7 @@ namespace MindTouch.Traum.Test {
                 calledUri = u;
                 calledRequest = r;
                 called++;
-                return Tsk.Result(DreamMessage2.Ok(responseDoc));
+                return DreamMessage2.Ok(responseDoc).AsTask();
             });
             XDoc doc = new XDoc("message").Elem("foo");
             DreamMessage2 response = Plug2.New("http://www.mindtouch.com").At("foo").Get(TimeSpan.MaxValue).Result;
@@ -218,7 +215,7 @@ namespace MindTouch.Traum.Test {
             AutoResetEvent resetEvent = new AutoResetEvent(false);
             MockPlug2.Register(new XUri("http://foo/bar"), (p, v, u, r) => {
                 resetEvent.Set();
-                return Tsk.Result(DreamMessage2.Ok());
+                return DreamMessage2.Ok().AsTask();
             });
             Plug2.New("http://foo/bar").Post(TimeSpan.MaxValue);
             Assert.IsTrue(resetEvent.WaitOne(1000, false), "no async failed");
@@ -233,14 +230,14 @@ namespace MindTouch.Traum.Test {
         [Test]
         public void MockPlug_can_verify_call_via_VerifyAll() {
             MockPlug2.Setup(new XUri("http://mock/foo")).ExpectCalls(Times.AtLeastOnce());
-            Assert.IsTrue(Plug2.New("http://mock/foo").Get(new Result<DreamMessage2>()).Wait().IsSuccessful);
+            Assert.IsTrue(Plug2.New("http://mock/foo").GetAsync().Result.IsSuccessful);
             MockPlug2.VerifyAll();
         }
 
         [Test]
         public void Can_verify_call() {
             var mock = MockPlug2.Setup(new XUri("http://mock/foo")).ExpectCalls(Times.AtLeastOnce());
-            Assert.IsTrue(Plug2.New("http://mock/foo").Get(new Result<DreamMessage2>()).Wait().IsSuccessful);
+            Assert.IsTrue(Plug2.New("http://mock/foo").GetAsync().Result.IsSuccessful);
             mock.Verify();
         }
 
@@ -261,7 +258,7 @@ namespace MindTouch.Traum.Test {
             var a = MockPlug2.Setup(new XUri("http://mock/foo")).Verb("POST");
             var b = MockPlug2.Setup(new XUri("http://mock/foo")).Verb("GET");
             var c = MockPlug2.Setup(new XUri("http://mock/foo")).Verb("DELETE");
-            Assert.IsTrue(Plug2.New("http://mock/foo").Get(new Result<DreamMessage2>()).Wait().IsSuccessful);
+            Assert.IsTrue(Plug2.New("http://mock/foo").GetAsync().Result.IsSuccessful);
             a.Verify(2.Seconds(), Times.Never());
             c.Verify(0.Seconds(), Times.Never());
             b.Verify(Times.Once());
@@ -272,7 +269,7 @@ namespace MindTouch.Traum.Test {
             var a = MockPlug2.Setup(new XUri("http://mock/foo"));
             var b = MockPlug2.Setup(new XUri("http://mock/foo")).Verb("GET");
             var c = MockPlug2.Setup(new XUri("http://mock/foo")).Verb("DELETE");
-            Assert.IsTrue(Plug2.New("http://mock/foo").Get(new Result<DreamMessage2>()).Wait().IsSuccessful);
+            Assert.IsTrue(Plug2.New("http://mock/foo").GetAsync().Result.IsSuccessful);
             a.Verify(2.Seconds(), Times.Never());
             c.Verify(0.Seconds(), Times.Never());
             b.Verify(Times.Once());
@@ -283,7 +280,7 @@ namespace MindTouch.Traum.Test {
             var a = MockPlug2.Setup(new XUri("http://mock/foo")).Verb("DELETE");
             var b = MockPlug2.Setup(new XUri("http://mock/foo")).Verb("GET");
             var c = MockPlug2.Setup(new XUri("http://mock/foo"));
-            Assert.IsTrue(Plug2.New("http://mock/foo").Get(new Result<DreamMessage2>()).Wait().IsSuccessful);
+            Assert.IsTrue(Plug2.New("http://mock/foo").GetAsync().Result.IsSuccessful);
             a.Verify(2.Seconds(), Times.Never());
             c.Verify(0.Seconds(), Times.Never());
             b.Verify(Times.Once());
@@ -294,7 +291,7 @@ namespace MindTouch.Traum.Test {
             var a = MockPlug2.Setup(new XUri("http://mock/foo")).At("bar");
             var b = MockPlug2.Setup(new XUri("http://mock/foo")).At("eek");
             var c = MockPlug2.Setup(new XUri("http://mock/foo")).At("baz");
-            Assert.IsTrue(Plug2.New("http://mock/foo/eek").Get(new Result<DreamMessage2>()).Wait().IsSuccessful);
+            Assert.IsTrue(Plug2.New("http://mock/foo/eek").GetAsync().Result.IsSuccessful);
             a.Verify(2.Seconds(), Times.Never());
             c.Verify(0.Seconds(), Times.Never());
             b.Verify(Times.Once());
@@ -305,7 +302,7 @@ namespace MindTouch.Traum.Test {
             var a = MockPlug2.Setup(new XUri("http://mock/foo")).With("bar", "a");
             var b = MockPlug2.Setup(new XUri("http://mock/foo")).With("eek", "b");
             var c = MockPlug2.Setup(new XUri("http://mock/foo")).With("baz", "c");
-            Assert.IsTrue(Plug2.New("http://mock/foo/").With("eek", "b").Get(new Result<DreamMessage2>()).Wait().IsSuccessful);
+            Assert.IsTrue(Plug2.New("http://mock/foo/").With("eek", "b").GetAsync().Result.IsSuccessful);
             a.Verify(2.Seconds(), Times.Never());
             c.Verify(0.Seconds(), Times.Never());
             b.Verify(Times.Once());
@@ -316,7 +313,7 @@ namespace MindTouch.Traum.Test {
             var a = MockPlug2.Setup(new XUri("http://mock/foo")).With("bar", "a");
             var b = MockPlug2.Setup(new XUri("http://mock/foo")).With("bar", "b");
             var c = MockPlug2.Setup(new XUri("http://mock/foo")).With("bar", "c");
-            Assert.IsTrue(Plug2.New("http://mock/foo/").With("bar", "b").Get(new Result<DreamMessage2>()).Wait().IsSuccessful);
+            Assert.IsTrue(Plug2.New("http://mock/foo/").With("bar", "b").GetAsync().Result.IsSuccessful);
             a.Verify(2.Seconds(), Times.Never());
             c.Verify(0.Seconds(), Times.Never());
             b.Verify(Times.Once());
@@ -327,7 +324,7 @@ namespace MindTouch.Traum.Test {
             var a = MockPlug2.Setup(new XUri("http://mock/foo")).With("bar", x => x == "a");
             var b = MockPlug2.Setup(new XUri("http://mock/foo")).With("bar", x => x == "b");
             var c = MockPlug2.Setup(new XUri("http://mock/foo")).With("bar", x => x == "c");
-            Assert.IsTrue(Plug2.New("http://mock/foo/").With("bar", "b").Get(new Result<DreamMessage2>()).Wait().IsSuccessful);
+            Assert.IsTrue(Plug2.New("http://mock/foo/").With("bar", "b").GetAsync().Result.IsSuccessful);
             a.Verify(2.Seconds(), Times.Never());
             c.Verify(0.Seconds(), Times.Never());
             b.Verify(Times.Once());
@@ -338,7 +335,7 @@ namespace MindTouch.Traum.Test {
             var a = MockPlug2.Setup(new XUri("http://mock/foo")).With("bar", "a");
             var b = MockPlug2.Setup(new XUri("http://mock/foo")).With("bar", "a").With("x", "1").With("y", "2");
             var c = MockPlug2.Setup(new XUri("http://mock/foo")).With("bar", "a").With("x", "1");
-            Assert.IsTrue(Plug2.New("http://mock/foo/").With("bar", "a").With("x", "1").With("y", "2").Get(new Result<DreamMessage2>()).Wait().IsSuccessful);
+            Assert.IsTrue(Plug2.New("http://mock/foo/").With("bar", "a").With("x", "1").With("y", "2").GetAsync().Result.IsSuccessful);
             a.Verify(2.Seconds(), Times.Never());
             c.Verify(0.Seconds(), Times.Never());
             b.Verify(Times.Once());
@@ -349,7 +346,7 @@ namespace MindTouch.Traum.Test {
             var a = MockPlug2.Setup(new XUri("http://mock/foo")).With("bar", "a");
             var b = MockPlug2.Setup(new XUri("http://mock/foo")).With("bar", "a").With("x", "1");
             var c = MockPlug2.Setup(new XUri("http://mock/foo")).With("bar", "a").With("x", "2").With("y", "2");
-            Assert.IsTrue(Plug2.New("http://mock/foo/").With("bar", "a").With("x", "1").Get(new Result<DreamMessage2>()).Wait().IsSuccessful);
+            Assert.IsTrue(Plug2.New("http://mock/foo/").With("bar", "a").With("x", "1").GetAsync().Result.IsSuccessful);
             a.Verify(2.Seconds(), Times.Never());
             c.Verify(0.Seconds(), Times.Never());
             b.Verify(Times.Once());
@@ -360,7 +357,7 @@ namespace MindTouch.Traum.Test {
             var a = MockPlug2.Setup(new XUri("http://mock/foo")).With("bar", "a");
             var b = MockPlug2.Setup(new XUri("http://mock/foo")).With("bar", "a").With("x", "1");
             var c = MockPlug2.Setup(new XUri("http://mock/foo")).With("bar", "a").With("x", "2").With("y", "2");
-            Assert.IsTrue(Plug2.New("http://mock/foo/").With("bar", "a").With("x", "1").With("y", "2").Get(new Result<DreamMessage2>()).Wait().IsSuccessful);
+            Assert.IsTrue(Plug2.New("http://mock/foo/").With("bar", "a").With("x", "1").With("y", "2").GetAsync().Result.IsSuccessful);
             a.Verify(2.Seconds(), Times.Never());
             c.Verify(0.Seconds(), Times.Never());
             b.Verify(Times.Once());
@@ -371,12 +368,12 @@ namespace MindTouch.Traum.Test {
             var bar = MockPlug2.Setup(new XUri("http://mock/foo")).At("bar").ExpectAtLeastOneCall();
             var eek = MockPlug2.Setup(new XUri("http://mock/foo")).At("eek").With("a", "b").ExpectCalls(Times.Exactly(3));
             var baz = MockPlug2.Setup(new XUri("http://mock/foo")).At("eek").With("b", "c").ExpectAtLeastOneCall();
-            Assert.IsTrue(Plug2.New("http://mock/foo/bar").Get(new Result<DreamMessage2>()).Wait().IsSuccessful);
-            Assert.IsTrue(Plug2.New("http://mock/foo/bar").Get(new Result<DreamMessage2>()).Wait().IsSuccessful);
-            Assert.IsTrue(Plug2.New("http://mock/foo/eek").With("a", "b").Get(new Result<DreamMessage2>()).Wait().IsSuccessful);
-            Assert.IsTrue(Plug2.New("http://mock/foo/eek").With("a", "b").Get(new Result<DreamMessage2>()).Wait().IsSuccessful);
-            Assert.IsTrue(Plug2.New("http://mock/foo/eek").With("a", "b").Get(new Result<DreamMessage2>()).Wait().IsSuccessful);
-            Assert.IsTrue(Plug2.New("http://mock/foo/eek").With("b", "c").Get(new Result<DreamMessage2>()).Wait().IsSuccessful);
+            Assert.IsTrue(Plug2.New("http://mock/foo/bar").GetAsync().Result.IsSuccessful);
+            Assert.IsTrue(Plug2.New("http://mock/foo/bar").GetAsync().Result.IsSuccessful);
+            Assert.IsTrue(Plug2.New("http://mock/foo/eek").With("a", "b").GetAsync().Result.IsSuccessful);
+            Assert.IsTrue(Plug2.New("http://mock/foo/eek").With("a", "b").GetAsync().Result.IsSuccessful);
+            Assert.IsTrue(Plug2.New("http://mock/foo/eek").With("a", "b").GetAsync().Result.IsSuccessful);
+            Assert.IsTrue(Plug2.New("http://mock/foo/eek").With("b", "c").GetAsync().Result.IsSuccessful);
             bar.Verify();
             baz.Verify();
             eek.Verify();
@@ -387,7 +384,7 @@ namespace MindTouch.Traum.Test {
             var bar = MockPlug2.Setup(new XUri("http://mock/foo")).WithHeader("bar", "a");
             var eek = MockPlug2.Setup(new XUri("http://mock/foo")).WithHeader("eek", "b");
             var baz = MockPlug2.Setup(new XUri("http://mock/foo")).WithHeader("baz", "c");
-            Assert.IsTrue(Plug2.New("http://mock/foo/").WithHeader("eek", "b").Get(new Result<DreamMessage2>()).Wait().IsSuccessful);
+            Assert.IsTrue(Plug2.New("http://mock/foo/").WithHeader("eek", "b").GetAsync().Result.IsSuccessful);
             bar.Verify(2.Seconds(), Times.Never());
             baz.Verify(0.Seconds(), Times.Never());
             eek.Verify(Times.Once());
@@ -398,7 +395,7 @@ namespace MindTouch.Traum.Test {
             var a = MockPlug2.Setup(new XUri("http://mock/foo")).WithHeader("bar", "a");
             var b = MockPlug2.Setup(new XUri("http://mock/foo")).WithHeader("bar", "b");
             var c = MockPlug2.Setup(new XUri("http://mock/foo")).WithHeader("bar", "c");
-            Assert.IsTrue(Plug2.New("http://mock/foo/").WithHeader("bar", "b").Get(new Result<DreamMessage2>()).Wait().IsSuccessful);
+            Assert.IsTrue(Plug2.New("http://mock/foo/").WithHeader("bar", "b").GetAsync().Result.IsSuccessful);
             a.Verify(2.Seconds(), Times.Never());
             c.Verify(0.Seconds(), Times.Never());
             b.Verify(Times.Once());
@@ -409,7 +406,7 @@ namespace MindTouch.Traum.Test {
             var a = MockPlug2.Setup(new XUri("http://mock/foo")).WithHeader("bar", x => x == "a");
             var b = MockPlug2.Setup(new XUri("http://mock/foo")).WithHeader("bar", x => x == "b");
             var c = MockPlug2.Setup(new XUri("http://mock/foo")).WithHeader("bar", x => x == "c");
-            Assert.IsTrue(Plug2.New("http://mock/foo/").WithHeader("bar", "b").Get(new Result<DreamMessage2>()).Wait().IsSuccessful);
+            Assert.IsTrue(Plug2.New("http://mock/foo/").WithHeader("bar", "b").GetAsync().Result.IsSuccessful);
             a.Verify(2.Seconds(), Times.Never());
             c.Verify(0.Seconds(), Times.Never());
             b.Verify(Times.Once());
@@ -420,7 +417,7 @@ namespace MindTouch.Traum.Test {
             var a = MockPlug2.Setup(new XUri("http://mock/foo")).WithHeader("bar", "a");
             var b = MockPlug2.Setup(new XUri("http://mock/foo")).WithHeader("bar", "a").WithHeader("x", "1").WithHeader("y", "2");
             var c = MockPlug2.Setup(new XUri("http://mock/foo")).WithHeader("bar", "a").WithHeader("x", "1");
-            Assert.IsTrue(Plug2.New("http://mock/foo/").WithHeader("bar", "a").WithHeader("x", "1").WithHeader("y", "2").Get(new Result<DreamMessage2>()).Wait().IsSuccessful);
+            Assert.IsTrue(Plug2.New("http://mock/foo/").WithHeader("bar", "a").WithHeader("x", "1").WithHeader("y", "2").GetAsync().Result.IsSuccessful);
             a.Verify(2.Seconds(), Times.Never());
             c.Verify(0.Seconds(), Times.Never());
             b.Verify(Times.Once());
@@ -431,7 +428,7 @@ namespace MindTouch.Traum.Test {
             var a = MockPlug2.Setup(new XUri("http://mock/foo")).WithHeader("bar", "a");
             var b = MockPlug2.Setup(new XUri("http://mock/foo")).WithHeader("bar", "a").WithHeader("x", "1");
             var c = MockPlug2.Setup(new XUri("http://mock/foo")).WithHeader("bar", "a").WithHeader("x", "2").WithHeader("y", "2");
-            Assert.IsTrue(Plug2.New("http://mock/foo/").WithHeader("bar", "a").WithHeader("x", "1").Get(new Result<DreamMessage2>()).Wait().IsSuccessful);
+            Assert.IsTrue(Plug2.New("http://mock/foo/").WithHeader("bar", "a").WithHeader("x", "1").GetAsync().Result.IsSuccessful);
             a.Verify(2.Seconds(), Times.Never());
             c.Verify(0.Seconds(), Times.Never());
             b.Verify(Times.Once());
@@ -442,7 +439,7 @@ namespace MindTouch.Traum.Test {
             var a = MockPlug2.Setup(new XUri("http://mock/foo")).WithHeader("bar", "a");
             var b = MockPlug2.Setup(new XUri("http://mock/foo")).WithHeader("bar", "a").WithHeader("x", "1");
             var c = MockPlug2.Setup(new XUri("http://mock/foo")).WithHeader("bar", "a").WithHeader("x", "2").WithHeader("y", "2");
-            Assert.IsTrue(Plug2.New("http://mock/foo/").WithHeader("bar", "a").WithHeader("x", "1").WithHeader("y", "2").Get(new Result<DreamMessage2>()).Wait().IsSuccessful);
+            Assert.IsTrue(Plug2.New("http://mock/foo/").WithHeader("bar", "a").WithHeader("x", "1").WithHeader("y", "2").GetAsync().Result.IsSuccessful);
             a.Verify(2.Seconds(), Times.Never());
             c.Verify(0.Seconds(), Times.Never());
             b.Verify(Times.Once());
@@ -454,7 +451,7 @@ namespace MindTouch.Traum.Test {
             var a = MockPlug2.Setup(new XUri("http://mock/foo")).WithBody(new XDoc("doc").Elem("x", "a"));
             var b = MockPlug2.Setup(new XUri("http://mock/foo")).WithBody(new XDoc("doc").Elem("x", "b"));
             var c = MockPlug2.Setup(new XUri("http://mock/foo")).WithBody(new XDoc("doc").Elem("x", "c"));
-            Assert.IsTrue(Plug2.New("http://mock/foo/").Post(new XDoc("doc").Elem("x", "b"), new Result<DreamMessage2>()).Wait().IsSuccessful);
+            Assert.IsTrue(Plug2.New("http://mock/foo/").PostAsync(new XDoc("doc").Elem("x", "b")).Result.IsSuccessful);
             a.Verify(2.Seconds(), Times.Never());
             c.Verify(0.Seconds(), Times.Never());
             b.Verify(Times.Once());
@@ -465,7 +462,7 @@ namespace MindTouch.Traum.Test {
             var a = MockPlug2.Setup(new XUri("http://mock/foo")).WithMessage(msg => false);
             var b = MockPlug2.Setup(new XUri("http://mock/foo")).WithMessage(msg => true);
             var c = MockPlug2.Setup(new XUri("http://mock/foo")).WithMessage(msg => false);
-            Assert.IsTrue(Plug2.New("http://mock/foo/").Post(new XDoc("doc"), new Result<DreamMessage2>()).Wait().IsSuccessful);
+            Assert.IsTrue(Plug2.New("http://mock/foo/").PostAsync(new XDoc("doc")).Result.IsSuccessful);
             a.Verify(2.Seconds(), Times.Never());
             c.Verify(0.Seconds(), Times.Never());
             b.Verify(Times.Once());
@@ -474,7 +471,7 @@ namespace MindTouch.Traum.Test {
         [Test]
         public void Can_add_headers_to_the_response() {
             MockPlug2.Setup(new XUri("http://mock/foo")).WithResponseHeader("foo", "bar");
-            var msg = Plug2.New("http://mock/foo").Get(new Result<DreamMessage2>()).Wait();
+            var msg = Plug2.New("http://mock/foo").GetAsync().Result;
             Assert.IsTrue(msg.IsSuccessful);
             Assert.AreEqual("bar", msg.Headers["foo"]);
         }
@@ -482,7 +479,7 @@ namespace MindTouch.Traum.Test {
         [Test]
         public void Can_add_headers_to_the_response_after_specifying_message() {
             MockPlug2.Setup(new XUri("http://mock/foo")).Returns(DreamMessage2.NotModified()).WithResponseHeader("foo", "bar");
-            var msg = Plug2.New("http://mock/foo").Get(new Result<DreamMessage2>()).Wait();
+            var msg = Plug2.New("http://mock/foo").GetAsync().Result;
             Assert.AreEqual(DreamStatus.NotModified, msg.Status);
             Assert.AreEqual("bar", msg.Headers["foo"]);
         }
@@ -490,7 +487,7 @@ namespace MindTouch.Traum.Test {
         [Test]
         public void Can_add_headers_to_the_response_before_specifying_message() {
             MockPlug2.Setup(new XUri("http://mock/foo")).WithResponseHeader("foo", "bar").Returns(DreamMessage2.NotModified());
-            var msg = Plug2.New("http://mock/foo").Get(new Result<DreamMessage2>()).Wait();
+            var msg = Plug2.New("http://mock/foo").GetAsync().Result;
             Assert.AreEqual(DreamStatus.NotModified, msg.Status);
             Assert.AreEqual("bar", msg.Headers["foo"]);
         }
@@ -498,7 +495,7 @@ namespace MindTouch.Traum.Test {
         public void Can_return_XDoc() {
             var doc = new XDoc("doc").Elem("foo", StringUtil.CreateAlphaNumericKey(6));
             MockPlug2.Setup(new XUri("http://mock/foo")).Returns(doc);
-            var msg = Plug2.New("http://mock/foo").Get(new Result<DreamMessage2>()).Wait();
+            var msg = Plug2.New("http://mock/foo").GetAsync().Result;
             Assert.IsTrue(msg.IsSuccessful);
             Assert.AreEqual(doc, msg.ToDocument());
         }
@@ -507,7 +504,7 @@ namespace MindTouch.Traum.Test {
         public void Can_add_headers_to_the_response_after_specifying_document() {
             var doc = new XDoc("doc").Elem("foo", StringUtil.CreateAlphaNumericKey(6));
             MockPlug2.Setup(new XUri("http://mock/foo")).Returns(doc).WithResponseHeader("foo", "bar");
-            var msg = Plug2.New("http://mock/foo").Get(new Result<DreamMessage2>()).Wait();
+            var msg = Plug2.New("http://mock/foo").GetAsync().Result;
             Assert.IsTrue(msg.IsSuccessful);
             Assert.AreEqual("bar", msg.Headers["foo"]);
             Assert.AreEqual(doc, msg.ToDocument());
@@ -517,7 +514,7 @@ namespace MindTouch.Traum.Test {
         public void Can_add_headers_to_the_response_before_specifying_document() {
             var doc = new XDoc("doc").Elem("foo", StringUtil.CreateAlphaNumericKey(6));
             MockPlug2.Setup(new XUri("http://mock/foo")).WithResponseHeader("foo", "bar").Returns(doc);
-            var msg = Plug2.New("http://mock/foo").Get(new Result<DreamMessage2>()).Wait();
+            var msg = Plug2.New("http://mock/foo").GetAsync().Result;
             Assert.IsTrue(msg.IsSuccessful);
             Assert.AreEqual("bar", msg.Headers["foo"]);
             Assert.AreEqual(doc, msg.ToDocument());
@@ -543,7 +540,7 @@ namespace MindTouch.Traum.Test {
                 }
                 return DreamMessage2.Ok(success);
             });
-            var msg = Plug2.New(uri).WithHeader("header", "value").Post(doc, new Result<DreamMessage2>()).Wait();
+            var msg = Plug2.New(uri).WithHeader("header", "value").PostAsync(doc).Result;
             Assert.IsTrue(msg.IsSuccessful, msg.ToDocument().ToPrettyString());
             Assert.AreEqual(success, msg.ToDocument());
         }
@@ -556,7 +553,7 @@ namespace MindTouch.Traum.Test {
                 .Returns(invocation => {
                     return invocation.ResponseHeaders["foo"] != "bar" ? DreamMessage2.BadRequest("wrong response header") : DreamMessage2.Ok(success);
                 });
-            var msg = Plug2.New("http://mock/foo/").Get(new Result<DreamMessage2>()).Wait();
+            var msg = Plug2.New("http://mock/foo/").GetAsync().Result;
             Assert.IsTrue(msg.IsSuccessful, msg.ToDocument().ToPrettyString());
             Assert.AreEqual(success, msg.ToDocument());
         }
@@ -569,7 +566,7 @@ namespace MindTouch.Traum.Test {
                     return invocation.ResponseHeaders["foo"] != "bar" ? DreamMessage2.BadRequest("wrong response header") : DreamMessage2.Ok(success);
                 })
                 .WithResponseHeader("foo", "bar");
-            var msg = Plug2.New("http://mock/foo/").Get(new Result<DreamMessage2>()).Wait();
+            var msg = Plug2.New("http://mock/foo/").GetAsync().Result;
             Assert.IsTrue(msg.IsSuccessful, msg.ToDocument().ToPrettyString());
             Assert.AreEqual(success, msg.ToDocument());
         }
@@ -584,7 +581,7 @@ namespace MindTouch.Traum.Test {
             MockPlug2.Setup(uri).Verb("POST")
                 .WithMessage(m => m.ToText() == payload)
                 .ExpectAtLeastOneCall();
-            var response = Plug2.New(uri).Post(message, new Result<DreamMessage2>()).Wait();
+            var response = Plug2.New(uri).PostAsync(message).Result;
             response.AssertSuccess();
             MockPlug2.VerifyAll(1.Seconds());
         }

@@ -909,6 +909,14 @@ namespace MindTouch.Traum {
         /// <summary>
         /// Invoke the plug with the <see cref="Verb.POST"/> verb and an empty message.
         /// </summary>
+        /// <returns>Synchronization handle.</returns>
+        public Task<DreamMessage2> PostAsync() {
+            return Invoke(Verb.POST, DreamMessage2.Ok(), DEFAULT_TIMEOUT);
+        }
+
+        /// <summary>
+        /// Invoke the plug with the <see cref="Verb.POST"/> verb and an empty message.
+        /// </summary>
         /// <param name="timeout">The timeout for this asynchronous call.</param>
         /// <returns>Synchronization handle.</returns>
         public Task<DreamMessage2> Post(TimeSpan timeout) {
@@ -919,10 +927,28 @@ namespace MindTouch.Traum {
         /// Invoke the plug with the <see cref="Verb.POST"/> verb.
         /// </summary>
         /// <param name="doc">Document to send.</param>
+        /// <returns>Synchronization handle.</returns>
+        public Task<DreamMessage2> PostAsync(XDoc doc) {
+            return Invoke(Verb.POST, DreamMessage2.Ok(doc), DEFAULT_TIMEOUT);
+        }
+
+        /// <summary>
+        /// Invoke the plug with the <see cref="Verb.POST"/> verb.
+        /// </summary>
+        /// <param name="doc">Document to send.</param>
         /// <param name="timeout">The timeout for this asynchronous call.</param>
         /// <returns>Synchronization handle.</returns>
         public Task<DreamMessage2> Post(XDoc doc, TimeSpan timeout) {
             return Invoke(Verb.POST, DreamMessage2.Ok(doc), timeout);
+        }
+
+        /// <summary>
+        /// Invoke the plug with the <see cref="Verb.POST"/> verb.
+        /// </summary>
+        /// <param name="message">Message to send.</param>
+        /// <returns>Synchronization handle.</returns>
+        public Task<DreamMessage2> PostAsync(DreamMessage2 message) {
+            return Invoke(Verb.POST, message, DEFAULT_TIMEOUT);
         }
 
         /// <summary>
@@ -964,6 +990,14 @@ namespace MindTouch.Traum {
         /// <returns>Synchronization handle.</returns>
         public Task<DreamMessage2> Put(DreamMessage2 message, TimeSpan timeout) {
             return Invoke(Verb.PUT, message, timeout);
+        }
+
+        /// <summary>
+        /// Invoke the plug with the <see cref="Verb.GET"/> verb and no message body.
+        /// </summary>
+        /// <returns>Synchronization handle.</returns>
+        public Task<DreamMessage2> GetAsync() {
+            return Invoke(Verb.GET, DreamMessage2.Ok(), DEFAULT_TIMEOUT);
         }
 
         /// <summary>
