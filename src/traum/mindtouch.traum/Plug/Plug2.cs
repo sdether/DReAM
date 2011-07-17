@@ -32,7 +32,6 @@ using MindTouch.Web;
 using MindTouch.Xml;
 
 namespace MindTouch.Traum {
-
     /// <summary>
     /// Provides a contract for intercepting and modifying <see cref="Plug2"/> requests and responses in the invocation pipeline.
     /// </summary>

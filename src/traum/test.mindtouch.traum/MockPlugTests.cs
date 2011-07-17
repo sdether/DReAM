@@ -58,9 +58,9 @@ namespace MindTouch.Traum.Test {
         [Test]
         public void Register_twice_throws() {
             var uri = new XUri("http://www.mindtouch.com/foo");
-            MockPlug2.Register(uri, (p, v, u, r) => DreamMessage2.Ok().AsTask());
+            MockPlug2.Register(uri, (p, v, u, r) => TaskEx.FromResult(DreamMessage2.Ok()));
             try {
-                MockPlug2.Register(uri, (p, v, u, r) => DreamMessage2.Ok().AsTask());
+                MockPlug2.Register(uri, (p, v, u, r) => DreamMessage2.Ok().AsCompletedTask());
             } catch(ArgumentException) {
                 return;
             } catch(Exception e) {
@@ -75,7 +75,7 @@ namespace MindTouch.Traum.Test {
             int firstCalled = 0;
             MockPlug2.Register(uri, (p, v, u, r) => {
                 firstCalled++;
-                return DreamMessage2.Ok().AsTask();
+                return DreamMessage2.Ok().AsCompletedTask();
             });
             Assert.IsTrue(Plug2.New(uri).Get(TimeSpan.MaxValue).Result.IsSuccessful);
             Assert.AreEqual(1, firstCalled);
@@ -83,7 +83,7 @@ namespace MindTouch.Traum.Test {
             int secondCalled = 0;
             MockPlug2.Register(uri, (p, v, u, r) => {
                 secondCalled++;
-                return DreamMessage2.Ok().AsTask();
+                return DreamMessage2.Ok().AsCompletedTask();
             });
             Assert.IsTrue(Plug2.New(uri).Get(TimeSpan.MaxValue).Result.IsSuccessful);
             Assert.AreEqual(1, firstCalled);
@@ -96,18 +96,18 @@ namespace MindTouch.Traum.Test {
             XUri uri = new XUri("http://www.mindtouch.com/foo");
             MockPlug2.Register(uri, (p, v, u, r) => {
                 firstCalled++;
-                return DreamMessage2.Ok().AsTask();
+                return DreamMessage2.Ok().AsCompletedTask();
             });
-            MockPlug2.Register(new XUri("http://www.mindtouch.com/bar"), (p, v, u, r) => DreamMessage2.Ok().AsTask());
+            MockPlug2.Register(new XUri("http://www.mindtouch.com/bar"), (p, v, u, r) => DreamMessage2.Ok().AsCompletedTask());
             Assert.IsTrue(Plug2.New(uri).Get(TimeSpan.MaxValue).Result.IsSuccessful);
             Assert.AreEqual(1, firstCalled);
             MockPlug2.DeregisterAll();
             int secondCalled = 0;
             MockPlug2.Register(uri, (p, v, u, r) => {
                 secondCalled++;
-                return DreamMessage2.Ok().AsTask();
+                return DreamMessage2.Ok().AsCompletedTask();
             });
-            MockPlug2.Register(new XUri("http://www.mindtouch.com/bar"), (p, v, u, r) => DreamMessage2.Ok().AsTask());
+            MockPlug2.Register(new XUri("http://www.mindtouch.com/bar"), (p, v, u, r) => DreamMessage2.Ok().AsCompletedTask());
             Assert.IsTrue(Plug2.New(uri).Get(TimeSpan.MaxValue).Result.IsSuccessful);
             Assert.AreEqual(1, firstCalled);
             Assert.AreEqual(1, secondCalled);
@@ -126,7 +126,7 @@ namespace MindTouch.Traum.Test {
                 calledUri = u;
                 calledRequest = r;
                 called++;
-                return DreamMessage2.Ok().AsTask();
+                return DreamMessage2.Ok().AsCompletedTask();
             });
 
             DreamMessage2 response = Plug2.New("http://www.mindtouch.com").At("foo").Get(TimeSpan.MaxValue).Result;
@@ -149,7 +149,7 @@ namespace MindTouch.Traum.Test {
                 calledUri = u;
                 calledRequest = r;
                 called++;
-                return DreamMessage2.Ok().AsTask();
+                return DreamMessage2.Ok().AsCompletedTask();
             });
 
             Plug2 plug = Plug2.New("http://www.mindtouch.com").At("foo");
@@ -174,7 +174,7 @@ namespace MindTouch.Traum.Test {
                 calledUri = u;
                 calledRequest = r;
                 called++;
-                return DreamMessage2.Ok().AsTask();
+                return DreamMessage2.Ok().AsCompletedTask();
             });
             XDoc doc = new XDoc("message").Elem("foo");
             DreamMessage2 response = Plug2.New("http://www.mindtouch.com").At("foo").Post(doc,TimeSpan.MaxValue).Result;
@@ -199,7 +199,7 @@ namespace MindTouch.Traum.Test {
                 calledUri = u;
                 calledRequest = r;
                 called++;
-                return DreamMessage2.Ok(responseDoc).AsTask();
+                return DreamMessage2.Ok(responseDoc).AsCompletedTask();
             });
             XDoc doc = new XDoc("message").Elem("foo");
             DreamMessage2 response = Plug2.New("http://www.mindtouch.com").At("foo").Get(TimeSpan.MaxValue).Result;
@@ -215,7 +215,7 @@ namespace MindTouch.Traum.Test {
             AutoResetEvent resetEvent = new AutoResetEvent(false);
             MockPlug2.Register(new XUri("http://foo/bar"), (p, v, u, r) => {
                 resetEvent.Set();
-                return DreamMessage2.Ok().AsTask();
+                return DreamMessage2.Ok().AsCompletedTask();
             });
             Plug2.New("http://foo/bar").Post(TimeSpan.MaxValue);
             Assert.IsTrue(resetEvent.WaitOne(1000, false), "no async failed");

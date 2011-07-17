@@ -23,7 +23,9 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using MindTouch.Dream;
 using MindTouch.Dream.Test;
 using MindTouch.Tasking;
@@ -37,7 +39,7 @@ using MindTouch.Extensions.Time;
 namespace MindTouch.Traum.Test {
 
     [TestFixture]
-    public class PlugTests {
+    public class Plug2Tests {
 
         //--- Class Fields ---
         private static readonly ILog _log = LogUtils.CreateLog();
@@ -91,7 +93,8 @@ namespace MindTouch.Traum.Test {
                     }
                     response.Return(DreamMessage.Ok());
                 };
-                var r = mock.AtLocalHost.Get(TimeSpan.MaxValue).Result;
+
+                var r = mock.AtLocalHost.AsPlug2().Get(TimeSpan.MaxValue).Result;
                 Assert.IsTrue(r.IsSuccessful, r.HasDocument ? r.ToDocument()["message"].AsText : "request failed: " + r.Status);
             }
         }
@@ -537,139 +540,68 @@ namespace MindTouch.Traum.Test {
             }
         }
 
-        [Ignore("need to run by hand.. test is too slow for regular execution")]
-        [Test]
-        public void Upload_a_bunch_of_large_files_via_local___SLOW_TEST() {
-            Upload_Files(true);
-        }
-
-        [Ignore("need to run by hand.. test is too slow for regular execution")]
-        [Test]
-        public void Upload_a_bunch_of_large_files_via_http___SLOW_TEST() {
-            Upload_Files(false);
-        }
-
-        [Test]
-        public void Plug_uses_own_timeout_to_govern_request_and_results_in_RequestConnectionTimeout() {
-            MockPlug2.Register(new XUri("mock://mock"), (plug, verb, uri, request, response) => {
-                Thread.Sleep(TimeSpan.FromSeconds(10));
-                response.Return(DreamMessage2.Ok());
-            });
-            var stopwatch = Stopwatch.StartNew();
-            var r = Plug2.New(MockPlug2.DefaultUri)
-                .WithTimeout(TimeSpan.FromSeconds(1))
-                .InvokeEx(Verb.GET, DreamMessage2.Ok(), new Result<DreamMessage2>(TimeSpan.MaxValue)).Block();
-            stopwatch.Stop();
-            Assert.LessOrEqual(stopwatch.Elapsed.Seconds, 2);
-            Assert.IsFalse(r.HasTimedOut);
-            Assert.IsFalse(r.HasException);
-            Assert.AreEqual(DreamStatus.RequestConnectionTimeout, r.Value.Status);
-        }
-
-        [Test]
-        public void Result_timeout_superceeds_plug_timeout_and_results_in_RequestConnectionTimeout() {
-            MockPlug2.Register(new XUri("mock://mock"), (plug, verb, uri, request, response) => {
-                Thread.Sleep(TimeSpan.FromSeconds(10));
-                response.Return(DreamMessage2.Ok());
-            });
-            var stopwatch = Stopwatch.StartNew();
-            var r = Plug2.New(MockPlug2.DefaultUri)
-                .WithTimeout(TimeSpan.FromSeconds(20))
-                .InvokeEx(Verb.GET, DreamMessage2.Ok(), new Result<DreamMessage2>(1.Seconds())).Block();
-            stopwatch.Stop();
-            Assert.LessOrEqual(stopwatch.Elapsed.Seconds, 2);
-            Assert.IsFalse(r.HasTimedOut);
-            Assert.IsFalse(r.HasException);
-            Assert.AreEqual(DreamStatus.RequestConnectionTimeout, r.Value.Status);
-        }
-
-        [Test]
-        public void Plug_timeout_is_not_used_for_message_memorization() {
-            var blockingStream = new MockBlockingStream();
-            MockPlug2.Register(new XUri("mock://mock"), (plug, verb, uri, request, response) => {
-                _log.Debug("returning blocking stream");
-                response.Return(new DreamMessage2(DreamStatus.Ok, null, MimeType.TEXT, -1, blockingStream));
-            });
-            var stopwatch = Stopwatch.StartNew();
-            var msg = Plug2.New(MockPlug2.DefaultUri)
-                .WithTimeout(TimeSpan.FromSeconds(1))
-                .InvokeEx(Verb.GET, DreamMessage2.Ok(), new Result<DreamMessage2>()).Wait();
-            stopwatch.Stop();
-            _log.Debug("completed request");
-            Assert.AreEqual(DreamStatus.Ok, msg.Status);
-            Assert.LessOrEqual(stopwatch.Elapsed.Seconds, 1);
-            stopwatch = Stopwatch.StartNew();
-            _log.Debug("memorizing request");
-            var r = msg.Memorize(new Result(1.Seconds())).Block();
-            stopwatch.Stop();
-            blockingStream.Unblock();
-            _log.Debug("completed request memorization");
-            Assert.LessOrEqual(stopwatch.Elapsed.Seconds, 2);
-            Assert.IsTrue(r.HasTimedOut);
-        }
-
         [Test]
         public void Result_timeout_is_used_for_message_memorization_and_results_in_ResponseDataTransferTimeout() {
             var blockingStream = new MockBlockingStream();
-            MockPlug2.Register(new XUri("mock://mock"), (plug, verb, uri, request, response) => {
+            MockPlug2.Register(new XUri("mock://mock"), (plug, verb, uri, request) => {
                 _log.Debug("returning blocking stream");
-                response.Return(new DreamMessage2(DreamStatus.Ok, null, MimeType.TEXT, -1, blockingStream));
+                                return TaskEx.FromResult(new DreamMessage2(DreamStatus.Ok, null, MimeType.TEXT, -1, blockingStream));
             });
             var stopwatch = Stopwatch.StartNew();
             _log.Debug("calling plug");
             var r = Plug2.New(MockPlug2.DefaultUri)
                 .WithTimeout(1.Seconds())
-                .Get(new Result<DreamMessage2>(3.Seconds())).Block();
+                .Get(3.Seconds())
+                .Block();
             _log.Debug("plug done");
             stopwatch.Stop();
             blockingStream.Unblock();
             Assert.GreaterOrEqual(stopwatch.Elapsed.Seconds, 3);
             Assert.LessOrEqual(stopwatch.Elapsed.Seconds, 4);
-            Assert.IsFalse(r.HasTimedOut);
-            Assert.IsFalse(r.HasException);
-            Assert.AreEqual(DreamStatus.ResponseDataTransferTimeout, r.Value.Status);
+            Assert.IsFalse(r.IsFaulted);
+            Assert.AreEqual(DreamStatus.ResponseDataTransferTimeout, r.Result.Status);
         }
 
 
         [Test]
         public void Plug_timeout_on_request_returns_RequestConnectionTimeout_not_ResponseDataTransferTimeout() {
             var blockingStream = new MockBlockingStream();
-            MockPlug2.Register(new XUri("mock://mock"), (plug, verb, uri, request, response) => {
+            MockPlug2.Register(new XUri("mock://mock"), (plug, verb, uri, request) => {
                 _log.Debug("blocking request");
                 Thread.Sleep(5.Seconds());
                 _log.Debug("returning blocking stream");
-                response.Return(new DreamMessage2(DreamStatus.Ok, null, MimeType.TEXT, -1, blockingStream));
-            });
+                                 return TaskEx.FromResult(new DreamMessage2(DreamStatus.Ok, null, MimeType.TEXT, -1, blockingStream));
+           });
             var stopwatch = Stopwatch.StartNew();
             _log.Debug("calling plug");
             var r = Plug2.New(MockPlug2.DefaultUri)
                 .WithTimeout(1.Seconds())
-                .Get(new Result<DreamMessage2>(5.Seconds())).Block();
+                .Get(5.Seconds())
+                .Block();
             _log.Debug("plug done");
             stopwatch.Stop();
             blockingStream.Unblock();
             Assert.GreaterOrEqual(stopwatch.Elapsed.Seconds, 1);
             Assert.LessOrEqual(stopwatch.Elapsed.Seconds, 3);
-            Assert.IsFalse(r.HasTimedOut);
-            Assert.IsFalse(r.HasException);
-            Assert.AreEqual(DreamStatus.RequestConnectionTimeout, r.Value.Status);
+            Assert.IsFalse(r.IsFaulted);
+            Assert.AreEqual(DreamStatus.RequestConnectionTimeout, r.Result.Status);
         }
 
         [Test]
         public void Can_use_Plug_extension_to_return_document_result() {
             var autoMockPlug2 = MockPlug2.Register(new XUri("mock://mock"));
             autoMockPlug2.Expect().Verb("GET").Response(DreamMessage2.Ok(new XDoc("works")));
-            Assert.AreEqual("works", Plug2.New("mock://mock").Get(new Result<XDoc>()).Wait().Name);
+            Assert.AreEqual("works", Plug2.New("mock://mock").GetDocument().Result.Name);
         }
 
         [Test]
         public void Plug_extension_to_return_document_sets_exception_on_non_OK_response() {
             var autoMockPlug2 = MockPlug2.Register(new XUri("mock://mock"));
             autoMockPlug2.Expect().Verb("GET").Response(DreamMessage2.BadRequest("bad puppy"));
-            var r = Plug2.New("mock://mock").Get(new Result<XDoc>()).Block();
-            Assert.IsTrue(r.HasException);
+            var r = Plug2.New("mock://mock").GetDocument().Block();
+            Assert.IsTrue(r.IsFaulted);
             Assert.AreEqual(typeof(DreamResponseException), r.Exception.GetType());
-            Assert.AreEqual(DreamStatus.BadRequest, ((DreamResponseException)r.Exception).Response.Status);
+            Assert.AreEqual(DreamStatus.BadRequest, ((DreamResponseException)r.Exception.InnerExceptions.First()).Response.Status);
         }
 
 
@@ -704,7 +636,6 @@ namespace MindTouch.Traum.Test {
             Assert.IsFalse(plug.Uri.TrailingSlash);
             Assert.AreEqual("http://foo/bar", plug.ToString());
         }
-
     }
 
     public class MockBlockingStream : Stream {

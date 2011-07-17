@@ -32,7 +32,7 @@ namespace MindTouch.Traum.Test.Mock {
 
         // Note (arnec): This is a field, not constant so that access triggers the static constructor
         public readonly static string DEFAULT = "mock://mock";
-        private static readonly MockPlug2.IMockInvokee DefaultInvokee = new MockPlug2.MockInvokee(null, (p, v, u, r) => DreamMessage2.Ok(new XDoc("empty")).AsTask(), int.MaxValue);
+        private static readonly MockPlug2.IMockInvokee DefaultInvokee = new MockPlug2.MockInvokee(null, (p, v, u, r) => DreamMessage2.Ok(new XDoc("empty")).AsCompletedTask(), int.MaxValue);
 
         //--- Class Constructors ---
         static MockEndpoint() {

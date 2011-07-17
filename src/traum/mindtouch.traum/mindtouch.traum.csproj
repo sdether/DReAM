@@ -107,11 +107,11 @@
     <Compile Include="Plug\HttpPlugEndpoint.cs" />
     <Compile Include="Plug\IPlugEndpoint2.cs" />
     <Compile Include="Plug\Plug2.cs" />
+    <Compile Include="Plug\Plug2Ex.cs" />
     <Compile Include="Plug\ProxyPlugEndpoint.cs" />
     <Compile Include="Plug\ResourcePlugEndpoint.cs" />
     <Compile Include="Plug\XriPlugEndpoint.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Test.cs" />
     <Compile Include="Xml\XTypes.cs" />
   </ItemGroup>
   <ItemGroup>

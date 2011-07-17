@@ -94,7 +94,8 @@
     <Compile Include="DreamMessageTests.cs" />
     <Compile Include="AssemblyInfo.cs" />
     <Compile Include="MockPlugTests.cs" />
-    <Compile Include="PlugTests.cs" />
+    <Compile Include="Plug2AsyncMethodTests.cs" />
+    <Compile Include="Plug2Tests.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
