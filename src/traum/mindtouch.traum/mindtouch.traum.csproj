@@ -77,14 +77,8 @@
     <ErrorReport>prompt</ErrorReport>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="AsyncCtpLibrary">
-      <HintPath>..\..\..\..\..\Users\Administrator\Documents\Microsoft Visual Studio Async CTP\Samples\AsyncCtpLibrary.dll</HintPath>
-    </Reference>
     <Reference Include="log4net">
       <HintPath>..\..\redist\log4net.dll</HintPath>
-    </Reference>
-    <Reference Include="SgmlReaderDll">
-      <HintPath>..\..\redist\SgmlReaderDll.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.configuration" />
@@ -102,17 +96,23 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DreamCookie.cs" />
+    <Compile Include="DreamCookieJar.cs" />
+    <Compile Include="DreamHeaders.cs" />
     <Compile Include="DreamMessage2.cs" />
     <Compile Include="Exceptions.cs" />
+    <Compile Include="LogUtils.cs" />
+    <Compile Include="mimetype.cs" />
     <Compile Include="Plug\HttpPlugEndpoint.cs" />
     <Compile Include="Plug\IPlugEndpoint2.cs" />
     <Compile Include="Plug\Plug2.cs" />
-    <Compile Include="Plug\Plug2Ex.cs" />
     <Compile Include="Plug\ProxyPlugEndpoint.cs" />
     <Compile Include="Plug\ResourcePlugEndpoint.cs" />
     <Compile Include="Plug\XriPlugEndpoint.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Xml\XTypes.cs" />
+    <Compile Include="TimeExtensions.cs" />
+    <Compile Include="types.cs" />
+    <Compile Include="XUri.cs" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
@@ -130,12 +130,6 @@
       <ProductName>Windows Installer 3.1</ProductName>
       <Install>true</Install>
     </BootstrapperPackage>
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\..\mindtouch.dream\mindtouch.dream.csproj">
-      <Project>{3E706653-69D1-4522-BEE8-ECEC1A1BF7DE}</Project>
-      <Name>mindtouch.dream</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

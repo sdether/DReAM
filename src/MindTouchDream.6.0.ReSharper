@@ -136,4 +136,10 @@
       <PredefinedRule Inspect="True" Prefix="" Suffix="" Style="AaBb" ElementKind="PrivateConstants" />
     </Naming2>
   </CodeStyleSettings>
+  <Daemon.SolutionSettings>
+    <SkipFilesAndFolders>
+      <Item>405573DD-20FB-4F51-9634-63646F1AE479/d:Plug/f:Plug2.cs</Item>
+      <Item>472FE14C-8142-4950-A2EF-91C58E6FAABF/f:Plug2AsyncMethodTests.cs</Item>
+    </SkipFilesAndFolders>
+  </Daemon.SolutionSettings>
 </Configuration>

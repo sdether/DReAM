@@ -725,18 +725,6 @@ namespace MindTouch.Traum {
         }
 
         /// <summary>
-        /// Blocking version of <see cref="Post(MindTouch.Xml.XDoc,TimeSpan)"/>
-        /// </summary>
-        /// <remarks>
-        /// WARNING: This method is thread-blocking.  Please avoid using it if possible.
-        /// </remarks>
-        /// <param name="doc"></param>
-        /// <returns></returns>
-        public DreamMessage2 Post(XDoc doc) {
-            return WaitAndConfirm(Invoke(Verb.POST, DreamMessage2.Ok(doc), TimeSpan.MaxValue));
-        }
-
-        /// <summary>
         /// Blocking version of <see cref="Post(DreamMessage2,TimeSpan)"/>
         /// </summary>
         /// <remarks>
