@@ -29,7 +29,6 @@ using System.Reflection;
 using System.Threading.Tasks;
 using MindTouch.Dream;
 using MindTouch.Web;
-using MindTouch.Xml;
 
 namespace MindTouch.Traum {
     /// <summary>
@@ -56,7 +55,7 @@ namespace MindTouch.Traum {
         public const ushort DEFAULT_MAX_AUTO_REDIRECTS = 50;
 
         /// <summary>
-        /// Base score normal priorty <see cref="IPlugEndpoint"/> implementations should use to signal a successful match.
+        /// Base score normal priorty <see cref="IPlugEndpoint2"/> implementations should use to signal a successful match.
         /// </summary>
         public const int BASE_ENDPOINT_SCORE = int.MaxValue / 2;
 
@@ -79,8 +78,8 @@ namespace MindTouch.Traum {
         static Plug2() {
 
             // let's find all IPlugEndpoint derived, concrete classes
-            foreach(Type type in typeof(Plug).Assembly.GetTypes()) {
-                if(typeof(IPlugEndpoint).IsAssignableFrom(type) && type.IsClass && !type.IsAbstract && !type.IsGenericTypeDefinition) {
+            foreach(Type type in typeof(Plug2).Assembly.GetTypes()) {
+                if(typeof(IPlugEndpoint2).IsAssignableFrom(type) && type.IsClass && !type.IsAbstract && !type.IsGenericTypeDefinition) {
                     ConstructorInfo ctor = type.GetConstructor(System.Type.EmptyTypes);
                     if(ctor != null) {
                         AddEndpoint((IPlugEndpoint2)ctor.Invoke(null));
@@ -209,26 +208,6 @@ namespace MindTouch.Traum {
         }
 
         private static DreamMessage2 PreProcess(string verb, XUri uri, XUri normalizedUri, DreamHeaders headers, DreamCookieJar cookies, DreamMessage2 message) {
-
-            // check if plug is running in the context of a service
-            DreamContext context = DreamContext.CurrentOrNull;
-            if(context != null) {
-
-                // set request id header
-                message.Headers.DreamRequestId = context.GetState<string>(DreamHeaders.DREAM_REQUEST_ID);
-
-                // set dream service header
-                if(context.Service.Self != null) {
-                    message.Headers.DreamService = context.AsPublicUri(context.Service.Self).ToString();
-                }
-
-                // check if uri is local://
-                // TODO: Dream related plumbing cleanup
-                //if(normalizedUri.Scheme.EqualsInvariant("local")) {
-                //    DreamUtil.AppendHeadersToInternallyForwardedMessage(context.Request, message);
-                //}
-            }
-
             if(cookies != null) {
                 lock(cookies) {
                     message.Cookies.AddRange(cookies.Fetch(uri));
@@ -244,7 +223,6 @@ namespace MindTouch.Traum {
 
             // check if we received cookies
             if(message.HasCookies) {
-                DreamContext context = DreamContext.CurrentOrNull;
 
                 // add matching cookies to service or to global cookie jar
                 if(cookies != null) {
@@ -360,14 +338,9 @@ namespace MindTouch.Traum {
         /// </summary>
         public DreamCookieJar CookieJar {
             get {
-
                 // Note (arnec): In order for the override to not block the environment, we always run this logic to get at the
                 // plug's cookie jar rather than assigning the resulting value to _cookieJarOverride
-                if(_cookieJarOverride != null) {
-                    return _cookieJarOverride;
-                }
-                DreamContext context = DreamContext.CurrentOrNull;
-                return ((context != null) && (context.Service.Cookies != null)) ? context.Service.Cookies : GlobalCookies;
+                return _cookieJarOverride ?? GlobalCookies;
             }
         }
 
@@ -711,193 +684,13 @@ namespace MindTouch.Traum {
             return Uri.ToString();
         }
 
-        #region --- Blocking Methods ---
-
-        /// <summary>
-        /// Blocking version of <see cref="Post(TimeSpan)"/>
-        /// </summary>
-        /// <remarks>
-        /// WARNING: This method is thread-blocking.  Please avoid using it if possible.
-        /// </remarks>
-        /// <returns></returns>
-        public DreamMessage2 Post() {
-            return WaitAndConfirm(Invoke(Verb.POST, DreamMessage2.Ok(XDoc.Empty), TimeSpan.MaxValue));
-        }
-
-        /// <summary>
-        /// Blocking version of <see cref="Post(DreamMessage2,TimeSpan)"/>
-        /// </summary>
-        /// <remarks>
-        /// WARNING: This method is thread-blocking.  Please avoid using it if possible.
-        /// </remarks>
-        /// <param name="message"></param>
-        /// <returns></returns>
-        public DreamMessage2 Post(DreamMessage2 message) {
-            return WaitAndConfirm(Invoke(Verb.POST, message, TimeSpan.MaxValue));
-        }
-
-        /// <summary>
-        /// Blocking version of <see cref="PostAsForm(TimeSpan)"/>
-        /// </summary>
-        /// <remarks>
-        /// WARNING: This method is thread-blocking.  Please avoid using it if possible.
-        /// </remarks>
-        /// <returns></returns>
-        public DreamMessage2 PostAsForm() {
-            DreamMessage2 message = DreamMessage2.Ok(Uri.Params);
-            XUri uri = Uri.WithoutParams();
-            return WaitAndConfirm(new Plug2(uri, Timeout, _headers, _preHandlers, _postHandlers, Credentials, _cookieJarOverride, MaxAutoRedirects).Invoke(Verb.POST, message, TimeSpan.MaxValue));
-        }
-
-        /// <summary>
-        /// Blocking version of <see cref="Put(MindTouch.Xml.XDoc,TimeSpan)"/>
-        /// </summary>
-        /// <remarks>
-        /// WARNING: This method is thread-blocking.  Please avoid using it if possible.
-        /// </remarks>
-        /// <param name="doc"></param>
-        /// <returns></returns>
-#if WARN_ON_SYNC
-        [Obsolete("This method is thread-blocking.  Please avoid using it if possible.")]
-#endif
-        public DreamMessage2 Put(XDoc doc) {
-            return WaitAndConfirm(Invoke(Verb.PUT, DreamMessage2.Ok(doc), TimeSpan.MaxValue));
-        }
-
-        /// <summary>
-        /// Blocking version of <see cref="Put(MindTouch.Traum.DreamMessage2,TimeSpan)"/>
-        /// </summary>
-        /// <remarks>
-        /// WARNING: This method is thread-blocking.  Please avoid using it if possible.
-        /// </remarks>
-        /// <param name="message"></param>
-        /// <returns></returns>
-#if WARN_ON_SYNC
-        [Obsolete("This method is thread-blocking.  Please avoid using it if possible.")]
-#endif
-        public DreamMessage2 Put(DreamMessage2 message) {
-            return WaitAndConfirm(Invoke(Verb.PUT, message, TimeSpan.MaxValue));
-        }
-
-        /// <summary>
-        /// Blocking version of <see cref="Get(TimeSpan)"/>
-        /// </summary>
-        /// <remarks>
-        /// WARNING: This method is thread-blocking.  Please avoid using it if possible.
-        /// </remarks>
-        /// <returns></returns>
-#if WARN_ON_SYNC
-        [Obsolete("This method is thread-blocking.  Please avoid using it if possible.")]
-#endif
-        public DreamMessage2 Get() {
-            return WaitAndConfirm(Invoke(Verb.GET, DreamMessage2.Ok(), TimeSpan.MaxValue));
-        }
-
-        /// <summary>
-        /// Blocking version of <see cref="Get(MindTouch.Traum.DreamMessage2,TimeSpan)"/>
-        /// </summary>
-        /// <remarks>
-        /// WARNING: This method is thread-blocking.  Please avoid using it if possible.
-        /// </remarks>
-        /// <param name="message"></param>
-        /// <returns></returns>
-#if WARN_ON_SYNC
-        [Obsolete("This method is thread-blocking.  Please avoid using it if possible.")]
-#endif
-        public DreamMessage2 Get(DreamMessage2 message) {
-            return WaitAndConfirm(Invoke(Verb.GET, message, TimeSpan.MaxValue));
-        }
-
-        /// <summary>
-        /// Blocking version of <see cref="Head(TimeSpan)"/>
-        /// </summary>
-        /// <remarks>
-        /// WARNING: This method is thread-blocking.  Please avoid using it if possible.
-        /// </remarks>
-        /// <returns></returns>
-#if WARN_ON_SYNC
-        [Obsolete("This method is thread-blocking.  Please avoid using it if possible.")]
-#endif
-        public DreamMessage2 Head() {
-            return WaitAndConfirm(Invoke(Verb.HEAD, DreamMessage2.Ok(), TimeSpan.MaxValue));
-        }
-
-        /// <summary>
-        /// Blocking version of <see cref="Options(TimeSpan)"/>
-        /// </summary>
-        /// <remarks>
-        /// WARNING: This method is thread-blocking.  Please avoid using it if possible.
-        /// </remarks>
-        /// <returns></returns>
-#if WARN_ON_SYNC
-        [Obsolete("This method is thread-blocking.  Please avoid using it if possible.")]
-#endif
-        public DreamMessage2 Options() {
-            return WaitAndConfirm(Invoke(Verb.OPTIONS, DreamMessage2.Ok(), TimeSpan.MaxValue));
-        }
-
-        /// <summary>
-        /// Blocking version of <see cref="Delete(TimeSpan)"/>
-        /// </summary>
-        /// <remarks>
-        /// WARNING: This method is thread-blocking.  Please avoid using it if possible.
-        /// </remarks>
-        /// <returns></returns>
-#if WARN_ON_SYNC
-        [Obsolete("This method is thread-blocking.  Please avoid using it if possible.")]
-#endif
-        public DreamMessage2 Delete() {
-            return WaitAndConfirm(Invoke(Verb.DELETE, DreamMessage2.Ok(), TimeSpan.MaxValue));
-        }
-
-        /// <summary>
-        /// Blocking version of <see cref="Delete(MindTouch.Xml.XDoc,TimeSpan)"/>
-        /// </summary>
-        /// <remarks>
-        /// WARNING: This method is thread-blocking.  Please avoid using it if possible.
-        /// </remarks>
-        /// <param name="doc"></param>
-        /// <returns></returns>
-#if WARN_ON_SYNC
-        [Obsolete("This method is thread-blocking.  Please avoid using it if possible.")]
-#endif
-        public DreamMessage2 Delete(XDoc doc) {
-            return WaitAndConfirm(Invoke(Verb.DELETE, DreamMessage2.Ok(doc), TimeSpan.MaxValue));
-        }
-
-        /// <summary>
-        /// Blocking version of <see cref="Delete(DreamMessage2,TimeSpan)"/>
-        /// </summary>
-        /// <remarks>
-        /// WARNING: This method is thread-blocking.  Please avoid using it if possible.
-        /// </remarks>
-        /// <param name="message"></param>
-        /// <returns></returns>
-        public DreamMessage2 Delete(DreamMessage2 message) {
-            return WaitAndConfirm(Invoke(Verb.DELETE, message, TimeSpan.MaxValue));
-        }
-
-        /// <summary>
-        /// Blocking version of <see cref="Invoke(string,DreamMessage2,TimeSpan)"/>
-        /// </summary>
-        /// <remarks>
-        /// WARNING: This method is thread-blocking.  Please avoid using it if possible.
-        /// </remarks>
-        /// <param name="verb"></param>
-        /// <param name="message"></param>
-        /// <returns></returns>
-        public DreamMessage2 Invoke(string verb, DreamMessage2 message) {
-            return WaitAndConfirm(Invoke(verb, message, TimeSpan.MaxValue));
-        }
-        #endregion
-
         #region --- Iterative Methods ---
 
         /// <summary>
         /// Invoke the plug with the <see cref="Verb.POST"/> verb and an empty message.
         /// </summary>
         /// <returns>Synchronization handle.</returns>
-        public Task<DreamMessage2> PostAsync() {
+        public Task<DreamMessage2> Post() {
             return Invoke(Verb.POST, DreamMessage2.Ok(), DEFAULT_TIMEOUT);
         }
 
@@ -908,25 +701,6 @@ namespace MindTouch.Traum {
         /// <returns>Synchronization handle.</returns>
         public Task<DreamMessage2> Post(TimeSpan timeout) {
             return Invoke(Verb.POST, DreamMessage2.Ok(), timeout);
-        }
-
-        /// <summary>
-        /// Invoke the plug with the <see cref="Verb.POST"/> verb.
-        /// </summary>
-        /// <param name="doc">Document to send.</param>
-        /// <returns>Synchronization handle.</returns>
-        public Task<DreamMessage2> PostAsync(XDoc doc) {
-            return Invoke(Verb.POST, DreamMessage2.Ok(doc), DEFAULT_TIMEOUT);
-        }
-
-        /// <summary>
-        /// Invoke the plug with the <see cref="Verb.POST"/> verb.
-        /// </summary>
-        /// <param name="doc">Document to send.</param>
-        /// <param name="timeout">The timeout for this asynchronous call.</param>
-        /// <returns>Synchronization handle.</returns>
-        public Task<DreamMessage2> Post(XDoc doc, TimeSpan timeout) {
-            return Invoke(Verb.POST, DreamMessage2.Ok(doc), timeout);
         }
 
         /// <summary>
@@ -957,16 +731,6 @@ namespace MindTouch.Traum {
             DreamMessage2 message = DreamMessage2.Ok(Uri.Params);
             XUri uri = Uri.WithoutParams();
             return new Plug2(uri, Timeout, Headers, _preHandlers, _postHandlers, Credentials, _cookieJarOverride, MaxAutoRedirects).Invoke(Verb.POST, message, timeout);
-        }
-
-        /// <summary>
-        /// Invoke the plug with the <see cref="Verb.PUT"/> verb.
-        /// </summary>
-        /// <param name="doc">Document to send.</param>
-        /// <param name="timeout">The timeout for this asynchronous call.</param>
-        /// <returns>Synchronization handle.</returns>
-        public Task<DreamMessage2> Put(XDoc doc, TimeSpan timeout) {
-            return Invoke(Verb.PUT, DreamMessage2.Ok(doc), timeout);
         }
 
         /// <summary>
@@ -1036,16 +800,6 @@ namespace MindTouch.Traum {
         /// <summary>
         /// Invoke the plug with the <see cref="Verb.DELETE"/> verb.
         /// </summary>
-        /// <param name="doc">Document to send.</param>
-        /// <param name="timeout">The timeout for this asynchronous call.</param>
-        /// <returns>Synchronization handle.</returns>
-        public Task<DreamMessage2> Delete(XDoc doc, TimeSpan timeout) {
-            return Invoke(Verb.DELETE, DreamMessage2.Ok(doc), timeout);
-        }
-
-        /// <summary>
-        /// Invoke the plug with the <see cref="Verb.DELETE"/> verb.
-        /// </summary>
         /// <param name="message">Message to send.</param>
         /// <param name="timeout">The timeout for this asynchronous call.</param>
         /// <returns>Synchronization handle.</returns>
@@ -1068,25 +822,29 @@ namespace MindTouch.Traum {
             //if(timeout != TimeSpan.MaxValue) {
             //    result.Timeout = TimeSpan.MaxValue;
             //}
-            return Invoke_Helper(verb, request, timeout);
-        }
-
-        private async Task<DreamMessage2> Invoke_Helper(string verb, DreamMessage2 request, TimeSpan timeout) {
             var hasTimeout = timeout != TimeSpan.MaxValue;
             var requestTimer = Stopwatch.StartNew();
-            var message = await InvokeEx(verb, request, timeout);
-            requestTimer.Stop();
-            if(hasTimeout) {
-                timeout = timeout - requestTimer.Elapsed;
-            }
-            try {
-                await message.Memorize(timeout);
-            } catch(TimeoutException e) {
-                return new DreamMessage2(DreamStatus.ResponseDataTransferTimeout, null, new XException2(e));
-            } catch(Exception e) {
-                return new DreamMessage2(DreamStatus.ResponseFailed, null, new XException2(e));
-            }
-            return message;
+            var completion = new TaskCompletionSource<DreamMessage2>();
+            InvokeEx(verb, request, timeout)
+                .ContinueWith(t1 => {
+                    requestTimer.Stop();
+                    if(hasTimeout) {
+                        timeout = timeout - requestTimer.Elapsed;
+                    }
+                    if(t1.IsFaulted) {
+                        completion.SetException(t1.Exception);
+                    } else {
+                        t1.Result.Memorize(timeout)
+                            .ContinueWith(t2 => {
+                                if(t2.IsFaulted) {
+                                    completion.SetException(t2.Exception);
+                                } else {
+                                    completion.SetResult(t2.Result);
+                                }
+                            });
+                    }
+                });
+            return completion.Task;
         }
 
         /// <summary>
@@ -1096,7 +854,7 @@ namespace MindTouch.Traum {
         /// <param name="request">Request message.</param>
         /// <param name="timeout">The timeout for this asynchronous call.</param>
         /// <returns>Synchronization handle.</returns>
-        public async Task<DreamMessage2> InvokeEx(string verb, DreamMessage2 request, TimeSpan timeout) {
+        public Task<DreamMessage2> InvokeEx(string verb, DreamMessage2 request, TimeSpan timeout) {
             if(verb == null) {
                 throw new ArgumentNullException("verb");
             }
@@ -1106,6 +864,7 @@ namespace MindTouch.Traum {
             if(request.Status != DreamStatus.Ok) {
                 throw new ArgumentException("request status must be 200 (Ok)");
             }
+            var completion = new TaskCompletionSource<DreamMessage2>();
 
             // determine which factory has the best match
             IPlugEndpoint2 match;
@@ -1115,7 +874,8 @@ namespace MindTouch.Traum {
             // check if we found a match
             if(match == null) {
                 request.Close();
-                return new DreamMessage2(DreamStatus.NoEndpointFound, null, XDoc.Empty);
+                completion.SetResult(new DreamMessage2(DreamStatus.NoEndpointFound, null));
+                return completion.Task;
             }
 
             // add matching cookies from service or from global cookie jar
@@ -1128,7 +888,7 @@ namespace MindTouch.Traum {
                 // check if custom pre-processing handlers are registered
                 if(_preHandlers != null) {
                     foreach(PlugHandler2 handler in _preHandlers) {
-                        request = handler(verb, Uri, normalizedUri, request) ?? new DreamMessage2(DreamStatus.RequestIsNull, null, XDoc.Empty);
+                        request = handler(verb, Uri, normalizedUri, request) ?? new DreamMessage2(DreamStatus.RequestIsNull, null);
                         if(request.Status != DreamStatus.Ok) {
                             return request;
                         }
@@ -1193,6 +953,4 @@ namespace MindTouch.Traum {
         }
         #endregion
     }
-
-    public interface IPlugPrePostProcessor { }
 }

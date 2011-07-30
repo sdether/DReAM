@@ -28,7 +28,6 @@ using System.Threading.Tasks;
 using MindTouch.Dream;
 using MindTouch.IO;
 using MindTouch.Web;
-using MindTouch.Xml;
 
 namespace MindTouch.Traum {
 
@@ -37,16 +36,8 @@ namespace MindTouch.Traum {
     /// </summary>
     public class DreamMessage2 {
 
-        //--- Types ---
-        internal interface IDiagnosticsInterceptor {
-            string Path { get; }
-            void AmendErrorDocument(XDoc document, DreamStatus status);
-        }
-
-
         //--- Class Fields ---
         private static readonly log4net.ILog _log = LogUtils.CreateLog();
-        private static IDiagnosticsInterceptor _interceptor;
 
         //--- Class Methods ---
         /// <summary>
@@ -60,38 +51,11 @@ namespace MindTouch.Traum {
         /// <summary>
         /// New Message with HTTP status: Ok (200).
         /// </summary>
-        /// <param name="doc">Message body.</param>
-        /// <returns>New DreamMessage2.</returns>
-        public static DreamMessage2 Ok(XDoc doc) {
-            return new DreamMessage2(DreamStatus.Ok, null, doc);
-        }
-
-        /// <summary>
-        /// New Message with HTTP status: Ok (200).
-        /// </summary>
-        /// <param name="contentType">Content Mime-Type.</param>
-        /// <param name="doc">Message body.</param>
-        /// <returns>New DreamMessage2.</returns>
-        public static DreamMessage2 Ok(MimeType contentType, XDoc doc) {
-            return new DreamMessage2(DreamStatus.Ok, null, contentType, doc);
-        }
-
-        /// <summary>
-        /// New Message with HTTP status: Ok (200).
-        /// </summary>
         /// <param name="contentType">Content Mime-Type.</param>
         /// <param name="text">Message body.</param>
         /// <returns>New DreamMessage2.</returns>
         public static DreamMessage2 Ok(MimeType contentType, string text) {
             return new DreamMessage2(DreamStatus.Ok, null, contentType, text);
-        }
-
-        /// <summary>
-        /// Obsolete: Use <see cref="Ok(System.Collections.Generic.KeyValuePair{string,string}[])"/> instead.
-        /// </summary>
-        [Obsolete("Use DreamMessage2.Ok(KeyValuePair<string, string>[] values) instead.")]
-        public static DreamMessage2 Ok(XUri uri) {
-            return new DreamMessage2(DreamStatus.Ok, null, MimeType.FORM_URLENCODED, uri.Query);
         }
 
         /// <summary>
@@ -125,33 +89,13 @@ namespace MindTouch.Traum {
         }
 
         /// <summary>
-        /// New Message with HTTP status: Created (201).
-        /// </summary>
-        /// <param name="uri">Location of created resource.</param>
-        /// <param name="doc">Message body.</param>
-        /// <returns>New DreamMessage2.</returns>
-        public static DreamMessage2 Created(XUri uri, XDoc doc) {
-            DreamMessage2 result = new DreamMessage2(DreamStatus.Created, null, doc);
-            result.Headers.Location = uri;
-            return result;
-        }
-
-        /// <summary>
-        /// New Message with HTTP status: Not Modified (304).
-        /// </summary>
-        /// <returns>New DreamMessage2.</returns>
-        public static DreamMessage2 NotModified() {
-            return new DreamMessage2(DreamStatus.NotModified, null, XDoc.Empty);
-        }
-
-        /// <summary>
         /// New Message with HTTP status: Not Found (404).
         /// </summary>
         /// <param name="reason">Reason.</param>
         /// <returns>New DreamMessage2.</returns>
         public static DreamMessage2 NotFound(string reason) {
-            _log.DebugFormat("Response: Not Found - {0}{1}", reason, DebugOnly_GetRequestPath());
-            return new DreamMessage2(DreamStatus.NotFound, null, GetDefaultErrorResponse(DreamStatus.NotFound, "Not Found", reason));
+            _log.DebugFormat("Response: Not Found - {0}", reason);
+            return new DreamMessage2(DreamStatus.NotFound, null, MimeType.TEXT, reason);
         }
 
         /// <summary>
@@ -160,8 +104,8 @@ namespace MindTouch.Traum {
         /// <param name="reason">Reason.</param>
         /// <returns>New DreamMessage2.</returns>
         public static DreamMessage2 BadRequest(string reason) {
-            _log.DebugFormat("Response: Bad Request - {0}{1}", reason, DebugOnly_GetRequestPath());
-            return new DreamMessage2(DreamStatus.BadRequest, null, GetDefaultErrorResponse(DreamStatus.BadRequest, "Bad Request", reason));
+            _log.DebugFormat("Response: Bad Request - {0}", reason);
+            return new DreamMessage2(DreamStatus.BadRequest, null, MimeType.TEXT, reason);
         }
 
         /// <summary>
@@ -170,18 +114,8 @@ namespace MindTouch.Traum {
         /// <param name="reason">Reason.</param>
         /// <returns>New DreamMessage2.</returns>
         public static DreamMessage2 NotImplemented(string reason) {
-            _log.DebugFormat("Response: Not Implemented - {0}{1}", reason, DebugOnly_GetRequestPath());
-            return new DreamMessage2(DreamStatus.NotImplemented, null, GetDefaultErrorResponse(DreamStatus.NotImplemented, "Not Implemented", reason));
-        }
-
-        /// <summary>
-        /// New Message with HTTP status: Conflict (409).
-        /// </summary>
-        /// <param name="doc">Message body.</param>
-        /// <returns>New DreamMessage2.</returns>
-        public static DreamMessage2 Conflict(XDoc doc) {
-            _log.DebugMethodCall("Response: Conflict");
-            return new DreamMessage2(DreamStatus.Conflict, null, doc);
+            _log.DebugFormat("Response: Not Implemented - {0}", reason);
+            return new DreamMessage2(DreamStatus.NotImplemented, null, MimeType.TEXT, reason);
         }
 
         /// <summary>
@@ -190,8 +124,8 @@ namespace MindTouch.Traum {
         /// <param name="reason">Reason.</param>
         /// <returns>New DreamMessage2.</returns>
         public static DreamMessage2 Conflict(string reason) {
-            _log.DebugFormat("Response: Conflict - {0}{1}", reason, DebugOnly_GetRequestPath());
-            return new DreamMessage2(DreamStatus.Conflict, null, GetDefaultErrorResponse(DreamStatus.Conflict, "Conflict", reason));
+            _log.DebugFormat("Response: Conflict - {0}", reason);
+            return new DreamMessage2(DreamStatus.Conflict, null, MimeType.TEXT, reason);
         }
 
         /// <summary>
@@ -200,7 +134,7 @@ namespace MindTouch.Traum {
         /// <param name="uri">Redirect target.</param>
         /// <returns>New DreamMessage2.</returns>
         public static DreamMessage2 Redirect(XUri uri) {
-            DreamMessage2 result = new DreamMessage2(DreamStatus.Found, null, XDoc.Empty);
+            var result = new DreamMessage2(DreamStatus.Found, null);
             result.Headers.Location = uri;
             return result;
         }
@@ -212,8 +146,8 @@ namespace MindTouch.Traum {
         /// <param name="reason">Reason.</param>
         /// <returns>New DreamMessage2.</returns>
         public static DreamMessage2 AccessDenied(string accessRealm, string reason) {
-            _log.DebugFormat("Response: Unauthorized - {0}{1}", reason, DebugOnly_GetRequestPath());
-            DreamMessage2 result = new DreamMessage2(DreamStatus.Unauthorized, null, GetDefaultErrorResponse(DreamStatus.Unauthorized, "Unauthorized", reason));
+            _log.DebugFormat("Response: Unauthorized - {0}", reason);
+            var result = new DreamMessage2(DreamStatus.Unauthorized, null, MimeType.TEXT, reason);
             result.Headers.Authenticate = string.Format("Basic realm=\"{0}\"", accessRealm);
             return result;
         }
@@ -224,8 +158,8 @@ namespace MindTouch.Traum {
         /// <param name="reason">Reason.</param>
         /// <returns>New DreamMessage2.</returns>
         public static DreamMessage2 LicenseRequired(string reason) {
-            _log.DebugFormat("Response: LicenseRequired - {0}{1}", reason, DebugOnly_GetRequestPath());
-            return new DreamMessage2(DreamStatus.LicenseRequired, null, GetDefaultErrorResponse(DreamStatus.LicenseRequired, "LicenseRequired", reason));
+            _log.DebugFormat("Response: LicenseRequired - {0}", reason);
+            return new DreamMessage2(DreamStatus.LicenseRequired, null, MimeType.TEXT, reason);
         }
 
         /// <summary>
@@ -234,8 +168,8 @@ namespace MindTouch.Traum {
         /// <param name="reason">Reason.</param>
         /// <returns>New DreamMessage2.</returns>
         public static DreamMessage2 Forbidden(string reason) {
-            _log.DebugFormat("Response: Forbidden - {0}{1}", reason, DebugOnly_GetRequestPath());
-            return new DreamMessage2(DreamStatus.Forbidden, null, GetDefaultErrorResponse(DreamStatus.Forbidden, "Forbidden", reason));
+            _log.DebugFormat("Response: Forbidden - {0}", reason);
+            return new DreamMessage2(DreamStatus.Forbidden, null, MimeType.TEXT, reason);
         }
 
         /// <summary>
@@ -245,8 +179,8 @@ namespace MindTouch.Traum {
         /// <param name="reason">Reason.</param>
         /// <returns>New DreamMessage2.</returns>
         public static DreamMessage2 MethodNotAllowed(string[] allowedMethods, string reason) {
-            _log.DebugFormat("Response: MethodNotAllowed - {0}{1}", reason, DebugOnly_GetRequestPath());
-            DreamMessage2 result = new DreamMessage2(DreamStatus.MethodNotAllowed, null, GetDefaultErrorResponse(DreamStatus.MethodNotAllowed, "Method Not Allowed", reason));
+            _log.DebugFormat("Response: MethodNotAllowed - {0}", reason);
+            var result = new DreamMessage2(DreamStatus.MethodNotAllowed, null, MimeType.TEXT, reason);
             result.Headers.Allow = string.Join(",", allowedMethods);
             return result;
         }
@@ -257,7 +191,7 @@ namespace MindTouch.Traum {
         /// <returns>New DreamMessage2.</returns>
         public static DreamMessage2 InternalError() {
             _log.DebugMethodCall("Response: Internal Error");
-            return new DreamMessage2(DreamStatus.InternalError, null, XDoc.Empty);
+            return new DreamMessage2(DreamStatus.InternalError, null);
         }
 
         /// <summary>
@@ -265,9 +199,9 @@ namespace MindTouch.Traum {
         /// </summary>
         /// <param name="text">Error message.</param>
         /// <returns>New DreamMessage2.</returns>
-        public static DreamMessage2 InternalError(string text) {
-            _log.DebugMethodCall("Response: Internal Error", text);
-            return new DreamMessage2(DreamStatus.InternalError, null, GetDefaultErrorResponse(DreamStatus.InternalError, "Internal Error", text));
+        public static DreamMessage2 InternalError(string reason) {
+            _log.DebugMethodCall("Response: Internal Error", reason);
+            return new DreamMessage2(DreamStatus.InternalError, null, MimeType.TEXT, reason);
         }
 
         /// <summary>
@@ -275,10 +209,10 @@ namespace MindTouch.Traum {
         /// </summary>
         /// <param name="e">Exception responsible for internal error.</param>
         /// <returns>New DreamMessage2.</returns>
-        public static DreamMessage2 InternalError(Exception e) {
-            _log.DebugExceptionMethodCall(e, "Response: Internal Error");
-            return new DreamMessage2(DreamStatus.InternalError, null, MimeType.DREAM_EXCEPTION, (e != null) ? new XException2(e) : XDoc.Empty);
-        }
+        //public static DreamMessage2 InternalError(Exception e) {
+        //    _log.DebugExceptionMethodCall(e, "Response: Internal Error");
+        //    return new DreamMessage2(DreamStatus.InternalError, null, MimeType.DREAM_EXCEPTION, (e != null) ? new XException2(e) : XDoc.Empty);
+        //}
 
         /// <summary>
         /// Create a message from a file.
@@ -336,27 +270,6 @@ namespace MindTouch.Traum {
             return null;
         }
 
-        private static XDoc GetDefaultErrorResponse(DreamStatus status, string title, string message) {
-            var result = new XDoc("error");
-            if(_interceptor != null) {
-              _interceptor.AmendErrorDocument(result, status);
-            }
-            result.Elem("status", (int)status).Elem("title", title).Elem("message", message);
-            return result;
-        }
-
-        private static string DebugOnly_GetRequestPath() {
-            if(!_log.IsDebugEnabled) {
-                return null;
-            }
-            var path = _interceptor != null ? _interceptor.Path : null;
-            return string.IsNullOrEmpty(path) ? null : ", path: " + path;
-        }
-
-        internal static void SetDiagnosticsInterceptor(IDiagnosticsInterceptor diagnosticsInterceptor) {
-            _interceptor = diagnosticsInterceptor;
-        }
-
         //--- Fields ---
 
         /// <summary>
@@ -369,11 +282,9 @@ namespace MindTouch.Traum {
         /// </summary>
         public readonly DreamHeaders Headers;
 
-        private XDoc _doc;
         private byte[] _bytes;
         private Stream _stream;
         private bool _streamOpen;
-        private System.Diagnostics.StackTrace _stackTrace = DebugUtil.GetStackTrace();
         //--- Constructors ---
 
         /// <summary>
@@ -386,42 +297,6 @@ namespace MindTouch.Traum {
             this.Headers = new DreamHeaders(headers);
             _bytes = new byte[0];
         }
-
-        /// <summary>
-        /// Create a new message.
-        /// </summary>
-        /// <param name="status">Http status.</param>
-        /// <param name="headers">Header collection.</param>
-        /// <param name="contentType">Content Mime-Type.</param>
-        /// <param name="doc">Message body.</param>
-        public DreamMessage2(DreamStatus status, DreamHeaders headers, MimeType contentType, XDoc doc) {
-            if(doc == null) {
-                throw new ArgumentNullException("doc");
-            }
-            this.Status = status;
-            this.Headers = new DreamHeaders(headers);
-
-            // check if document is empty
-            if(doc.IsEmpty) {
-
-                // we store empty XML documents as text content; it causes less confusion for browsers
-                this.Headers.ContentType = MimeType.TEXT;
-                this.Headers.ContentLength = 0L;
-                _doc = doc;
-                _bytes = new byte[0];
-            } else {
-                this.Headers.ContentType = contentType ?? MimeType.XML;
-                _doc = doc.Clone();
-            }
-        }
-
-        /// <summary>
-        /// Create a new message.
-        /// </summary>
-        /// <param name="status">Http status.</param>
-        /// <param name="headers">Header collection.</param>
-        /// <param name="doc">Message body.</param>
-        public DreamMessage2(DreamStatus status, DreamHeaders headers, XDoc doc) : this(status, headers, MimeType.XML, doc) { }
 
         /// <summary>
         /// Create a new message.
@@ -505,7 +380,7 @@ namespace MindTouch.Traum {
         /// <summary>
         /// <see langword="True"/> if the underlying content stream is closed.
         /// </summary>
-        public bool IsClosed { get { return (_doc == null) && (_stream == null) && (_bytes == null); } }
+        public bool IsClosed { get { return (_stream == null) && (_bytes == null); } }
 
         /// <summary>
         /// Total number of bytes in message.
@@ -528,19 +403,6 @@ namespace MindTouch.Traum {
         }
 
         /// <summary>
-        /// <see langword="True"/> if the message content can be retrieved as an <see cref="XDoc"/> instance.
-        /// </summary>
-        public bool HasDocument {
-            get {
-                if(_doc == null) {
-                    MimeType mime = ContentType;
-                    return mime.IsXml || mime.Match(MimeType.FORM_URLENCODED);
-                }
-                return true;
-            }
-        }
-
-        /// <summary>
         /// Can this message be clone?
         /// </summary>
         /// <remarks>In general only false for closed messages and messages with non-memorized streams.</remarks>
@@ -549,16 +411,8 @@ namespace MindTouch.Traum {
                 return !IsClosed && (_stream == null || _stream == Stream.Null || _stream.IsStreamMemorized());
             }
         }
-        //--- Methods ---
 
-        /// <summary>
-        /// Get the message body as a document.
-        /// </summary>
-        /// <returns>XDoc instance.</returns>
-        public XDoc ToDocument() {
-            MakeDocument();
-            return _doc;
-        }
+        //--- Methods ---
 
         /// <summary>
         /// Get the message body as a Stream.
@@ -574,9 +428,6 @@ namespace MindTouch.Traum {
         /// </summary>
         /// <remarks>This method is potentially thread-blocking. Please avoid using it if possible.</remarks>
         /// <returns>Array of bytes.</returns>
-#if WARN_ON_SYNC
-        [Obsolete("This method is potentially thread-blocking. Please avoid using it if possible.")]
-#endif
         public byte[] ToBytes() {
             MakeBytes();
             return _bytes;
@@ -640,17 +491,12 @@ namespace MindTouch.Traum {
         /// </summary>
         /// <returns>A new message instance.</returns>
         public DreamMessage2 Clone() {
-            DreamMessage2 result;
-            if(_doc != null) {
-                result = new DreamMessage2(Status, Headers, _doc.Clone());
-            } else {
-                byte[] bytes = ToBytes();
-                result = new DreamMessage2(Status, Headers, ContentType, bytes);
+            byte[] bytes = ToBytes();
+            var result = new DreamMessage2(Status, Headers, ContentType, bytes);
 
-                // length may differ for HEAD requests
-                if(bytes.LongLength != ContentLength) {
-                    result.Headers.ContentLength = bytes.LongLength;
-                }
+            // length may differ for HEAD requests
+            if(bytes.LongLength != ContentLength) {
+                result.Headers.ContentLength = bytes.LongLength;
             }
             if(HasCookies) {
                 result.Cookies.AddRange(Cookies);
@@ -666,7 +512,6 @@ namespace MindTouch.Traum {
                 _stream.Close();
                 _streamOpen = false;
             }
-            _doc = null;
             _stream = null;
             _bytes = null;
         }
@@ -676,8 +521,8 @@ namespace MindTouch.Traum {
         /// </summary>
         /// <param name="timeout">The synchronization handle to return.</param>
         /// <returns>Synchronization handle for memorization completion.</returns>
-        public async Task Memorize(TimeSpan timeout) {
-            await Memorize(-1, timeout);
+        public Task<DreamMessage2> Memorize(TimeSpan timeout) {
+            return Memorize(-1, timeout);
         }
 
         /// <summary>
@@ -686,22 +531,17 @@ namespace MindTouch.Traum {
         /// <param name="max">Maximum number of bytes to memorize.</param>
         /// <param name="timeout">Async timeout.</param>
         /// <returns>Synchronization handle for memorization completion.</returns>
-        public async Task Memorize(long max, TimeSpan timeout) {
+        public Task<DreamMessage2> Memorize(int max, TimeSpan timeout) {
+            var completion = new TaskCompletionSource<DreamMessage2>();
 
             // check if we need to call Memorize_Helper()
             if((_stream == null) || _stream.IsStreamMemorized()) {
 
                 // message already contains a document or byte array or a memory stream
                 // we don't need to memorize those
-                return;
+                completion.SetResult(this);
+                return completion.Task;
             }
-            await Memorize_Helper((int)max, timeout);
-        }
-
-        private async Task Memorize_Helper(int max, TimeSpan timeout) {
-
-            // NOTE (steveb): this method is used to load an external stream into memory; this alleviates the problem of streams not being closed for simple operations
-
             if(max < 0) {
                 max = int.MaxValue - 1;
             }
@@ -716,7 +556,8 @@ namespace MindTouch.Traum {
                 _streamOpen = false;
 
                 // throw size exceeded exception
-                throw new InternalBufferOverflowException("message body exceeded max size");
+                completion.SetException(new InternalBufferOverflowException("message body exceeded max size"));
+                return completion.Task;
             }
             if(length < 0) {
                 length = int.MaxValue;
@@ -725,48 +566,19 @@ namespace MindTouch.Traum {
             // NOTE: the content-length and body length may differ (e.g. HEAD verb)
 
             // copy contents asynchronously
-            var buffer = new ChunkedMemoryStream();
-            await _stream.CopyToAsync(buffer, Math.Min(length, max + 1));
-
-            // mark stream as closed
-            _stream.Close();
-            _stream = null;
-            _streamOpen = false;
-
-            if(buffer.Length > max) {
-                throw new InternalBufferOverflowException("message body exceeded max size");
-            }
-            buffer.Position = 0;
-            _stream = buffer;
-        }
-
-        /// <summary>
-        /// Convert the message into a string.
-        /// </summary>
-        /// <returns>String.</returns>
-        public override string ToString() {
-            return new XMessage2(this).ToString();
-        }
-
-        private void MakeDocument() {
-            if(IsClosed) {
-                throw new InvalidOperationException("message has already been closed");
-            }
-            if(_doc == null) {
-                try {
-                    MakeStream();
-                    _doc = XDocFactory.From(_stream, ContentType);
-                    if((_doc == null) || _doc.IsEmpty) {
-                        throw new InvalidDataException(string.Format("message body with content type '{0}' is not well-formed xml", ContentType));
+            StreamMemorizer.Memorize(_stream, Math.Min(length, max + 1))
+                .ContinueWith(t => {
+                    if(t.Result.Length > max) {
+                        completion.SetException(new InternalBufferOverflowException("message body exceeded max size"));
+                        return;
                     }
-                } finally {
-                    if(_stream != null) {
-                        _stream.Close();
-                        _stream = null;
-                        _streamOpen = false;
-                    }
-                }
-            }
+                    _stream = t.Result;
+                    _stream.Close();
+                    _stream = null;
+                    _streamOpen = false;
+                    completion.SetResult(null);
+                });
+            return completion.Task;
         }
 
         private void MakeStream() {
@@ -774,14 +586,7 @@ namespace MindTouch.Traum {
                 throw new InvalidOperationException("message has already been closed");
             }
             if(_stream == null) {
-                if(_bytes != null) {
-                    _stream = new MemoryStream(_bytes, 0, _bytes.Length, true, true);
-                } else {
-                    var stream = new ChunkedMemoryStream();
-                    _doc.WriteTo(stream, ContentType.CharSet);
-                    stream.Position = 0;
-                    _stream = stream;
-                }
+                _stream = new MemoryStream(_bytes, 0, _bytes.Length, true, true);
                 _streamOpen = false;
 
                 // NOTE: the content-length and body length may differ (e.g. HEAD verb)
@@ -798,14 +603,7 @@ namespace MindTouch.Traum {
                 throw new InvalidOperationException("message has already been closed");
             }
             if(_bytes == null) {
-                if(_stream == null) {
-                    Encoding encoding = ContentType.CharSet;
-                    _bytes = encoding.GetBytes(_doc.ToString(encoding));
-                } else if(_stream is ChunkedMemoryStream) {
-                    _bytes = ((ChunkedMemoryStream)_stream).ToArray();
-                    _stream = null;
-                    _streamOpen = false;
-                } else if(_stream is MemoryStream) {
+                if(_stream is MemoryStream) {
                     _bytes = ((MemoryStream)_stream).ToArray();
                     _stream = null;
                     _streamOpen = false;
