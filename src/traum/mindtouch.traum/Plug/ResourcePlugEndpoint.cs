@@ -42,10 +42,10 @@ namespace MindTouch.Traum {
         Task<DreamMessage2> IPlugEndpoint2.Invoke(Plug2 plug, string verb, XUri uri, DreamMessage2 request, TimeSpan timeout) {
 
             // we only support GET as verb
-            TaskCompletionSource<DreamMessage2> result = new TaskCompletionSource<DreamMessage2>();
+            var result = new TaskCompletionSource<DreamMessage2>();
             DreamMessage2 reply;
             if((verb != Verb.GET) && (verb != Verb.HEAD)) {
-                reply = new DreamMessage2(DreamStatus.MethodNotAllowed, null, null);
+                reply = new DreamMessage2(DreamStatus.MethodNotAllowed, null);
                 reply.Headers.Allow = Verb.GET + "," + Verb.HEAD;
             } else {
                 bool head = (verb == Verb.HEAD);

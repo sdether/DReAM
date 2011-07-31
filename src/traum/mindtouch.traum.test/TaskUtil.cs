@@ -3,7 +3,7 @@
 namespace MindTouch.Traum.Test {
     public static class TaskUtil {
         public static Task<T> AsCompletedTask<T>(this T value) {
-            return TaskEx.FromResult(value);
+            return System.Threading.Tasks.TaskEx.FromResult(value);
         }
         public static Task Block(this Task task) {
             task.Wait(-1);

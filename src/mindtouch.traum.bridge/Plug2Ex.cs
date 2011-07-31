@@ -1,7 +1,5 @@
 using System;
 using System.Threading.Tasks;
-using MindTouch.Dream;
-using MindTouch.Xml;
 
 namespace MindTouch.Traum {
 //    public static class Plug2Ex {

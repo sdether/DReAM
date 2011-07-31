@@ -97,6 +97,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AsyncCopier.cs" />
+    <Compile Include="DateTimeUtil.cs" />
+    <Compile Include="TaskEx.cs" />
     <Compile Include="DreamCookie.cs" />
     <Compile Include="DreamCookieJar.cs" />
     <Compile Include="DreamHeaders.cs" />
@@ -107,13 +109,11 @@
     <Compile Include="Plug\HttpPlugEndpoint.cs" />
     <Compile Include="Plug\IPlugEndpoint2.cs" />
     <Compile Include="Plug\Plug2.cs" />
-    <Compile Include="Plug\ProxyPlugEndpoint.cs" />
     <Compile Include="Plug\ResourcePlugEndpoint.cs" />
     <Compile Include="Plug\XriPlugEndpoint.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="StreamUtil.cs" />
     <Compile Include="stringutil.cs" />
-    <Compile Include="TimeExtensions.cs" />
+    <Compile Include="TraumExtensions.cs" />
     <Compile Include="types.cs" />
     <Compile Include="XUri.cs" />
   </ItemGroup>

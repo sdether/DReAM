@@ -45,7 +45,7 @@ namespace MindTouch.Traum {
         /// </summary>
         /// <returns>New DreamMessage2.</returns>
         public static DreamMessage2 Ok() {
-            return new DreamMessage2(DreamStatus.Ok, null);
+            return new DreamMessage2(DreamStatus.Ok);
         }
 
         /// <summary>
@@ -86,6 +86,14 @@ namespace MindTouch.Traum {
         /// <returns>New DreamMessage2.</returns>
         public static DreamMessage2 Ok(MimeType contentType, long contentLength, Stream content) {
             return new DreamMessage2(DreamStatus.Ok, null, contentType, contentLength, content);
+        }
+
+        /// <summary>
+        /// New Message with HTTP status: Not Modified (304).
+        /// </summary>
+        /// <returns>New DreamMessage.</returns>
+        public static DreamMessage2 NotModified() {
+            return new DreamMessage2(DreamStatus.NotModified);
         }
 
         /// <summary>
@@ -134,7 +142,7 @@ namespace MindTouch.Traum {
         /// <param name="uri">Redirect target.</param>
         /// <returns>New DreamMessage2.</returns>
         public static DreamMessage2 Redirect(XUri uri) {
-            var result = new DreamMessage2(DreamStatus.Found, null);
+            var result = new DreamMessage2(DreamStatus.Found);
             result.Headers.Location = uri;
             return result;
         }
@@ -191,7 +199,7 @@ namespace MindTouch.Traum {
         /// <returns>New DreamMessage2.</returns>
         public static DreamMessage2 InternalError() {
             _log.DebugMethodCall("Response: Internal Error");
-            return new DreamMessage2(DreamStatus.InternalError, null);
+            return new DreamMessage2(DreamStatus.InternalError);
         }
 
         /// <summary>
@@ -202,6 +210,27 @@ namespace MindTouch.Traum {
         public static DreamMessage2 InternalError(string reason) {
             _log.DebugMethodCall("Response: Internal Error", reason);
             return new DreamMessage2(DreamStatus.InternalError, null, MimeType.TEXT, reason);
+        }
+
+        /// <summary>
+        /// New Message with HTTP status: Internal Error (500)
+        /// </summary>
+        /// <param name="exception">Error.</param>
+        /// <returns>New DreamMessage2.</returns>
+        public static DreamMessage2 InternalError(Exception exception) {
+            // TODO (arnec): need a better story for exceptions in messages
+            _log.DebugMethodCall("Response: Internal Error", exception.Message);
+            return new DreamMessage2(DreamStatus.InternalError, exception);
+        }
+
+        /// <summary>
+        /// New Message with HTTP status: Request Failed (11)
+        /// </summary>
+        /// <param name="exception">Error.</param>
+        /// <returns>New DreamMessage2.</returns>
+        public static DreamMessage2 RequestFailed(Exception exception) {
+            _log.DebugMethodCall("Response: Request Failed", exception.Message);
+            return new DreamMessage2(DreamStatus.RequestFailed, exception);
         }
 
         /// <summary>
@@ -292,9 +321,31 @@ namespace MindTouch.Traum {
         /// </summary>
         /// <param name="status">Http status.</param>
         /// <param name="headers">Header collection.</param>
+        public DreamMessage2(DreamStatus status) {
+            this.Status = status;
+            this.Headers = new DreamHeaders();
+            _bytes = new byte[0];
+        }
+
+        /// <summary>
+        /// Create a new message.
+        /// </summary>
+        /// <param name="status">Http status.</param>
+        /// <param name="headers">Header collection.</param>
         public DreamMessage2(DreamStatus status, DreamHeaders headers) {
             this.Status = status;
             this.Headers = new DreamHeaders(headers);
+            _bytes = new byte[0];
+        }
+
+        /// <summary>
+        /// Create a new message.
+        /// </summary>
+        /// <param name="status">Http status.</param>
+        /// <param name="exception">Error.</param>
+        public DreamMessage2(DreamStatus status, Exception exception) {
+            this.Status = status;
+            this.Headers = new DreamHeaders();
             _bytes = new byte[0];
         }
 
@@ -316,7 +367,7 @@ namespace MindTouch.Traum {
 
             // set stream
             _stream = stream ?? Stream.Null;
-            _streamOpen = !_stream.IsStreamMemorized();
+            _streamOpen = _stream is MemoryStream;
         }
 
         /// <summary>
@@ -532,15 +583,13 @@ namespace MindTouch.Traum {
         /// <param name="timeout">Async timeout.</param>
         /// <returns>Synchronization handle for memorization completion.</returns>
         public Task<DreamMessage2> Memorize(int max, TimeSpan timeout) {
-            var completion = new TaskCompletionSource<DreamMessage2>();
 
             // check if we need to call Memorize_Helper()
             if((_stream == null) || _stream.IsStreamMemorized()) {
 
                 // message already contains a document or byte array or a memory stream
                 // we don't need to memorize those
-                completion.SetResult(this);
-                return completion.Task;
+                return this.AsCompletedTask();
             }
             if(max < 0) {
                 max = int.MaxValue - 1;
@@ -556,8 +605,7 @@ namespace MindTouch.Traum {
                 _streamOpen = false;
 
                 // throw size exceeded exception
-                completion.SetException(new InternalBufferOverflowException("message body exceeded max size"));
-                return completion.Task;
+                return new InternalBufferOverflowException("message body exceeded max size").AsFaultedTask<DreamMessage2>();
             }
             if(length < 0) {
                 length = int.MaxValue;
@@ -566,6 +614,7 @@ namespace MindTouch.Traum {
             // NOTE: the content-length and body length may differ (e.g. HEAD verb)
 
             // copy contents asynchronously
+            var completion = new TaskCompletionSource<DreamMessage2>();
             StreamMemorizer.Memorize(_stream, Math.Min(length, max + 1))
                 .ContinueWith(t => {
                     if(t.Result.Length > max) {

@@ -864,7 +864,6 @@ namespace MindTouch.Traum {
             if(request.Status != DreamStatus.Ok) {
                 throw new ArgumentException("request status must be 200 (Ok)");
             }
-            var completion = new TaskCompletionSource<DreamMessage2>();
 
             // determine which factory has the best match
             IPlugEndpoint2 match;
@@ -874,8 +873,7 @@ namespace MindTouch.Traum {
             // check if we found a match
             if(match == null) {
                 request.Close();
-                completion.SetResult(new DreamMessage2(DreamStatus.NoEndpointFound, null));
-                return completion.Task;
+                return new DreamMessage2(DreamStatus.NoEndpointFound).AsCompletedTask();
             }
 
             // add matching cookies from service or from global cookie jar
@@ -888,15 +886,15 @@ namespace MindTouch.Traum {
                 // check if custom pre-processing handlers are registered
                 if(_preHandlers != null) {
                     foreach(PlugHandler2 handler in _preHandlers) {
-                        request = handler(verb, Uri, normalizedUri, request) ?? new DreamMessage2(DreamStatus.RequestIsNull, null);
+                        request = handler(verb, Uri, normalizedUri, request) ?? new DreamMessage2(DreamStatus.RequestIsNull);
                         if(request.Status != DreamStatus.Ok) {
-                            return request;
+                            return request.AsCompletedTask();
                         }
                     }
                 }
             } catch(Exception e) {
                 request.Close();
-                return new DreamMessage2(DreamStatus.RequestFailed, null, new XException2(e));
+                return new DreamMessage2.RequestFailed(e).As;
             }
 
             // Note (arnec): Plug never throws, so we usurp the passed result if it has a timeout
@@ -911,16 +909,18 @@ namespace MindTouch.Traum {
 
             DreamMessage2 response = null;
             try {
-                response = await match.Invoke(this, verb, normalizedUri, request, timeout);
+                // await
+                response = match.Invoke(this, verb, normalizedUri, request, timeout);
 
             } catch(Exception e) {
                 // an exception occurred somewhere during processing (not expected, but it could happen)
                 request.Close();
+                
                 var status = DreamStatus.RequestFailed;
                 if(e is TimeoutException) {
                     status = DreamStatus.RequestConnectionTimeout;
                 }
-                return new DreamMessage2(status, null, new XException2(e));
+                return new DreamMessage2(status, e).AsCompletedTask();
 
             }
             try {
@@ -936,7 +936,8 @@ namespace MindTouch.Traum {
                     var redirectPlug = new Plug2(message.Headers.Location, Timeout, Headers, null, null, null, CookieJar, (ushort)(MaxAutoRedirects - 1));
                     var redirectMessage = request.Clone();
                     request.Close();
-                    await redirectPlug.InvokeEx(verb, redirectMessage, Timeout);
+                    // await
+                    redirectPlug.InvokeEx(verb, redirectMessage, Timeout);
                 } else {
                     request.Close();
                     if(_postHandlers != null) {
@@ -947,9 +948,9 @@ namespace MindTouch.Traum {
                 }
             } catch(Exception e) {
                 request.Close();
-                return new DreamMessage2(DreamStatus.ResponseFailed, null, new XException2(e));
+                return new DreamMessage2(DreamStatus.ResponseFailed, e).AsCompletedTask();
             }
-            return response;
+            return response.AsCompletedTask();
         }
         #endregion
     }

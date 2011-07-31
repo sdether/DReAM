@@ -58,7 +58,7 @@ namespace MindTouch.Traum.Test {
         [Test]
         public void Register_twice_throws() {
             var uri = new XUri("http://www.mindtouch.com/foo");
-            MockPlug2.Register(uri, (p, v, u, r) => TaskEx.FromResult(DreamMessage2.Ok()));
+            MockPlug2.Register(uri, (p, v, u, r) => System.Threading.Tasks.TaskEx.FromResult(DreamMessage2.Ok()));
             try {
                 MockPlug2.Register(uri, (p, v, u, r) => DreamMessage2.Ok().AsCompletedTask());
             } catch(ArgumentException) {
@@ -219,11 +219,11 @@ namespace MindTouch.Traum.Test {
             });
             Plug2.New("http://foo/bar").Post(TimeSpan.MaxValue);
             Assert.IsTrue(resetEvent.WaitOne(1000, false), "no async failed");
-            TaskEx.Run(() => Plug2.New("http://foo/bar").Post(TimeSpan.MaxValue));
+            System.Threading.Tasks.TaskEx.Run(() => Plug2.New("http://foo/bar").Post(TimeSpan.MaxValue));
             Assert.IsTrue(resetEvent.WaitOne(1000, false), "async failed");
-            TaskEx.Run(() => TaskEx.Run(() => Plug2.New("http://foo/bar").Post(TimeSpan.MaxValue)));
+            System.Threading.Tasks.TaskEx.Run(() => System.Threading.Tasks.TaskEx.Run(() => Plug2.New("http://foo/bar").Post(TimeSpan.MaxValue)));
             Assert.IsTrue(resetEvent.WaitOne(1000, false), "nested async failed");
-            TaskEx.Run(() => TaskEx.Run(() => TaskEx.Run(() => Plug2.New("http://foo/bar").Post(TimeSpan.MaxValue))));
+            System.Threading.Tasks.TaskEx.Run(() => System.Threading.Tasks.TaskEx.Run(() => System.Threading.Tasks.TaskEx.Run(() => Plug2.New("http://foo/bar").Post(TimeSpan.MaxValue))));
             Assert.IsTrue(resetEvent.WaitOne(1000, false), "double async failed");
         }
 

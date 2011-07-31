@@ -545,7 +545,7 @@ namespace MindTouch.Traum.Test {
             var blockingStream = new MockBlockingStream();
             MockPlug2.Register(new XUri("mock://mock"), (plug, verb, uri, request) => {
                 _log.Debug("returning blocking stream");
-                                return TaskEx.FromResult(new DreamMessage2(DreamStatus.Ok, null, MimeType.TEXT, -1, blockingStream));
+                                return System.Threading.Tasks.TaskEx.FromResult(new DreamMessage2(DreamStatus.Ok, null, MimeType.TEXT, -1, blockingStream));
             });
             var stopwatch = Stopwatch.StartNew();
             _log.Debug("calling plug");
@@ -570,7 +570,7 @@ namespace MindTouch.Traum.Test {
                 _log.Debug("blocking request");
                 Thread.Sleep(5.Seconds());
                 _log.Debug("returning blocking stream");
-                                 return TaskEx.FromResult(new DreamMessage2(DreamStatus.Ok, null, MimeType.TEXT, -1, blockingStream));
+                                 return System.Threading.Tasks.TaskEx.FromResult(new DreamMessage2(DreamStatus.Ok, null, MimeType.TEXT, -1, blockingStream));
            });
             var stopwatch = Stopwatch.StartNew();
             _log.Debug("calling plug");

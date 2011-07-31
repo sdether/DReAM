@@ -174,7 +174,7 @@ namespace MindTouch.Traum {
         /// <param name="commentUri">Uri for comment.</param>
         /// <returns>New cookie instance.</returns>
         public static DreamCookie NewSetCookie(string name, string value, XUri uri, DateTime expires, bool secure, string comment, XUri commentUri) {
-            return new DreamCookie(name, value, uri, expires, 1, secure, false, comment, commentUri, false, false);
+            return new DreamCookie(name, value, uri, expires, 1, secure, false, comment, commentUri, false);
         }
 
         /// <summary>
@@ -190,7 +190,7 @@ namespace MindTouch.Traum {
         /// <param name="httpOnly"><see langword="True"/> if cookie is only accessible to the http transport, i.e. not client side scripts.</param>
         /// <returns>New cookie instance.</returns>
         public static DreamCookie NewSetCookie(string name, string value, XUri uri, DateTime expires, bool secure, string comment, XUri commentUri, bool httpOnly) {
-            return new DreamCookie(name, value, uri, expires, 1, secure, false, comment, commentUri, httpOnly, false);
+            return new DreamCookie(name, value, uri, expires, 1, secure, false, comment, commentUri, httpOnly);
         }
 
         /// <summary>
@@ -315,7 +315,7 @@ namespace MindTouch.Traum {
                 // TODO (steveb): the produced URI always uses 'http' even when the cookie is secure, why?
                 uri = new XUri(string.Format("http://{0}{1}", domain, path));
             }
-            return new DreamCookie(cookieName, cookieValue, uri, expires, version, secure, discard, comment, commentUri, httpOnly, false);
+            return new DreamCookie(cookieName, cookieValue, uri, expires, version, secure, discard, comment, commentUri, httpOnly);
         }
 
         private static DateTime ParseCookieDateTimeString(string cookieExpires) {
@@ -525,23 +525,16 @@ namespace MindTouch.Traum {
         /// <param name="uri">Cookie Uri.</param>
         public DreamCookie(string name, string value, XUri uri) : this(name, value, uri, DateTime.MaxValue, 0) { }
 
-        private DreamCookie(string name, string value, XUri uri, DateTime expires, int version) : this(name, value, uri, expires, version, false, false, null, null, false, false) { }
+        private DreamCookie(string name, string value, XUri uri, DateTime expires, int version) : this(name, value, uri, expires, version, false, false, null, null, false) { }
 
-        private DreamCookie(string name, string value, XUri uri, DateTime expires, int version, bool secure, bool discard, string comment, XUri commentUri, bool httpOnly, bool skipContextDiscovery) {
+        private DreamCookie(string name, string value, XUri uri, DateTime expires, int version, bool secure, bool discard, string comment, XUri commentUri, bool httpOnly) {
             if(string.IsNullOrEmpty(name)) {
                 throw new ArgumentException("Name cannot be empty");
             }
             _name = name;
             _value = value;
             if(uri != null) {
-                _uri = uri.WithoutQuery().WithoutCredentials().WithoutFragment().AsLocalUri();
-                if(!skipContextDiscovery) {
-                    DreamContext dc = DreamContext.CurrentOrNull;
-                    if(dc != null) {
-                        _publicUri = dc.PublicUri;
-                        _localMachineUri = dc.Env.LocalMachineUri;
-                    }
-                }
+                _uri = uri.WithoutQuery().WithoutCredentials().WithoutFragment();
             }
 
             // auto-convert very old expiration dates to max since they are most likely bogus
@@ -658,42 +651,6 @@ namespace MindTouch.Traum {
             get { return _httpOnly; }
         }
 
-        /// <summary>
-        /// Serialize the cookie as a set cookie xml document.
-        /// </summary>
-        public XDoc AsSetCookieDocument {
-            get {
-                XDoc result = new XDoc("set-cookie")
-                    .Attr("version", 1)
-                    .Elem("name", Name)
-                    .Elem("uri", Uri)
-                    .Elem("value", Value);
-                if(Expires < DateTime.MaxValue) {
-                    result.Elem("expires", Expires);
-                }
-                if(!string.IsNullOrEmpty(Comment)) {
-                    result.Elem("comment", Comment);
-                }
-                if(CommentUri != null) {
-                    result.Elem("uri.comment", CommentUri.ToString());
-                }
-                if(Discard) {
-                    result.Attr("discard", true);
-                }
-                if(Secure) {
-                    result.Attr("secure", true);
-                }
-                return result;
-            }
-        }
-
-        /// <summary>
-        /// Serialize the cookie as a cookie xml document.
-        /// </summary>
-        public XDoc AsCookieDocument {
-            get { return new XDoc("cookie").Elem("name", Name).Elem("uri", Uri).Elem("value", Value); }
-        }
-
         //--- Methods ---
         /// <summary>
         /// Compare <see cref="DreamCookie"/> instances for identical content.
@@ -740,7 +697,7 @@ namespace MindTouch.Traum {
         public DreamCookie WithHostPort(string hostPort) {
             string scheme = _uri == null ? "local" : _uri.Scheme;
             string path = _uri == null ? string.Empty : _uri.Path;
-            return new DreamCookie(Name, Value, new XUri(string.Format("{0}://{1}{2}", scheme, hostPort, path)), Expires, Version, Secure, Discard, Comment, CommentUri, HttpOnly, false);
+            return new DreamCookie(Name, Value, new XUri(string.Format("{0}://{1}{2}", scheme, hostPort, path)), Expires, Version, Secure, Discard, Comment, CommentUri, HttpOnly);
         }
 
         /// <summary>
@@ -751,7 +708,7 @@ namespace MindTouch.Traum {
         public DreamCookie WithPath(string path) {
             string scheme = _uri == null ? "local" : _uri.Scheme;
             string hostPort = _uri == null ? string.Empty : _uri.Path;
-            return new DreamCookie(Name, Value, new XUri(string.Format("{0}://{1}{2}", scheme, hostPort, path)), Expires, Version, Secure, Discard, Comment, CommentUri, HttpOnly, false);
+            return new DreamCookie(Name, Value, new XUri(string.Format("{0}://{1}{2}", scheme, hostPort, path)), Expires, Version, Secure, Discard, Comment, CommentUri, HttpOnly);
         }
 
         /// <summary>
@@ -760,7 +717,7 @@ namespace MindTouch.Traum {
         /// <param name="expires">Cookie expiration.</param>
         /// <returns>New Cookie.</returns>
         public DreamCookie WithExpiration(DateTime expires) {
-            return new DreamCookie(Name, Value, Uri, expires, Version, Secure, Discard, Comment, CommentUri, HttpOnly, false);
+            return new DreamCookie(Name, Value, Uri, expires, Version, Secure, Discard, Comment, CommentUri, HttpOnly);
         }
 
         /// <summary>
@@ -769,7 +726,7 @@ namespace MindTouch.Traum {
         /// <param name="discard"><see langword="True"/> if the cookie should be discarded.</param>
         /// <returns></returns>
         public DreamCookie WithDiscard(bool discard) {
-            return new DreamCookie(Name, Value, Uri, Expires, Version, Secure, discard, Comment, CommentUri, HttpOnly, false);
+            return new DreamCookie(Name, Value, Uri, Expires, Version, Secure, discard, Comment, CommentUri, HttpOnly);
         }
 
         /// <summary>
@@ -851,7 +808,7 @@ namespace MindTouch.Traum {
         /// </remarks>
         /// <returns></returns>
         public DreamCookie ToPublicCookie() {
-            return new DreamCookie(Name, Value, GetPublicUri(), Expires, Version, Secure, Discard, Comment, CommentUri, HttpOnly, true);
+            return new DreamCookie(Name, Value, GetPublicUri(), Expires, Version, Secure, Discard, Comment, CommentUri, HttpOnly);
         }
 
         private XUri GetPublicUri() {

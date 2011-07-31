@@ -28,7 +28,6 @@ using System.Threading.Tasks;
 using MindTouch.Dream;
 using MindTouch.IO;
 using MindTouch.Web;
-using MindTouch.Xml;
 
 namespace MindTouch.Traum.Http {
 
@@ -56,7 +55,7 @@ namespace MindTouch.Traum.Http {
             }
         }
 
-        public async Task<DreamMessage2> Invoke(Plug2 plug, string verb, XUri uri, DreamMessage2 request, TimeSpan timeout) {
+        public Task<DreamMessage2> Invoke(Plug2 plug, string verb, XUri uri, DreamMessage2 request, TimeSpan timeout) {
 
             // register activity
             Action<string> activity = delegate(string message) { };
@@ -72,7 +71,7 @@ namespace MindTouch.Traum.Http {
             return res;
         }
 
-        private async Task<DreamMessage2> HandleInvoke(Action<string> activity, Plug2 plug, string verb, XUri uri, DreamMessage2 request, TimeSpan timeout) {
+        private Task<DreamMessage2> HandleInvoke(Action<string> activity, Plug2 plug, string verb, XUri uri, DreamMessage2 request, TimeSpan timeout) {
 
             // remove internal headers
             request.Headers.DreamTransport = null;

@@ -76,7 +76,6 @@ namespace System {
 
         private static char[] _alphanum_chars;
         private static RNGCryptoServiceProvider _generator = new RNGCryptoServiceProvider();
-        private static Dictionary<string, Sgml.Entity> _literals;
         private static Dictionary<string, string> _entities;
         private static Regex _specialSymbolRegEx = new Regex("[&<>\x22\u0080-\uFFFF]", RegexOptions.Compiled | RegexOptions.CultureInvariant);
         private static Regex _htmlEntitiesRegEx = new Regex("&(?<value>#(x[a-f0-9]+|[0-9]+)|[a-z0-9]+);", RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
@@ -94,31 +93,6 @@ namespace System {
                 chars.Add(i);
             }
             _alphanum_chars = chars.ToArray();
-        }
-
-        //--- Class Properties ---
-        private static Dictionary<string, Sgml.Entity> LiteralNameLookup {
-            get {
-                if(_literals == null) {
-                    Sgml.SgmlReader sgmlReader = new Sgml.SgmlReader();
-                    sgmlReader.DocType = "HTML";
-                    _literals = sgmlReader.Dtd.GetEntitiesLiteralNameLookup();
-                }
-                return _literals;
-            }
-        }
-
-        private static Dictionary<string, string> EntityNameLookup {
-            get {
-                if(_entities == null) {
-                    Dictionary<string, string> result = new Dictionary<string, string>();
-                    foreach(KeyValuePair<string, Sgml.Entity> entry in LiteralNameLookup) {
-                        result[entry.Value.Name] = entry.Key;
-                    }
-                    _entities = result;
-                }
-                return _entities;
-            }
         }
 
         //--- Extension Methods ---
