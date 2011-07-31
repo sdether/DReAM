@@ -815,13 +815,6 @@ namespace MindTouch.Traum {
         /// <param name="timeout">The timeout for this asynchronous call.</param>
         /// <returns>Synchronization handle.</returns>
         public Task<DreamMessage2> Invoke(string verb, DreamMessage2 request, TimeSpan timeout) {
-
-            // Note (arnec): Plug never throws, so we remove the timeout from the result (if it has one), 
-            // and pass it into our coroutine manually.
-            //var timeout = result.Timeout;
-            //if(timeout != TimeSpan.MaxValue) {
-            //    result.Timeout = TimeSpan.MaxValue;
-            //}
             var hasTimeout = timeout != TimeSpan.MaxValue;
             var requestTimer = Stopwatch.StartNew();
             var completion = new TaskCompletionSource<DreamMessage2>();
@@ -848,7 +841,7 @@ namespace MindTouch.Traum {
         }
 
         /// <summary>
-        /// Invoke the plug, but leave the stream unread so that the returned <see cref="DreamMessage"/> can be streamed.
+        /// Invoke the plug, but leave the stream unread so that the returned <see cref="DreamMessage2"/> can be streamed.
         /// </summary>
         /// <param name="verb">Request verb.</param>
         /// <param name="request">Request message.</param>
@@ -894,7 +887,7 @@ namespace MindTouch.Traum {
                 }
             } catch(Exception e) {
                 request.Close();
-                return new DreamMessage2.RequestFailed(e).As;
+                return DreamMessage2.RequestFailed(e).AsCompletedTask();
             }
 
             // Note (arnec): Plug never throws, so we usurp the passed result if it has a timeout
@@ -906,51 +899,52 @@ namespace MindTouch.Traum {
 
             // if the governing result has a shorter timeout than the plug, it superceeds the plug timeout
             //var timeout = outerTimeout < Timeout ? outerTimeout : Timeout;
+            var completion = new TaskCompletionSource<DreamMessage2>();
+            match.Invoke(this, verb, normalizedUri, request, timeout).ContinueWith(invokeTask => {
+                if(invokeTask.IsFaulted) {
+                    // an exception occurred somewhere during processing (not expected, but it could happen)
+                    request.Close();
 
-            DreamMessage2 response = null;
-            try {
-                // await
-                response = match.Invoke(this, verb, normalizedUri, request, timeout);
-
-            } catch(Exception e) {
-                // an exception occurred somewhere during processing (not expected, but it could happen)
-                request.Close();
-                
-                var status = DreamStatus.RequestFailed;
-                if(e is TimeoutException) {
-                    status = DreamStatus.RequestConnectionTimeout;
+                    var status = DreamStatus.RequestFailed;
+                    var e = invokeTask.UnwrapFault();
+                    if(e is TimeoutException) {
+                        status = DreamStatus.RequestConnectionTimeout;
+                    }
+                    completion.SetResult(new DreamMessage2(status, e));
+                    return;
                 }
-                return new DreamMessage2(status, e).AsCompletedTask();
+                var response = invokeTask.Result;
+                try {
+                    var message = PostProcess(verb, Uri, normalizedUri, _headers, cookies, response);
 
-            }
-            try {
-                var message = PostProcess(verb, Uri, normalizedUri, _headers, cookies, response);
-
-                // check if custom post-processing handlers are registered
-                if((message.Status == DreamStatus.MovedPermanently ||
-                    message.Status == DreamStatus.Found ||
-                    message.Status == DreamStatus.TemporaryRedirect) &&
-                   AutoRedirect &&
-                   request.IsCloneable
-                ) {
-                    var redirectPlug = new Plug2(message.Headers.Location, Timeout, Headers, null, null, null, CookieJar, (ushort)(MaxAutoRedirects - 1));
-                    var redirectMessage = request.Clone();
-                    request.Close();
-                    // await
-                    redirectPlug.InvokeEx(verb, redirectMessage, Timeout);
-                } else {
-                    request.Close();
-                    if(_postHandlers != null) {
-                        foreach(PlugHandler2 handler in _postHandlers) {
-                            response = handler(verb, Uri, normalizedUri, response) ?? new DreamMessage2(DreamStatus.ResponseIsNull, null, XDoc.Empty);
+                    // check if custom post-processing handlers are registered
+                    if((message.Status == DreamStatus.MovedPermanently ||
+                        message.Status == DreamStatus.Found ||
+                        message.Status == DreamStatus.TemporaryRedirect) &&
+                       AutoRedirect &&
+                       request.IsCloneable
+                    ) {
+                        var redirectPlug = new Plug2(message.Headers.Location, Timeout, Headers, null, null, null, CookieJar, (ushort)(MaxAutoRedirects - 1));
+                        var redirectMessage = request.Clone();
+                        request.Close();
+                        // await
+                        redirectPlug.InvokeEx(verb, redirectMessage, Timeout).ContinueWith(redirectTask => completion.SetResult(redirectTask.Result));
+                    } else {
+                        request.Close();
+                        if(_postHandlers != null) {
+                            foreach(PlugHandler2 handler in _postHandlers) {
+                                response = handler(verb, Uri, normalizedUri, response) ?? new DreamMessage2(DreamStatus.ResponseIsNull);
+                            }
                         }
                     }
+                } catch(Exception e) {
+                    request.Close();
+                    completion.SetResult(new DreamMessage2(DreamStatus.ResponseFailed, e));
                 }
-            } catch(Exception e) {
-                request.Close();
-                return new DreamMessage2(DreamStatus.ResponseFailed, e).AsCompletedTask();
-            }
-            return response.AsCompletedTask();
+            });
+
+
+            return completion.Task;
         }
         #endregion
     }

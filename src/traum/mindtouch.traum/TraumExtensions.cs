@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace MindTouch.Traum {
@@ -34,5 +35,8 @@ namespace MindTouch.Traum {
             return date;
         }
 
+        public static Exception UnwrapFault(this Task task) {
+            return task.Exception.Flatten().InnerExceptions.First();
+        }
     }
 }

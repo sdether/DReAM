@@ -57,24 +57,6 @@ namespace MindTouch.Traum.Http {
 
         public Task<DreamMessage2> Invoke(Plug2 plug, string verb, XUri uri, DreamMessage2 request, TimeSpan timeout) {
 
-            // register activity
-            Action<string> activity = delegate(string message) { };
-            activity("pre Invoke");
-
-            // await
-            var res = HandleInvoke(activity, plug, verb, uri, request, timeout);
-            activity("post Invoke");
-            request.Close();
-
-            // unregister activity
-            activity(null);
-
-            // return response
-            return res;
-        }
-
-        private Task<DreamMessage2> HandleInvoke(Action<string> activity, Plug2 plug, string verb, XUri uri, DreamMessage2 request, TimeSpan timeout) {
-
             // remove internal headers
             request.Headers.DreamTransport = null;
 
@@ -93,79 +75,15 @@ namespace MindTouch.Traum.Http {
             if((plug.Credentials == null) && StringUtil.ContainsInvariantIgnoreCase(verb, "GET")) {
 
                 // create the request hashcode
-                StringBuilder buffer = new StringBuilder();
+                var buffer = new StringBuilder();
                 buffer.AppendLine(uri.ToString());
                 foreach(KeyValuePair<string, string> header in request.Headers) {
                     buffer.Append(header.Key).Append(": ").Append(header.Value).AppendLine();
                 }
-                Guid hash = new Guid(StringUtil.ComputeHash(buffer.ToString()));
-
-                // check if an active connection exists
-                //Task<DreamMessage2> relay = null;
-                //lock(_requests) {
-                //    List<Task<DreamMessage2>> pending;
-                //    relay = new TaskCompletionSource<DreamMessage2>();
-                //    if(_requests.TryGetValue(hash, out pending)) {
-                //        pending.Add(relay);
-                //    } else {
-                //        pending = new List<Task<DreamMessage2>>();
-                //        pending.Add(response);
-                //        _requests[hash] = pending;
-                //    }
-                //}
-
-                // check if we're pooling a request
-                //if(relay != null) {
-
-                //    // wait for the relayed response
-                //    yield return relay;
-                //    response.Return(relay);
-                //    yield break;
-                //} else {
-
-                // NOTE (steveb): we use TaskEnv.Instantaneous so that we don't exit the current stack frame before we've executed the continuation;
-                //                otherwise, we'll trigger an exception because our result object may not be set.
-
-                // create new handler to multicast the response to the relays
-                //response = new Result<DreamMessage2>(response.Timeout, TaskEnv.Instantaneous);
-                //response.WhenDone(_ => {
-                //    List<Result<DreamMessage2>> pending;
-                //    lock(_requests) {
-                //        _requests.TryGetValue(hash, out pending);
-                //        _requests.Remove(hash);
-                //    }
-
-                //    // this check should never fail!
-                //    if(response.HasException) {
-
-                //        // send the exception to all relays
-                //        foreach(Result<DreamMessage2> result in pending) {
-                //            result.Throw(response.Exception);
-                //        }
-                //    } else {
-                //        DreamMessage2 original = response.Value;
-
-                //        // only memorize the message if it needs to be cloned
-                //        if(pending.Count > 1) {
-
-                //            // clone the message to all relays
-                //            foreach(Result<DreamMessage2> result in pending) {
-                //                result.Return(original.Clone());
-                //            }
-                //        } else {
-
-                //            // relay the original message
-                //            pending[0].Return(original);
-                //        }
-                //    }
-                //});
-                //} **relay** 
             }
 
             // initialize request
-            activity("pre WebRequest.Create");
-            HttpWebRequest httpRequest = (HttpWebRequest)WebRequest.Create(uri.ToUri());
-            activity("post WebRequest.Create");
+            var httpRequest = (HttpWebRequest)WebRequest.Create(uri.ToUri());
             httpRequest.Method = verb;
             httpRequest.Timeout = System.Threading.Timeout.Infinite;
             httpRequest.ReadWriteTimeout = System.Threading.Timeout.Infinite;
@@ -179,7 +97,7 @@ namespace MindTouch.Traum.Http {
             //      retrieved in a timely manner but where the reading of the response body times out.
 
             httpRequest.KeepAlive = false;
-            httpRequest.ProtocolVersion = System.Net.HttpVersion.Version10;
+            httpRequest.ProtocolVersion = HttpVersion.Version10;
 
             // set credentials
             if(plug.Credentials != null) {
@@ -194,101 +112,73 @@ namespace MindTouch.Traum.Http {
             }
 
             // add request headres
-            foreach(KeyValuePair<string, string> header in request.Headers) {
-                HttpUtil.AddHeader(httpRequest, header.Key, header.Value);
+            foreach(var header in request.Headers) {
+                httpRequest.AddHeader(header.Key, header.Value);
             }
+            var completion = new TaskCompletionSource<DreamMessage2>();
             // send message stream
             if((request.ContentLength != 0) || (verb == Verb.POST)) {
                 Task<Stream> getRequestStream = null;
                 try {
-                    activity("pre BeginGetRequestStream");
-                    getRequestStream = httpRequest.GetRequestStreamAsync();
-                    activity("post BeginGetRequestStream");
+                    getRequestStream = Task.Factory.FromAsync<Stream>(httpRequest.BeginGetRequestStream, httpRequest.EndGetRequestStream, null);
                 } catch(Exception e) {
-                    activity("pre HandleResponse 1");
-                    return HandleResponse(activity, e, httpRequest, null, timeout);
-                    //if(response == null) {
-                    //    _log.ErrorExceptionMethodCall(e, "HandleInvoke@BeginGetRequestStream", verb, uri);
-                    //    throw e;
-                    //}
-                    //return response;
-                }
-                activity("pre await getRequestStream");
-                // send request
-                Stream outStream;
-                try {
-                    // await
-                    outStream = getRequestStream;
-                    activity("post await getRequestStream");
-                } catch(Exception e) {
-                    activity("pre HandleResponse 2");
-                    return HandleResponse(activity, e, httpRequest, null, timeout);
-                    //if(response == null) {
-                    //    _log.ErrorExceptionMethodCall(e, "HandleInvoke@getRequestStream", verb, uri);
-                    //    throw e;
-                    //}
-                    //return response;
+                    return HandleResponse(e, httpRequest, null, timeout);
                 }
 
-                // copy data
-                using(outStream) {
-                    try {
-                        activity("pre yield CopyStream");
-                        // await
-                        request.ToStream().CopyToAsync(outStream, (int)request.ContentLength);
-                        activity("post yield CopyStream");
-                    } catch(Exception e) {
-                        activity("pre HandleResponse 3");
-                        return HandleResponse(activity, e, httpRequest, null, timeout);
-                        //if(response == null) {
-                        //    _log.ErrorExceptionMethodCall(e, "HandleInvoke@CopyToAsync", verb, uri);
-                        //    throw e;
-                        //}
-                        //return response;
+                // send request
+                getRequestStream.ContinueWith(t1 => {
+                    if(t1.IsFaulted) {
+                        var e = t1.UnwrapFault();
+                        HandleResponse(e, httpRequest, null, timeout, completion);
+                        return;
                     }
-                }
+                    Stream outStream = t1.Result;
+
+                    // copy data
+                    using(outStream) {
+                        try {
+                            // await
+                            request.ToStream().CopyToAsync(outStream, (int)request.ContentLength);
+                        } catch(Exception e) {
+                            return HandleResponse(e, httpRequest, null, timeout);
+                        }
+                    }
+                });
+
+            } else {
+
             }
             request = null;
 
             // wait for response
             HttpWebResponse httpResponse = null;
             try {
-                activity("pre await GetResponseAsync");
                 // await
-                httpResponse = (HttpWebResponse) httpRequest.GetResponseAsync();
-                activity("post await GetResponseAsync");
+                httpResponse = (HttpWebResponse)httpRequest.GetResponseAsync();
             } catch(Exception e) {
-                activity("pre HandleResponse 4");
-                return HandleResponse(activity, e, httpRequest, null, timeout);
-                //if(response == null) {
-                //    _log.ErrorExceptionMethodCall(e, "HandleInvoke@GetResponseAsync", verb, uri);
-                //    throw e;
-                //}
-                //return response;
+                return HandleResponse(e, httpRequest, null, timeout);
             }
 
             // handle response
-            activity("pre HandleResponse 6");
-            return HandleResponse(activity, null, httpRequest, httpResponse, timeout);
-            //if(response == null) {
-            //    _log.ErrorExceptionMethodCall(e, "HandleInvoke@GetResponseAsync", verb, uri);
-            //    throw e;
-            //}
-            //return response;
+            return HandleResponse(null, httpRequest, httpResponse, timeout);
         }
 
-        private DreamMessage2 HandleResponse(Action<string> activity, Exception exception, HttpWebRequest httpRequest, HttpWebResponse httpResponse, TimeSpan timeout) {
+        private void HandleResponse(Exception exception, HttpWebRequest httpRequest, HttpWebResponse httpResponse, TimeSpan timeout, TaskCompletionSource<DreamMessage2> completion) {
+            completion.SetResult(HandleResponse2(exception, httpRequest, httpResponse, timeout));
+        }
+
+        private Task<DreamMessage2> HandleResponse(Exception exception, HttpWebRequest httpRequest, HttpWebResponse httpResponse, TimeSpan timeout) {
+            return HandleResponse2(exception, httpRequest, httpResponse, timeout).AsCompletedTask();
+        }
+
+        private DreamMessage2 HandleResponse2(Exception exception, HttpWebRequest httpRequest, HttpWebResponse httpResponse, TimeSpan timeout) {
             if(exception != null) {
                 if(exception is WebException) {
-                    activity("pre WebException");
                     httpResponse = (HttpWebResponse)((WebException)exception).Response;
-                    activity("post WebException");
                 } else {
-                    activity("pre HttpWebResponse close");
                     try {
                         httpResponse.Close();
                     } catch { }
-                    activity("HandleResponse exit 1");
                     httpRequest.Abort();
                     return new DreamMessage2(DreamStatus.UnableToConnect, exception);
                 }
@@ -296,7 +186,6 @@ namespace MindTouch.Traum.Http {
 
             // check if a response was obtained, otherwise fail
             if(httpResponse == null) {
-                activity("HandleResponse exit 2");
                 httpRequest.Abort();
                 return new DreamMessage2(DreamStatus.UnableToConnect, exception);
             }
@@ -310,9 +199,7 @@ namespace MindTouch.Traum.Http {
 
             if(!string.IsNullOrEmpty(httpResponse.ContentType)) {
                 contentType = new MimeType(httpResponse.ContentType);
-                activity("pre new BufferedStream");
                 stream = new BufferedStream(httpResponse.GetResponseStream());
-                activity("post new BufferedStream");
             } else {
 
                 // TODO (arnec): If we get a response with a stream, but no content-type, we're currently dropping the stream. Might want to revisit that.
@@ -323,7 +210,6 @@ namespace MindTouch.Traum.Http {
             }
 
             // encapsulate the response in a dream message
-            activity("HandleResponse exit 3");
             return new DreamMessage2((DreamStatus)(int)statusCode, new DreamHeaders(headers), contentType, contentLength, stream);
         }
     }
