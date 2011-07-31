@@ -97,7 +97,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AsyncCopier.cs" />
+    <Compile Include="cultureutil.cs" />
     <Compile Include="DateTimeUtil.cs" />
+    <Compile Include="dreamutil.cs" />
+    <Compile Include="HttpUtil.cs" />
     <Compile Include="TaskEx.cs" />
     <Compile Include="DreamCookie.cs" />
     <Compile Include="DreamCookieJar.cs" />

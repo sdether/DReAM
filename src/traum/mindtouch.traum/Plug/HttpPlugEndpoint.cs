@@ -60,7 +60,9 @@ namespace MindTouch.Traum.Http {
             // register activity
             Action<string> activity = delegate(string message) { };
             activity("pre Invoke");
-            var res = await HandleInvoke(activity, plug, verb, uri, request, timeout);
+
+            // await
+            var res = HandleInvoke(activity, plug, verb, uri, request, timeout);
             activity("post Invoke");
             request.Close();
 
@@ -215,7 +217,8 @@ namespace MindTouch.Traum.Http {
                 // send request
                 Stream outStream;
                 try {
-                    outStream = await getRequestStream;
+                    // await
+                    outStream = getRequestStream;
                     activity("post await getRequestStream");
                 } catch(Exception e) {
                     activity("pre HandleResponse 2");
@@ -231,7 +234,7 @@ namespace MindTouch.Traum.Http {
                 using(outStream) {
                     try {
                         activity("pre yield CopyStream");
-                        await
+                        // await
                         request.ToStream().CopyToAsync(outStream, (int)request.ContentLength);
                         activity("post yield CopyStream");
                     } catch(Exception e) {
@@ -251,7 +254,8 @@ namespace MindTouch.Traum.Http {
             HttpWebResponse httpResponse = null;
             try {
                 activity("pre await GetResponseAsync");
-                httpResponse = (HttpWebResponse)await httpRequest.GetResponseAsync();
+                // await
+                httpResponse = (HttpWebResponse) httpRequest.GetResponseAsync();
                 activity("post await GetResponseAsync");
             } catch(Exception e) {
                 activity("pre HandleResponse 4");
@@ -286,7 +290,7 @@ namespace MindTouch.Traum.Http {
                     } catch { }
                     activity("HandleResponse exit 1");
                     httpRequest.Abort();
-                    return new DreamMessage2(DreamStatus.UnableToConnect, null, new XException2(exception));
+                    return new DreamMessage2(DreamStatus.UnableToConnect, exception);
                 }
             }
 
@@ -294,7 +298,7 @@ namespace MindTouch.Traum.Http {
             if(httpResponse == null) {
                 activity("HandleResponse exit 2");
                 httpRequest.Abort();
-                return new DreamMessage2(DreamStatus.UnableToConnect, null, new XException2(exception));
+                return new DreamMessage2(DreamStatus.UnableToConnect, exception);
             }
 
             // determine response type

@@ -45,7 +45,7 @@ namespace MindTouch.Traum {
             var result = new TaskCompletionSource<DreamMessage2>();
             DreamMessage2 reply;
             if((verb != Verb.GET) && (verb != Verb.HEAD)) {
-                reply = new DreamMessage2(DreamStatus.MethodNotAllowed, null);
+                reply = new DreamMessage2(DreamStatus.MethodNotAllowed);
                 reply.Headers.Allow = Verb.GET + "," + Verb.HEAD;
             } else {
                 bool head = (verb == Verb.HEAD);
@@ -62,7 +62,7 @@ namespace MindTouch.Traum {
                     try {
                         System.IO.Stream stream = assembly.GetManifestResourceStream(uri.Path.Substring(1));
                         if(stream != null) {
-                            MimeType mime = MimeType.New(uri.GetParam(DreamOutParam.TYPE, null)) ?? MimeType.BINARY;
+                            MimeType mime = MimeType.BINARY;
                             reply = new DreamMessage2(DreamStatus.Ok, null, mime, stream.Length, head ? System.IO.Stream.Null : stream);
                             if(head) {
                                 stream.Close();

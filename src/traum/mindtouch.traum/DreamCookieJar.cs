@@ -146,12 +146,8 @@ namespace MindTouch.Web {
             if(uri == null) {
                 throw new ArgumentNullException("uri");
             }
-            List<DreamCookie> result = new List<DreamCookie>();
+            var result = new List<DreamCookie>();
             Fetch(uri, 0, result);
-            XUri localUri = uri.AsLocalUri();
-            if(localUri != uri) {
-                Fetch(localUri, 0, result);
-            }
             return result;
         }
 
@@ -172,7 +168,7 @@ namespace MindTouch.Web {
                 if(_cookies == null) {
                     _cookies = new List<DreamCookie>();
                 }
-                List<DreamCookie> expired = new List<DreamCookie>();
+                var expired = new List<DreamCookie>();
                 for(int i = 0; i < _cookies.Count; ++i) {
                     DreamCookie cookie = _cookies[i];
 

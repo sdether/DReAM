@@ -7,9 +7,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{298A8F5F-EC9D-4CF9-A29E-A1B4F6976EFC}"
 	ProjectSection(SolutionItems) = preProject
 		..\LICENSE = ..\LICENSE
-		..\mindtouch.build.xml = ..\mindtouch.build.xml
 		..\MindTouchDream.proj = ..\MindTouchDream.proj
-		..\README.md = ..\README.md
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "mindtouch.dream", "mindtouch.dream\mindtouch.dream.csproj", "{3E706653-69D1-4522-BEE8-ECEC1A1BF7DE}"

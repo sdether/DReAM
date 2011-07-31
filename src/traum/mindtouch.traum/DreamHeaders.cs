@@ -22,6 +22,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.Linq;
 using MindTouch.Traum;
 using MindTouch.Web;
 
@@ -1166,8 +1167,8 @@ namespace MindTouch.Dream {
                             Cookies.AddRange(DreamCookie.ParseSetCookieHeader(value));
                         }
                     } else {
-                        string[] values = headers.GetValues(key);
-                        if(!ArrayUtil.IsNullOrEmpty(values)) {
+                        var values = headers.GetValues(key);
+                        if(values != null && values.Any()) {
                             if(key.EqualsInvariant(FORWARDED_HOST) || key.EqualsInvariant(FORWARDED_FOR)) {
 
                                 // NOTE (steveb): 'X-Forwarded-Host', 'X-Forwarded-For' may contain one or more entries, but NameValueCollection doesn't seem to care :(
