@@ -26,7 +26,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MindTouch.Dream;
-using MindTouch.IO;
 using MindTouch.Web;
 
 namespace MindTouch.Traum {
@@ -615,7 +614,7 @@ namespace MindTouch.Traum {
 
             // copy contents asynchronously
             var completion = new TaskCompletionSource<DreamMessage2>();
-            StreamMemorizer.Memorize(_stream, Math.Min(length, max + 1))
+            _stream.MemorizeAsync(Math.Min(length, max + 1))
                 .ContinueWith(t => {
                     if(t.Result.Length > max) {
                         completion.SetException(new InternalBufferOverflowException("message body exceeded max size"));

@@ -26,7 +26,6 @@ using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using MindTouch.Dream;
-using MindTouch.IO;
 using MindTouch.Web;
 
 namespace MindTouch.Traum.Http {
@@ -34,7 +33,7 @@ namespace MindTouch.Traum.Http {
     internal class HttpPlugEndpoint : IPlugEndpoint2 {
 
         //--- Class Fields ---
-        private static log4net.ILog _log = LogUtils.CreateLog();
+        private static readonly log4net.ILog _log = LogUtils.CreateLog();
         private static readonly Dictionary<Guid, List<Task<DreamMessage2>>> _requests = new Dictionary<Guid, List<Task<DreamMessage2>>>();
 
         //--- Methods ---
@@ -72,7 +71,7 @@ namespace MindTouch.Traum.Http {
             }
 
             // check if we can pool the request with an existing one
-            if((plug.Credentials == null) && StringUtil.ContainsInvariantIgnoreCase(verb, "GET")) {
+            if((plug.Credentials == null) && verb.ContainsInvariantIgnoreCase("GET")) {
 
                 // create the request hashcode
                 var buffer = new StringBuilder();
@@ -118,12 +117,7 @@ namespace MindTouch.Traum.Http {
             var completion = new TaskCompletionSource<DreamMessage2>();
             // send message stream
             if((request.ContentLength != 0) || (verb == Verb.POST)) {
-                Task<Stream> getRequestStream = null;
-                try {
-                    getRequestStream = Task.Factory.FromAsync<Stream>(httpRequest.BeginGetRequestStream, httpRequest.EndGetRequestStream, null);
-                } catch(Exception e) {
-                    return HandleResponse(e, httpRequest, null, timeout);
-                }
+                Task<Stream> getRequestStream = Task.Factory.FromAsync<Stream>(httpRequest.BeginGetRequestStream, httpRequest.EndGetRequestStream, null);
 
                 // send request
                 getRequestStream.ContinueWith(t1 => {
@@ -132,43 +126,34 @@ namespace MindTouch.Traum.Http {
                         HandleResponse(e, httpRequest, null, timeout, completion);
                         return;
                     }
-                    Stream outStream = t1.Result;
-
-                    // copy data
-                    using(outStream) {
-                        try {
-                            // await
-                            request.ToStream().CopyToAsync(outStream, (int)request.ContentLength);
-                        } catch(Exception e) {
-                            return HandleResponse(e, httpRequest, null, timeout);
+                    var outStream = t1.Result;
+                    request.ToStream().CopyAsync(outStream, (int)request.ContentLength).ContinueWith(t2 => {
+                        if(t2.IsFaulted) {
+                            var e = t2.UnwrapFault();
+                            HandleResponse(e, httpRequest, null, timeout, completion);
                         }
-                    }
+                        GetResponse(timeout, completion, httpRequest);
+                    });
                 });
 
             } else {
-
+                GetResponse(timeout, completion, httpRequest);
             }
-            request = null;
+            return completion.Task;
+        }
 
-            // wait for response
-            HttpWebResponse httpResponse = null;
-            try {
-                // await
-                httpResponse = (HttpWebResponse)httpRequest.GetResponseAsync();
-            } catch(Exception e) {
-                return HandleResponse(e, httpRequest, null, timeout);
-            }
-
-            // handle response
-            return HandleResponse(null, httpRequest, httpResponse, timeout);
+        private void GetResponse(TimeSpan timeout, TaskCompletionSource<DreamMessage2> completion, HttpWebRequest httpRequest) {
+            Task.Factory.FromAsync<WebResponse>(httpRequest.BeginGetResponse, httpRequest.EndGetResponse, null).ContinueWith(t => {
+                if(t.IsFaulted) {
+                    var e = t.UnwrapFault();
+                    HandleResponse(e, httpRequest, null, timeout, completion);
+                }
+                HandleResponse(null, httpRequest, (HttpWebResponse)t.Result, timeout, completion);
+            });
         }
 
         private void HandleResponse(Exception exception, HttpWebRequest httpRequest, HttpWebResponse httpResponse, TimeSpan timeout, TaskCompletionSource<DreamMessage2> completion) {
             completion.SetResult(HandleResponse2(exception, httpRequest, httpResponse, timeout));
-        }
-
-        private Task<DreamMessage2> HandleResponse(Exception exception, HttpWebRequest httpRequest, HttpWebResponse httpResponse, TimeSpan timeout) {
-            return HandleResponse2(exception, httpRequest, httpResponse, timeout).AsCompletedTask();
         }
 
         private DreamMessage2 HandleResponse2(Exception exception, HttpWebRequest httpRequest, HttpWebResponse httpResponse, TimeSpan timeout) {
