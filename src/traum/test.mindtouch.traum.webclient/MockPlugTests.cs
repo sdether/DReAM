@@ -23,7 +23,6 @@ using System;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
-using MindTouch.Dream;
 using log4net;
 using MindTouch.Extensions.Time;
 using MindTouch.Xml;
@@ -468,6 +467,7 @@ namespace MindTouch.Traum.Webclient.Test {
 
         [Test]
         public void Can_add_headers_to_the_response() {
+            _log.Debug("Can_add_headers_to_the_response");
             MockPlug2.Setup(new XUri("http://mock/foo")).WithResponseHeader("foo", "bar");
             var msg = Plug2.New("http://mock/foo").Get().Result;
             Assert.IsTrue(msg.IsSuccessful);

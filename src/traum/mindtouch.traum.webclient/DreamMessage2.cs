@@ -597,7 +597,7 @@ namespace MindTouch.Traum.Webclient {
         /// <param name="timeout">Async timeout.</param>
         /// <returns>Synchronization handle for memorization completion.</returns>
         public Task<DreamMessage2> Memorize(int max, TimeSpan timeout) {
-
+            _log.Debug("memorizing");
             // check if we need to call Memorize_Helper()
             if((_stream == null) || _stream.IsStreamMemorized()) {
 

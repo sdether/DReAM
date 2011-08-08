@@ -21,6 +21,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using log4net;
 
 namespace MindTouch.Traum.Webclient.Test.Mock {
     internal class MockEndpoint : IPlugEndpoint2 {
@@ -31,6 +32,7 @@ namespace MindTouch.Traum.Webclient.Test.Mock {
         // Note (arnec): This is a field, not constant so that access triggers the static constructor
         public readonly static string DEFAULT = "mock://mock";
         private static readonly MockPlug2.IMockInvokee DefaultInvokee = new MockPlug2.MockInvokee(null, (p, v, u, r) => DreamMessage2.Ok().AsCompletedTask(), int.MaxValue);
+        private static readonly ILog _log = LogUtils.CreateLog();
 
         //--- Class Constructors ---
         static MockEndpoint() {
@@ -51,6 +53,7 @@ namespace MindTouch.Traum.Webclient.Test.Mock {
         public int GetScoreWithNormalizedUri(XUri uri, out XUri normalized) {
             var match = GetBestMatch(uri);
             normalized = uri;
+            _log.DebugFormat("considering uri '{0}' with score {1}", uri, match == null ? 0 : match.EndPointScore);
             return match == null ? 0 : match.EndPointScore;
         }
 
@@ -71,7 +74,8 @@ namespace MindTouch.Traum.Webclient.Test.Mock {
 
         public Task<DreamMessage2> Invoke(Plug2 plug, string verb, XUri uri, DreamMessage2 request, TimeSpan timeout) {
             var match = GetBestMatch(uri);
-            return Task.Factory.StartNew(() => match.Invoke(plug, verb, uri,  MemorizeAndClone(request)).Result);
+            _log.DebugFormat("invoking uri '{0}'", uri);
+            return Task.Factory.StartNew(() => match.Invoke(plug, verb, uri, MemorizeAndClone(request)).Result);
         }
 
         public void Register(MockPlug2.IMockInvokee invokee) {

@@ -916,6 +916,7 @@ namespace MindTouch.Traum.Webclient {
             //var timeout = outerTimeout < Timeout ? outerTimeout : Timeout;
             var completion = new TaskCompletionSource<DreamMessage2>();
             match.Invoke(this, verb, normalizedUri, request, timeout).ContinueWith(invokeTask => {
+                _log.Debug("plug handler completed");
                 if(invokeTask.IsFaulted) {
                     // an exception occurred somewhere during processing (not expected, but it could happen)
                     request.Close();
@@ -942,7 +943,6 @@ namespace MindTouch.Traum.Webclient {
                         var redirectPlug = new Plug2(message.Headers.Location, Timeout, Headers, null, null, null, CookieJar, (ushort)(MaxAutoRedirects - 1));
                         var redirectMessage = request.Clone();
                         request.Close();
-                        // await
                         redirectPlug.InvokeEx(verb, redirectMessage, Timeout).ContinueWith(redirectTask => completion.SetResult(redirectTask.Result));
                     } else {
                         request.Close();
@@ -951,6 +951,7 @@ namespace MindTouch.Traum.Webclient {
                                 response = handler(verb, Uri, normalizedUri, response) ?? new DreamMessage2(DreamStatus.ResponseIsNull);
                             }
                         }
+                        completion.SetResult(response);
                     }
                 } catch(Exception e) {
                     request.Close();

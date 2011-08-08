@@ -35,14 +35,11 @@ namespace MindTouch.Traum.Webclient.Test {
     /// </summary>
     /// <remarks>
     /// Meant to be used to test services without having to set up dependent remote endpoints the service relies on for proper execution.
-    /// <see cref="MockPlug2"/> provides 3 different mechanisms for mocking an endpoint:
+    /// <see cref="MockPlug2"/> provides 2 different mechanisms for mocking an endpoint:
     /// <list type="bullet">
     /// <item>
     /// <see cref="MockPlug2"/> endpoints, which can match requests based on content and supply a reply. These endpoints are order independent and
     /// can be set up to verifiable.
-    /// </item>
-    /// <item>
-    /// <see cref="AutoMockPlug"/> endpoints, which are order dependent and provide an Arrange/Act/Assert workflow for validating calls.
     /// </item>
     /// <item>
     /// <see cref="MockInvokeDelegate"/> endpoints which redirect an intercepted Uri (and child paths) to a delegate to be handled as the

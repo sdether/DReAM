@@ -51,14 +51,14 @@ namespace MindTouch.Traum.Webclient.Test {
 
         [Test]
         public void With_and_without_cookiejar() {
-            DreamCookie global = new DreamCookie("test", "global", new XUri("http://baz.com/foo"));
-            List<DreamCookie> globalCollection = new List<DreamCookie>();
+            var global = new DreamCookie("test", "global", new XUri("http://baz.com/foo"));
+            var globalCollection = new List<DreamCookie>();
             globalCollection.Add(global);
             Plug2.GlobalCookies.Update(globalCollection, null);
-            DreamCookie local = new DreamCookie("test", "local", new XUri("http://baz.com/foo"));
-            List<DreamCookie> localCollection = new List<DreamCookie>();
+            var local = new DreamCookie("test", "local", new XUri("http://baz.com/foo"));
+            var localCollection = new List<DreamCookie>();
             localCollection.Add(local);
-            DreamCookieJar localJar = new DreamCookieJar();
+            var localJar = new DreamCookieJar();
             localJar.Update(localCollection, null);
             Plug2 globalPlug2 = Plug2.New("http://baz.com/foo/bar");
             Plug2 localPlug2 = globalPlug2.WithCookieJar(localJar);
@@ -76,10 +76,10 @@ namespace MindTouch.Traum.Webclient.Test {
                     if(string.IsNullOrEmpty(request.Headers.DreamPublicUri)) {
                         throw new DreamBadRequestException(string.Format("got origin header '{0}', indicating we didn't arrive via local://", request.Headers.DreamOrigin));
                     }
-                    response.Return(DreamMessage.Ok());
+                    response.Return(TestEx.DreamMessage("foo"));
                 };
                 var r = Plug2.New(mock.AtLocalHost.Uri.WithScheme("ext-http")).Get(TimeSpan.MaxValue).Result;
-                Assert.IsTrue(r.IsSuccessful, r.HasDocument ? r.ToDocument()["message"].AsText : "request failed: " + r.Status);
+                Assert.IsTrue(r.IsSuccessful, "request failed: " + r.Status);
             }
         }
 
@@ -95,7 +95,7 @@ namespace MindTouch.Traum.Webclient.Test {
                 };
 
                 var r = mock.AtLocalHost.AsPlug2().Get(TimeSpan.MaxValue).Result;
-                Assert.IsTrue(r.IsSuccessful, r.HasDocument ? r.ToDocument()["message"].AsText : "request failed: " + r.Status);
+                Assert.IsTrue(r.IsSuccessful, "request failed: " + r.Status);
             }
         }
 
@@ -110,7 +110,7 @@ namespace MindTouch.Traum.Webclient.Test {
                     if(context.Uri.LastSegment == "redirect") {
                         _log.Debug("called redirect");
                         redirectCalled++;
-                        response.Return(DreamMessage.Redirect(redirectUri));
+                        response.Return(DreamMessage.Redirect(redirectUri.ToDreamUri()));
                         return;
                     }
                     _log.DebugFormat("called uri: {0} => {1}", context.Uri, msg);
@@ -119,7 +119,7 @@ namespace MindTouch.Traum.Webclient.Test {
                 var uri = mock.AtLocalHost.Uri.WithScheme("ext-http").At("redirect");
                 _log.DebugFormat("calling redirect service at {0}", uri);
                 var r = Plug2.New(uri).WithHeader("h", "y").WithoutAutoRedirects().Get(TimeSpan.MaxValue).Result;
-                Assert.AreEqual(DreamStatus.Found, r.Status, r.HasDocument ? r.ToDocument()["message"].AsText : "request failed: " + r.Status);
+                Assert.AreEqual(DreamStatus.Found, r.Status, "request failed: " + r.Status);
                 Assert.AreEqual(1, redirectCalled, "redirect called incorrectly");
                 Assert.AreEqual(redirectUri.ToString(), r.Headers.Location.ToString());
             }
@@ -138,9 +138,10 @@ namespace MindTouch.Traum.Webclient.Test {
                         _log.Debug("called redirect");
                         if(h == "y") {
                             redirectCalled++;
-                            var headers = new DreamHeaders();
-                            headers.Add(DreamHeaders.LOCATION, context.Service.Self.Uri.At("target").AsPublicUri().ToString());
-                            response.Return(new DreamMessage(DreamStatus.MovedPermanently, headers));
+                            var headers = new Dream.DreamHeaders {
+                                { DreamHeaders.LOCATION, context.Service.Self.Uri.At("target").AsPublicUri().ToString() }
+                            };
+                            response.Return(new DreamMessage(Dream.DreamStatus.MovedPermanently, headers));
                             return;
                         }
                         msg = "redirect request lacked header";
@@ -161,7 +162,7 @@ namespace MindTouch.Traum.Webclient.Test {
                 var uri = mock.AtLocalHost.Uri.WithScheme("ext-http").At("redirect");
                 _log.DebugFormat("calling redirect service at {0}", uri);
                 var r = Plug2.New(uri).WithHeader("h", "y").Get(TimeSpan.MaxValue).Result;
-                Assert.IsTrue(r.IsSuccessful, r.HasDocument ? r.ToDocument()["message"].AsText : "request failed: " + r.Status);
+                Assert.IsTrue(r.IsSuccessful, "request failed: " + r.Status);
                 Assert.AreEqual(1, redirectCalled, "redirect called incorrectly");
                 Assert.AreEqual(1, targetCalled, "target called incorrectly");
             }
@@ -184,9 +185,8 @@ namespace MindTouch.Traum.Webclient.Test {
                             redirect = redirect.With("q", q);
                         }
                         redirectCalled++;
-                        var headers = new DreamHeaders();
-                        headers.Add(DreamHeaders.LOCATION, redirect.ToString());
-                        response.Return(new DreamMessage(DreamStatus.MovedPermanently, headers));
+                        var headers = new Dream.DreamHeaders { { DreamHeaders.LOCATION, redirect.ToString() } };
+                        response.Return(new DreamMessage(Dream.DreamStatus.MovedPermanently, headers));
                         return;
                     }
                     if(context.Uri.LastSegment == "target") {
@@ -212,7 +212,7 @@ namespace MindTouch.Traum.Webclient.Test {
                 redirectCalled = 0;
                 targetCalled = 0;
                 r = Plug2.New(uri).With("q", "x").With("forward", "true").Get(TimeSpan.MaxValue).Result;
-                Assert.IsTrue(r.IsSuccessful, r.HasDocument ? r.ToDocument()["message"].AsText : "request failed: " + r.Status);
+                Assert.IsTrue(r.IsSuccessful, "request failed: " + r.Status);
                 Assert.AreEqual(1, redirectCalled, "redirect with forward called incorrectly");
                 Assert.AreEqual(1, targetCalled, "target with forward called incorrectly");
             }
@@ -252,7 +252,7 @@ namespace MindTouch.Traum.Webclient.Test {
                 var uri = mock.AtLocalHost.Uri.WithScheme("ext-http").At("redirect");
                 _log.DebugFormat("calling redirect service at {0}", uri);
                 var r = Plug2.New(uri).WithHeader("h", "y").Get(TimeSpan.MaxValue).Result;
-                Assert.IsTrue(r.IsSuccessful, r.HasDocument ? r.ToDocument()["message"].AsText : "request failed: " + r.Status);
+                Assert.IsTrue(r.IsSuccessful, "request failed: " + r.Status);
                 Assert.AreEqual(1, redirectCalled, "redirect called incorrectly");
                 Assert.AreEqual(1, targetCalled, "target called incorrectly");
             }
@@ -301,7 +301,7 @@ namespace MindTouch.Traum.Webclient.Test {
                 redirectCalled = 0;
                 targetCalled = 0;
                 r = Plug2.New(uri).With("q", "x").With("forward", "true").Get(TimeSpan.MaxValue).Result;
-                Assert.IsTrue(r.IsSuccessful, r.HasDocument ? r.ToDocument()["message"].AsText : "request failed: " + r.Status);
+                Assert.IsTrue(r.IsSuccessful, "request failed: " + r.Status);
                 Assert.AreEqual(1, redirectCalled, "redirect with forward called incorrectly");
                 Assert.AreEqual(1, targetCalled, "target with forward called incorrectly");
             }
@@ -318,16 +318,16 @@ namespace MindTouch.Traum.Webclient.Test {
                     if(context.Uri.LastSegment == "redirect") {
                         _log.Debug("called redirect");
                         redirectCalled++;
-                        response.Return(DreamMessage.Redirect(redirectUri));
+                        response.Return(DreamMessage.Redirect(redirectUri.ToDreamUri()));
                         return;
                     }
                     _log.DebugFormat("called uri: {0} => {1}", context.Uri, msg);
                     response.Return(DreamMessage.NotFound(msg));
                 };
-                var uri = mock.AtLocalMachine.At("redirect");
+                var uri = mock.AtLocalMachine.At("redirect").ToTraumUri();
                 _log.DebugFormat("calling redirect service at {0}", uri);
                 var r = Plug2.New(uri).WithHeader("h", "y").WithoutAutoRedirects().Get(TimeSpan.MaxValue).Result;
-                Assert.AreEqual(DreamStatus.Found, r.Status, r.HasDocument ? r.ToDocument()["message"].AsText : "request failed: " + r.Status);
+                Assert.AreEqual(DreamStatus.Found, "request failed: " + r.Status);
                 Assert.AreEqual(1, redirectCalled, "redirect called incorrectly");
                 Assert.AreEqual(redirectUri.ToString(), r.Headers.Location.ToString());
             }
@@ -346,9 +346,10 @@ namespace MindTouch.Traum.Webclient.Test {
                         _log.Debug("called redirect");
                         if(h == "y") {
                             redirectCalled++;
-                            var headers = new DreamHeaders();
-                            headers.Add(DreamHeaders.LOCATION, context.Service.Self.Uri.At("target").AsPublicUri().ToString());
-                            response.Return(new DreamMessage(DreamStatus.MovedPermanently, headers));
+                            var headers = new Dream.DreamHeaders {
+                                { DreamHeaders.LOCATION, context.Service.Self.Uri.At("target").AsPublicUri().ToString() }
+                            };
+                            response.Return(new DreamMessage(Dream.DreamStatus.MovedPermanently, headers));
                             return;
                         }
                         msg = "redirect request lacked header";
@@ -366,10 +367,10 @@ namespace MindTouch.Traum.Webclient.Test {
                     _log.DebugFormat("called uri: {0} => {1}", context.Uri, msg);
                     response.Return(DreamMessage.NotFound(msg));
                 };
-                var uri = mock.AtLocalMachine.At("redirect");
+                var uri = mock.AtLocalMachine.At("redirect").ToTraumUri();
                 _log.DebugFormat("calling redirect service at {0}", uri);
                 var r = Plug2.New(uri).WithHeader("h", "y").Get(TimeSpan.MaxValue).Result;
-                Assert.IsTrue(r.IsSuccessful, r.HasDocument ? r.ToDocument()["message"].AsText : "request failed: " + r.Status);
+                Assert.IsTrue(r.IsSuccessful, "request failed: " + r.Status);
                 Assert.AreEqual(1, redirectCalled, "redirect called incorrectly");
                 Assert.AreEqual(1, targetCalled, "target called incorrectly");
             }
@@ -392,9 +393,8 @@ namespace MindTouch.Traum.Webclient.Test {
                             redirect = redirect.With("q", q);
                         }
                         redirectCalled++;
-                        var headers = new DreamHeaders();
-                        headers.Add(DreamHeaders.LOCATION, redirect.ToString());
-                        response.Return(new DreamMessage(DreamStatus.MovedPermanently, headers));
+                        var headers = new Dream.DreamHeaders { { DreamHeaders.LOCATION, redirect.ToString() } };
+                        response.Return(new DreamMessage(Dream.DreamStatus.MovedPermanently, headers));
                         return;
                     }
                     if(context.Uri.LastSegment == "target") {
@@ -411,7 +411,7 @@ namespace MindTouch.Traum.Webclient.Test {
                     _log.DebugFormat("called uri: {0} => {1}", context.Uri, msg);
                     response.Return(DreamMessage.NotFound(msg));
                 };
-                var uri = mock.AtLocalMachine.At("redirect");
+                var uri = mock.AtLocalMachine.At("redirect").ToTraumUri();
                 _log.DebugFormat("calling redirect service at {0}", uri);
                 var r = Plug2.New(uri).With("q", "x").Get(TimeSpan.MaxValue).Result;
                 Assert.AreEqual(DreamStatus.BadRequest, r.Status);
@@ -420,7 +420,7 @@ namespace MindTouch.Traum.Webclient.Test {
                 redirectCalled = 0;
                 targetCalled = 0;
                 r = Plug2.New(uri).With("q", "x").With("forward", "true").Get(TimeSpan.MaxValue).Result;
-                Assert.IsTrue(r.IsSuccessful, r.HasDocument ? r.ToDocument()["message"].AsText : "request failed: " + r.Status);
+                Assert.IsTrue(r.IsSuccessful, "request failed: " + r.Status);
                 Assert.AreEqual(1, redirectCalled, "redirect with forward called incorrectly");
                 Assert.AreEqual(1, targetCalled, "target with forward called incorrectly");
             }
@@ -457,10 +457,10 @@ namespace MindTouch.Traum.Webclient.Test {
                     _log.DebugFormat("called uri: {0} => {1}", context.Uri, msg);
                     response.Return(DreamMessage.NotFound(msg));
                 };
-                var uri = mock.AtLocalMachine.At("redirect");
+                var uri = mock.AtLocalMachine.At("redirect").ToTraumUri();
                 _log.DebugFormat("calling redirect service at {0}", uri);
                 var r = Plug2.New(uri).WithHeader("h", "y").Get(TimeSpan.MaxValue).Result;
-                Assert.IsTrue(r.IsSuccessful, r.HasDocument ? r.ToDocument()["message"].AsText : "request failed: " + r.Status);
+                Assert.IsTrue(r.IsSuccessful, "request failed: " + r.Status);
                 Assert.AreEqual(1, redirectCalled, "redirect called incorrectly");
                 Assert.AreEqual(1, targetCalled, "target called incorrectly");
             }
@@ -500,7 +500,7 @@ namespace MindTouch.Traum.Webclient.Test {
                     _log.DebugFormat("called uri: {0} => {1}", context.Uri, msg);
                     response.Return(DreamMessage.NotFound(msg));
                 };
-                var uri = mock.AtLocalMachine.At("redirect");
+                var uri = mock.AtLocalMachine.At("redirect").ToTraumUri();
                 _log.DebugFormat("calling redirect service at {0}", uri);
                 var r = Plug2.New(uri).With("q", "x").Get(TimeSpan.MaxValue).Result;
                 Assert.AreEqual(DreamStatus.BadRequest, r.Status);
@@ -509,7 +509,7 @@ namespace MindTouch.Traum.Webclient.Test {
                 redirectCalled = 0;
                 targetCalled = 0;
                 r = Plug2.New(uri).With("q", "x").With("forward", "true").Get(TimeSpan.MaxValue).Result;
-                Assert.IsTrue(r.IsSuccessful, r.HasDocument ? r.ToDocument()["message"].AsText : "request failed: " + r.Status);
+                Assert.IsTrue(r.IsSuccessful, "request failed: " + r.Status);
                 Assert.AreEqual(1, redirectCalled, "redirect with forward called incorrectly");
                 Assert.AreEqual(1, targetCalled, "target with forward called incorrectly");
             }
@@ -530,7 +530,7 @@ namespace MindTouch.Traum.Webclient.Test {
                     _log.DebugFormat("call {0} to redirect", totalCalls);
                     response.Return(DreamMessage.Redirect(context.Uri.WithoutQuery().With("c", totalCalls.ToString())));
                 };
-                var uri = mock.AtLocalMachine.At("redirect");
+                var uri = mock.AtLocalMachine.At("redirect").ToTraumUri();
                 var redirects = 10;
                 var expectedCalls = redirects + 1;
                 var r = Plug2.New(uri).WithAutoRedirects(10).Get(TimeSpan.MaxValue).Result;
@@ -545,7 +545,7 @@ namespace MindTouch.Traum.Webclient.Test {
             var blockingStream = new MockBlockingStream();
             MockPlug2.Register(new XUri("mock://mock"), (plug, verb, uri, request) => {
                 _log.Debug("returning blocking stream");
-                                return System.Threading.Tasks.TaskEx.FromResult(new DreamMessage2(DreamStatus.Ok, null, MimeType.TEXT, -1, blockingStream));
+                return new DreamMessage2(DreamStatus.Ok, null, MimeType.TEXT, -1, blockingStream).AsCompletedTask();
             });
             var stopwatch = Stopwatch.StartNew();
             _log.Debug("calling plug");
@@ -570,7 +570,7 @@ namespace MindTouch.Traum.Webclient.Test {
                 _log.Debug("blocking request");
                 Thread.Sleep(5.Seconds());
                 _log.Debug("returning blocking stream");
-                                 return System.Threading.Tasks.TaskEx.FromResult(new DreamMessage2(DreamStatus.Ok, null, MimeType.TEXT, -1, blockingStream));
+                return new DreamMessage2(DreamStatus.Ok, null, MimeType.TEXT, -1, blockingStream).AsCompletedTask();
            });
             var stopwatch = Stopwatch.StartNew();
             _log.Debug("calling plug");
@@ -586,24 +586,6 @@ namespace MindTouch.Traum.Webclient.Test {
             Assert.IsFalse(r.IsFaulted);
             Assert.AreEqual(DreamStatus.RequestConnectionTimeout, r.Result.Status);
         }
-
-        [Test]
-        public void Can_use_Plug_extension_to_return_document_result() {
-            var autoMockPlug2 = MockPlug2.Register(new XUri("mock://mock"));
-            autoMockPlug2.Expect().Verb("GET").Response(DreamMessage2.Ok(new XDoc("works")));
-            Assert.AreEqual("works", Plug2.New("mock://mock").GetDocument().Result.Name);
-        }
-
-        [Test]
-        public void Plug_extension_to_return_document_sets_exception_on_non_OK_response() {
-            var autoMockPlug2 = MockPlug2.Register(new XUri("mock://mock"));
-            autoMockPlug2.Expect().Verb("GET").Response(DreamMessage2.BadRequest("bad puppy"));
-            var r = Plug2.New("mock://mock").GetDocument().Block();
-            Assert.IsTrue(r.IsFaulted);
-            Assert.AreEqual(typeof(DreamResponseException), r.Exception.GetType());
-            Assert.AreEqual(DreamStatus.BadRequest, ((DreamResponseException)r.Exception.InnerExceptions.First()).Response.Status);
-        }
-
 
         [Test]
         public void Can_append_trailing_slash() {

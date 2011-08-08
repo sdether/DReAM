@@ -93,6 +93,7 @@
     <Compile Include="MockPlugTests.cs" />
     <Compile Include="Plug2AsyncMethodTests.cs" />
     <Compile Include="Plug2Tests.cs" />
+    <Compile Include="TestEx.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
