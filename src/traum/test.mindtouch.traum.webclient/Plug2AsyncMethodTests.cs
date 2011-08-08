@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using MindTouch.Dream;
+using MindTouch.Dream.Test;
 using MindTouch.Extensions.Time;
 using MindTouch.Tasking;
 using NUnit.Framework;
@@ -19,8 +20,14 @@ namespace MindTouch.Traum.Webclient.Test {
         //--- Class Fields ---
         private static readonly ILog _log = LogUtils.CreateLog();
 
+        [SetUp]
+        public void Setup() {
+            LocalEndpointBridge.Init();
+        }
+
         [TearDown]
         public void Teardown() {
+            MockPlug.DeregisterAll();
             MockPlug2.DeregisterAll();
         }
 

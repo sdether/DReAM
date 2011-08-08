@@ -635,11 +635,15 @@ namespace MindTouch.Traum.Webclient {
                         completion.SetException(new InternalBufferOverflowException("message body exceeded max size"));
                         return;
                     }
-                    _stream = t.Result;
-                    _stream.Close();
-                    _stream = null;
-                    _streamOpen = false;
-                    completion.SetResult(null);
+                    try {
+                        _stream = t.Result;
+                        _stream.Close();
+                        _stream = null;
+                        _streamOpen = false;
+                        completion.SetResult(this);
+                    } catch(Exception e) {
+                        completion.SetException(e);
+                    }
                 });
             return completion.Task;
         }

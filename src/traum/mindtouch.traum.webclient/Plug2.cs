@@ -842,8 +842,10 @@ namespace MindTouch.Traum.Webclient {
                     if(t1.IsFaulted) {
                         completion.SetException(t1.Exception);
                     } else {
+                        _log.Debug("memorizing message");
                         t1.Result.Memorize(timeout)
                             .ContinueWith(t2 => {
+                                _log.Debug("message memorized");
                                 if(t2.IsFaulted) {
                                     completion.SetException(t2.Exception);
                                 } else {

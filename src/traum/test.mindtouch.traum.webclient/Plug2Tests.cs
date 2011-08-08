@@ -44,8 +44,14 @@ namespace MindTouch.Traum.Webclient.Test {
         //--- Class Fields ---
         private static readonly ILog _log = LogUtils.CreateLog();
 
+        [SetUp]
+        public void Setup() {
+            LocalEndpointBridge.Init();
+        }
+
         [TearDown]
         public void Teardown() {
+            MockPlug.DeregisterAll();
             MockPlug2.DeregisterAll();
         }
 
@@ -69,38 +75,24 @@ namespace MindTouch.Traum.Webclient.Test {
         }
 
         [Test]
-        public void Get_via_exthttp_hits_dream_over_wire() {
+        public void Get_via_http_hits_dream_over_wire() {
             using(var hostInfo = DreamTestHelper.CreateRandomPortHost()) {
                 var mock = MockService.CreateMockService(hostInfo);
                 mock.Service.CatchAllCallback = delegate(DreamContext context, DreamMessage request, Result<DreamMessage> response) {
                     if(string.IsNullOrEmpty(request.Headers.DreamPublicUri)) {
-                        throw new DreamBadRequestException(string.Format("got origin header '{0}', indicating we didn't arrive via local://", request.Headers.DreamOrigin));
+                        throw new DreamBadRequestException("didn't get DreamPublicUri header, indicating we didn't arrive via wire");
                     }
                     response.Return(TestEx.DreamMessage("foo"));
-                };
-                var r = Plug2.New(mock.AtLocalHost.Uri.WithScheme("ext-http")).Get(TimeSpan.MaxValue).Result;
-                Assert.IsTrue(r.IsSuccessful, "request failed: " + r.Status);
-            }
-        }
-
-        [Test]
-        public void Get_via_http_hits_dream_via_local_pathway() {
-            using(var hostInfo = DreamTestHelper.CreateRandomPortHost()) {
-                var mock = MockService.CreateMockService(hostInfo);
-                mock.Service.CatchAllCallback = delegate(DreamContext context, DreamMessage request, Result<DreamMessage> response) {
-                    if(!string.IsNullOrEmpty(request.Headers.DreamPublicUri)) {
-                        throw new DreamBadRequestException(string.Format("got origin header '{0}', indicating we didn't arrive via local://", request.Headers.DreamOrigin));
-                    }
-                    response.Return(DreamMessage.Ok());
                 };
 
                 var r = mock.AtLocalHost.AsPlug2().Get(TimeSpan.MaxValue).Result;
                 Assert.IsTrue(r.IsSuccessful, "request failed: " + r.Status);
+                Assert.AreEqual("foo", r.ToText());
             }
         }
 
         [Test]
-        public void Get_via_exthttp_and_AutoRedirect_off_shows_302() {
+        public void Get_via_http_and_AutoRedirect_off_shows_302() {
             using(var hostInfo = DreamTestHelper.CreateRandomPortHost()) {
                 var mock = MockService.CreateMockService(hostInfo);
                 var redirectCalled = 0;
@@ -126,7 +118,7 @@ namespace MindTouch.Traum.Webclient.Test {
         }
 
         [Test]
-        public void Get_via_exthttp_follows_301_and_forwards_headers() {
+        public void Get_via_http_follows_301_and_forwards_headers() {
             using(var hostInfo = DreamTestHelper.CreateRandomPortHost()) {
                 var mock = MockService.CreateMockService(hostInfo);
                 var redirectCalled = 0;
@@ -169,7 +161,7 @@ namespace MindTouch.Traum.Webclient.Test {
         }
 
         [Test]
-        public void Get_via_exthttp_follows_301_but_expects_query_to_be_in_location() {
+        public void Get_via_http_follows_301_but_expects_query_to_be_in_location() {
             using(var hostInfo = DreamTestHelper.CreateRandomPortHost()) {
                 var mock = MockService.CreateMockService(hostInfo);
                 var redirectCalled = 0;
@@ -219,7 +211,7 @@ namespace MindTouch.Traum.Webclient.Test {
         }
 
         [Test]
-        public void Get_via_exthttp_follows_302_and_forwards_headers() {
+        public void Get_via_http_follows_302_and_forwards_headers() {
             using(var hostInfo = DreamTestHelper.CreateRandomPortHost()) {
                 var mock = MockService.CreateMockService(hostInfo);
                 var redirectCalled = 0;
@@ -259,7 +251,7 @@ namespace MindTouch.Traum.Webclient.Test {
         }
 
         [Test]
-        public void Get_via_exthttp_follows_but_expects_query_to_be_in_location() {
+        public void Get_via_http_follows_but_expects_query_to_be_in_location() {
             using(var hostInfo = DreamTestHelper.CreateRandomPortHost()) {
                 var mock = MockService.CreateMockService(hostInfo);
                 var redirectCalled = 0;
@@ -571,7 +563,7 @@ namespace MindTouch.Traum.Webclient.Test {
                 Thread.Sleep(5.Seconds());
                 _log.Debug("returning blocking stream");
                 return new DreamMessage2(DreamStatus.Ok, null, MimeType.TEXT, -1, blockingStream).AsCompletedTask();
-           });
+            });
             var stopwatch = Stopwatch.StartNew();
             _log.Debug("calling plug");
             var r = Plug2.New(MockPlug2.DefaultUri)

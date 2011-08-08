@@ -23,6 +23,7 @@ using System;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using MindTouch.Dream.Test;
 using log4net;
 using MindTouch.Extensions.Time;
 using MindTouch.Xml;
@@ -36,22 +37,28 @@ namespace MindTouch.Traum.Webclient.Test {
 
         private static readonly ILog _log = LogUtils.CreateLog();
 
+        [SetUp]
+        public void Setup() {
+            LocalEndpointBridge.Init();
+        }
+
         [TearDown]
-        public void PerTestCleanup() {
+        public void Teardown() {
+            MockPlug.DeregisterAll();
             MockPlug2.DeregisterAll();
         }
 
         [Test]
         public void Default_uri_works_as_no_op_without_registrations() {
             var msg = Plug2.New(MockPlug2.DefaultUri).Get().Result;
-            Assert.AreEqual("empty", msg.ToText());
+            Assert.AreEqual("", msg.ToText());
         }
 
         [Test]
         public void Default_uri_keeps_working_as_no_op_after_DeregisterAll() {
             MockPlug2.DeregisterAll();
             var msg = Plug2.New(MockPlug2.DefaultUri).Get().Result;
-            Assert.AreEqual("empty", msg.ToText());
+            Assert.AreEqual("", msg.ToText());
         }
 
         [Test]
