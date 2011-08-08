@@ -21,14 +21,11 @@
 
 using System;
 using System.Collections;
-using System.IO;
 using System.Text;
-
 using log4net;
 using log4net.Core;
-using log4net.ObjectRenderer;
 
-namespace MindTouch {
+namespace MindTouch.Traum {
 
     /// <summary>
     /// Provides extension and static helper methods for working with a log4Net <see cref="ILog"/> instance.

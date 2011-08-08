@@ -23,11 +23,8 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Security.Principal;
-using MindTouch.Traum;
-using MindTouch.Web;
 
-namespace MindTouch.Dream {
+namespace MindTouch.Traum {
 
     /// <summary>
     /// Dream Feature Access level.

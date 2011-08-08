@@ -20,7 +20,6 @@
  */
 
 using System;
-using MindTouch.Dream;
 
 namespace MindTouch.Traum {
 

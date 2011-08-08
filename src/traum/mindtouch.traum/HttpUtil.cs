@@ -27,10 +27,8 @@ using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Web;
-using MindTouch.Dream;
-using MindTouch.Traum;
 
-namespace MindTouch.Web {
+namespace MindTouch.Traum {
 
     /// <summary>
     /// Static utility class containing extension and helper methods for Web and Http related tasks.

@@ -22,7 +22,6 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using MindTouch.Dream;
 
 namespace MindTouch.Traum {
 

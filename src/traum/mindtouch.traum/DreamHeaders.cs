@@ -23,10 +23,8 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Linq;
-using MindTouch.Traum;
-using MindTouch.Web;
 
-namespace MindTouch.Dream {
+namespace MindTouch.Traum {
 
     // TODO (steveb:
     // * add 'CacheControl' type

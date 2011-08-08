@@ -19,10 +19,11 @@
  * limitations under the License.
  */
 
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 
-namespace System {
+namespace MindTouch.Traum {
 
     /// <summary>
     /// Static Utility class containing extension and helper methods for working with <see cref="CultureInfo"/>.

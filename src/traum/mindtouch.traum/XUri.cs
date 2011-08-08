@@ -28,10 +28,9 @@ using System.Collections.Specialized;
 using System.Runtime.Serialization;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Web;
 using System.IO;
 
-namespace MindTouch.Dream {
+namespace MindTouch.Traum {
 
     /// <summary>
     /// Uri Path string encoding format
@@ -91,7 +90,6 @@ namespace MindTouch.Dream {
     /// <summary>
     /// Encapsulation of a Uniform Resource Identifier as an immutable class with a fluent interface for modification.
     /// </summary>
-    [Serializable]
     public sealed class XUri : ISerializable {
 
         // NOTE (steveb): XUri parses absolute URIs based on RFC3986 (http://www.ietf.org/rfc/rfc3986.txt), with the addition of ^, |, [ and ] as a valid character in segments, queries, and fragments; and \ as valid segment separator

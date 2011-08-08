@@ -19,6 +19,7 @@
  * limitations under the License.
  */
 
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
@@ -26,7 +27,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
 
-namespace System {
+namespace MindTouch.Traum {
 
     /// <summary>
     /// Implementation of <see cref="IComparer"/> based on <see cref="CultureInfo.CompareInfo"/>.

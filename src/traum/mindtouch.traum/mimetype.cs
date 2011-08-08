@@ -24,7 +24,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 
-namespace MindTouch.Dream {
+namespace MindTouch.Traum {
 
     /// <summary>
     /// Enumerates the possible Http response codes.

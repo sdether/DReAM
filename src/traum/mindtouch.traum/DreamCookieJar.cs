@@ -21,10 +21,8 @@
 
 using System;
 using System.Collections.Generic;
-using MindTouch.Dream;
-using MindTouch.Traum;
 
-namespace MindTouch.Web {
+namespace MindTouch.Traum {
     /// <summary>
     /// Provides a hierarchical <see cref="DreamCookie"/> container.
     /// </summary>

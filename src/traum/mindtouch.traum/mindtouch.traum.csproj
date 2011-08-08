@@ -101,7 +101,6 @@
     <Compile Include="DateTimeUtil.cs" />
     <Compile Include="dreamutil.cs" />
     <Compile Include="HttpUtil.cs" />
-    <Compile Include="TaskEx.cs" />
     <Compile Include="DreamCookie.cs" />
     <Compile Include="DreamCookieJar.cs" />
     <Compile Include="DreamHeaders.cs" />
@@ -109,11 +108,11 @@
     <Compile Include="Exceptions.cs" />
     <Compile Include="LogUtils.cs" />
     <Compile Include="mimetype.cs" />
-    <Compile Include="Plug\HttpPlugEndpoint.cs" />
-    <Compile Include="Plug\IPlugEndpoint2.cs" />
-    <Compile Include="Plug\Plug2.cs" />
-    <Compile Include="Plug\ResourcePlugEndpoint.cs" />
-    <Compile Include="Plug\XriPlugEndpoint.cs" />
+    <Compile Include="HttpPlugEndpoint.cs" />
+    <Compile Include="IPlugEndpoint2.cs" />
+    <Compile Include="Plug2.cs" />
+    <Compile Include="ResourcePlugEndpoint.cs" />
+    <Compile Include="XriPlugEndpoint.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="stringutil.cs" />
     <Compile Include="TraumExtensions.cs" />

@@ -25,10 +25,8 @@ using System.IO;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
-using MindTouch.Dream;
-using MindTouch.Web;
 
-namespace MindTouch.Traum.Http {
+namespace MindTouch.Traum {
 
     internal class HttpPlugEndpoint : IPlugEndpoint2 {
 

@@ -20,15 +20,11 @@
  */
 
 using System;
-using System.Collections.Specialized;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using System.Net;
 using System.Reflection;
 using System.Threading.Tasks;
-using MindTouch.Dream;
-using MindTouch.Web;
 
 namespace MindTouch.Traum {
     /// <summary>
