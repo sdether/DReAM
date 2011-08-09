@@ -62,7 +62,7 @@ namespace MindTouch.Traum.Webclient.Test {
         public void DreamResponseException_from_null_message_returns_default_exception_message() {
             DreamMessage2 msg = null;
             var exception = new DreamResponseException(msg);
-            Assert.AreEqual("Exception of type 'MindTouch.Dream.DreamResponseException' was thrown.", exception.Message);
+            Assert.AreEqual("Exception of type 'MindTouch.Traum.DreamResponseException' was thrown.", exception.Message);
         }
 
         [Test]

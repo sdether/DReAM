@@ -636,10 +636,10 @@ namespace MindTouch.Traum.Webclient {
                         return;
                     }
                     try {
-                        _stream = t.Result;
                         _stream.Close();
                         _stream = null;
                         _streamOpen = false;
+                        _stream = t.Result;
                         completion.SetResult(this);
                     } catch(Exception e) {
                         completion.SetException(e);

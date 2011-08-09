@@ -1,9 +1,13 @@
 using System;
 using System.IO;
 using System.Threading.Tasks;
+using log4net;
 
 namespace MindTouch.Traum.Webclient {
     public class AsyncStreamCopier {
+
+        //--- Class Fields ---
+        private static readonly ILog _log = LogUtils.CreateLog();
 
         public static Task Copy(Stream source, Stream destination, int length) {
             var copier = new AsyncStreamCopier(source, destination);
@@ -29,35 +33,46 @@ namespace MindTouch.Traum.Webclient {
         }
 
         private void Read() {
-            var chunkLength = Math.Min(_buffer.Length, _remaining);
+            var length = Math.Min(_buffer.Length, _remaining);
             if(_source is MemoryStream) {
-                _source.Read(_buffer, 0, chunkLength);
-                Write(chunkLength);
+                int read;
+                try {
+                    read = _source.Read(_buffer, 0, length);
+                } catch(Exception e) {
+                    Completion.SetException(e);
+                    return;
+                }
+                FinishRead(read);
             } else {
-                Task<int>.Factory.FromAsync(_source.BeginRead, _source.EndRead, _buffer, 0, chunkLength, null)
+                Task<int>.Factory.FromAsync(_source.BeginRead, _source.EndRead, _buffer, 0, length, null)
                     .ContinueWith(t => {
                         if(t.IsFaulted) {
                             Completion.SetException(t.UnwrapFault());
                             return;
                         }
                         var read = t.Result;
-                        if(read == 0) {
-                            _doneReading = true;
-                            return;
-                        }
-                        Write(read);
+                        FinishRead(read);
                     });
             }
         }
 
+        private void FinishRead(int read) {
+            if(read == 0) {
+                _log.Debug("done reading");
+                _doneReading = true;
+            }
+            Write(read);
+        }
+
         private void Write(int length) {
             if(_destination is MemoryStream) {
-                _destination.Write(_buffer, 0, length);
-                if(_remaining == 0 || _doneReading) {
-                    Completion.SetResult(true);
+                try {
+                    _destination.Write(_buffer, 0, length);
+                } catch(Exception e) {
+                    Completion.SetException(e);
                     return;
                 }
-                Read();
+                FinishWrite(length);
             } else {
                 Task.Factory.FromAsync(_destination.BeginWrite, _destination.EndWrite, _buffer, 0, length, null)
                     .ContinueWith(t => {
@@ -65,14 +80,20 @@ namespace MindTouch.Traum.Webclient {
                             Completion.SetException(t.UnwrapFault());
                             return;
                         }
-                        _remaining -= length;
-                        if(_remaining == 0 || _doneReading) {
-                            Completion.SetResult(true);
-                            return;
-                        }
-                        Read();
+                        FinishWrite(length);
                     });
             }
+        }
+
+        private void FinishWrite(int length) {
+            _remaining -= length;
+            _log.DebugFormat("wrote: {0}, remaining: {1}", length, _remaining);
+            if(_remaining == 0 || _doneReading) {
+                _log.DebugFormat("done writing");
+                Completion.SetResult(true);
+                return;
+            }
+            Read();
         }
     }
 }

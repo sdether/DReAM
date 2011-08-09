@@ -152,10 +152,6 @@ namespace MindTouch.Traum.Webclient {
         }
 
         private void HandleResponse(Exception exception, HttpWebRequest httpRequest, HttpWebResponse httpResponse, TimeSpan timeout, TaskCompletionSource<DreamMessage2> completion) {
-            completion.SetResult(HandleResponse2(exception, httpRequest, httpResponse, timeout));
-        }
-
-        private DreamMessage2 HandleResponse2(Exception exception, HttpWebRequest httpRequest, HttpWebResponse httpResponse, TimeSpan timeout) {
             if(exception != null) {
                 if(exception is WebException) {
                     httpResponse = (HttpWebResponse)((WebException)exception).Response;
@@ -164,22 +160,24 @@ namespace MindTouch.Traum.Webclient {
                         httpResponse.Close();
                     } catch { }
                     httpRequest.Abort();
-                    return new DreamMessage2(DreamStatus.UnableToConnect, exception);
+                    completion.SetResult(new DreamMessage2(DreamStatus.UnableToConnect, exception));
+                    return;
                 }
             }
 
             // check if a response was obtained, otherwise fail
             if(httpResponse == null) {
                 httpRequest.Abort();
-                return new DreamMessage2(DreamStatus.UnableToConnect, exception);
+                completion.SetResult(new DreamMessage2(DreamStatus.UnableToConnect, exception));
+                return;
             }
 
             // determine response type
             MimeType contentType;
             Stream stream;
-            HttpStatusCode statusCode = httpResponse.StatusCode;
-            WebHeaderCollection headers = httpResponse.Headers;
-            long contentLength = httpResponse.ContentLength;
+            var statusCode = httpResponse.StatusCode;
+            var headers = httpResponse.Headers;
+            var contentLength = httpResponse.ContentLength;
 
             if(!string.IsNullOrEmpty(httpResponse.ContentType)) {
                 contentType = new MimeType(httpResponse.ContentType);
@@ -194,7 +192,7 @@ namespace MindTouch.Traum.Webclient {
             }
 
             // encapsulate the response in a dream message
-            return new DreamMessage2((DreamStatus)(int)statusCode, new DreamHeaders(headers), contentType, contentLength, stream);
+            completion.SetResult(new DreamMessage2((DreamStatus)(int)statusCode, new DreamHeaders(headers), contentType, contentLength, stream));
         }
     }
 }

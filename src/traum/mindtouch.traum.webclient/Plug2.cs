@@ -934,8 +934,6 @@ namespace MindTouch.Traum.Webclient {
                 var response = invokeTask.Result;
                 try {
                     var message = PostProcess(verb, Uri, normalizedUri, _headers, cookies, response);
-
-                    // check if custom post-processing handlers are registered
                     if((message.Status == DreamStatus.MovedPermanently ||
                         message.Status == DreamStatus.Found ||
                         message.Status == DreamStatus.TemporaryRedirect) &&
