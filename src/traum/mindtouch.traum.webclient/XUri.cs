@@ -436,12 +436,22 @@ namespace MindTouch.Traum.Webclient {
 
                     // replace char with '%' + code
                     encoded[index++] = 0x25; // '%'
-                    encoded[index++] = (byte)StringUtil.IntToHexChar((asciiByte >> 4) & 15);
-                    encoded[index++] = (byte)StringUtil.IntToHexChar(asciiByte & 15);
+                    encoded[index++] = IntToHex((asciiByte >> 4) & 15);
+                    encoded[index++] = IntToHex(asciiByte & 15);
                 }
             }
             return Encoding.ASCII.GetString(encoded);
         }
+
+        /// <summary>
+        /// Convert an integer value to a hexadecimal value.
+        /// </summary>
+        /// <param name="n">Integer to convert.</param>
+        /// <returns>Hexadecimal character.</returns>
+        public static byte IntToHex(int n) {
+            return (byte)n.ToString("X")[0];
+        }
+
 
         /// <summary>
         /// Double encode a string.
@@ -493,8 +503,8 @@ namespace MindTouch.Traum.Webclient {
                     encoded[index++] = 0x25; // '%'
                     encoded[index++] = (byte)'2';
                     encoded[index++] = (byte)'5';
-                    encoded[index++] = (byte)StringUtil.IntToHexChar((asciiByte >> 4) & 15);
-                    encoded[index++] = (byte)StringUtil.IntToHexChar(asciiByte & 15);
+                    encoded[index++] = IntToHex((asciiByte >> 4) & 15);
+                    encoded[index++] = IntToHex(asciiByte & 15);
                 }
             }
             return Encoding.ASCII.GetString(encoded);

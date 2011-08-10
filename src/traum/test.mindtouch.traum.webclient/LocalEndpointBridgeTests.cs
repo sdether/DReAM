@@ -19,13 +19,13 @@ namespace MindTouch.Traum.Webclient.Test {
 
         [TearDown]
         public void Teardown() {
+            Dream.Test.MockPlug.DeregisterAll();
             MockPlug.DeregisterAll();
-            MockPlug2.DeregisterAll();
         }
 
         [Test]
         public void Local_scheme_gets_redirected_to_Dream() {
-            MockPlug.Setup("local://foo/bar").Returns(TestEx.DreamMessage("foobar"));
+            Dream.Test.MockPlug.Setup("local://foo/bar").Returns(TestEx.DreamMessage("foobar"));
             var msg = Plug.New("local://foo").At("bar").Get().Result;
             Assert.IsTrue(msg.IsSuccessful, "request failed:" + msg.Status);
             Assert.AreEqual("foobar", msg.ToText());

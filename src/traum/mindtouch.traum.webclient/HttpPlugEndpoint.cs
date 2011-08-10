@@ -23,7 +23,9 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
+using System.Reflection;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using MindTouch.Traum.Webclient;
 
@@ -34,6 +36,14 @@ namespace MindTouch.Traum.Webclient {
         //--- Class Fields ---
         private static readonly Logger.ILog _log = Logger.CreateLog();
         private static readonly Dictionary<Guid, List<Task<DreamMessage>>> _requests = new Dictionary<Guid, List<Task<DreamMessage>>>();
+        private static string _version;
+
+        //--- Class Properties ---
+        private static string DreamVersion {
+            get { return _version ?? (_version = Assembly.GetAssembly(typeof(HttpPlugEndpoint)).GetName().Version.ToString()); }
+        }
+
+        //--- Class Fields ---
 
         //--- Methods ---
         public int GetScoreWithNormalizedUri(XUri uri, out XUri normalized) {
@@ -44,10 +54,10 @@ namespace MindTouch.Traum.Webclient {
                 return 1;
             case "ext-http":
                 normalized = normalized.WithScheme("http");
-                return int.MaxValue;
+                return Int32.MaxValue;
             case "ext-https":
                 normalized = normalized.WithScheme("https");
-                return int.MaxValue;
+                return Int32.MaxValue;
             default:
                 return 0;
             }
@@ -61,7 +71,7 @@ namespace MindTouch.Traum.Webclient {
             // set request headers
             request.Headers.Host = uri.Host;
             if(request.Headers.UserAgent == null) {
-                request.Headers.UserAgent = "Dream/" + DreamUtil.DreamVersion;
+                request.Headers.UserAgent = "Dream/" + DreamVersion;
             }
 
             // add cookies to request
@@ -83,8 +93,8 @@ namespace MindTouch.Traum.Webclient {
             // initialize request
             var httpRequest = (HttpWebRequest)WebRequest.Create(uri.ToUri());
             httpRequest.Method = verb;
-            httpRequest.Timeout = System.Threading.Timeout.Infinite;
-            httpRequest.ReadWriteTimeout = System.Threading.Timeout.Infinite;
+            httpRequest.Timeout = Timeout.Infinite;
+            httpRequest.ReadWriteTimeout = Timeout.Infinite;
 
             // Note from http://support.microsoft.com/kb/904262
             // The HTTP request is made up of the following parts:
@@ -101,10 +111,10 @@ namespace MindTouch.Traum.Webclient {
             if(plug.Credentials != null) {
                 httpRequest.Credentials = plug.Credentials;
                 httpRequest.PreAuthenticate = true;
-            } else if(!string.IsNullOrEmpty(uri.User) || !string.IsNullOrEmpty(uri.Password)) {
-                httpRequest.Credentials = new NetworkCredential(uri.User ?? string.Empty, uri.Password ?? string.Empty);
+            } else if(!String.IsNullOrEmpty(uri.User) || !String.IsNullOrEmpty(uri.Password)) {
+                httpRequest.Credentials = new NetworkCredential(uri.User ?? String.Empty, uri.Password ?? String.Empty);
                 httpRequest.PreAuthenticate = true;
-                var authbytes = Encoding.ASCII.GetBytes(string.Concat(uri.User ?? string.Empty, ":", uri.Password ?? string.Empty));
+                var authbytes = Encoding.ASCII.GetBytes(String.Concat(uri.User ?? String.Empty, ":", uri.Password ?? String.Empty));
                 var base64 = Convert.ToBase64String(authbytes);
                 httpRequest.Headers.Add("Authorization", "Basic " + base64);
             }
@@ -179,7 +189,7 @@ namespace MindTouch.Traum.Webclient {
             var headers = httpResponse.Headers;
             var contentLength = httpResponse.ContentLength;
 
-            if(!string.IsNullOrEmpty(httpResponse.ContentType)) {
+            if(!String.IsNullOrEmpty(httpResponse.ContentType)) {
                 contentType = new MimeType(httpResponse.ContentType);
                 stream = new BufferedStream(httpResponse.GetResponseStream());
             } else {

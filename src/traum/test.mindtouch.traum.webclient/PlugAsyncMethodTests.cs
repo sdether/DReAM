@@ -27,19 +27,19 @@ namespace MindTouch.Traum.Webclient.Test {
 
         [TearDown]
         public void Teardown() {
+            Dream.Test.MockPlug.DeregisterAll();
             MockPlug.DeregisterAll();
-            MockPlug2.DeregisterAll();
         }
 
         [Test]
         public void Plug_uses_own_timeout_to_govern_request_and_results_in_RequestConnectionTimeout() {
-            MockPlug2.Register(new XUri("mock://mock"), (plug, verb, uri, request) => {
+            MockPlug.Register(new XUri("mock://mock"), (plug, verb, uri, request) => {
                 Thread.Sleep(TimeSpan.FromSeconds(10));
                 return DreamMessage.Ok().AsCompletedTask();
 
             });
             var stopwatch = Stopwatch.StartNew();
-            var r = Plug.New(MockPlug2.DefaultUri)
+            var r = Plug.New(MockPlug.DefaultUri)
                 .WithTimeout(TimeSpan.FromSeconds(1))
                 .InvokeEx(Verb.GET, DreamMessage.Ok(), TimeSpan.MaxValue).Block();
             stopwatch.Stop();
@@ -50,12 +50,12 @@ namespace MindTouch.Traum.Webclient.Test {
 
         [Test]
         public void Result_timeout_superceeds_plug_timeout_and_results_in_RequestConnectionTimeout() {
-            MockPlug2.Register(new XUri("mock://mock"), (plug, verb, uri, request) => {
+            MockPlug.Register(new XUri("mock://mock"), (plug, verb, uri, request) => {
                 Thread.Sleep(TimeSpan.FromSeconds(10));
                 return DreamMessage.Ok().AsCompletedTask();
             });
             var stopwatch = Stopwatch.StartNew();
-            var r = Plug.New(MockPlug2.DefaultUri)
+            var r = Plug.New(MockPlug.DefaultUri)
                 .WithTimeout(TimeSpan.FromSeconds(20))
                 .InvokeEx(Verb.GET, DreamMessage.Ok(), 1.Seconds()).Block();
             stopwatch.Stop();
@@ -67,12 +67,12 @@ namespace MindTouch.Traum.Webclient.Test {
         [Test]
         public void Plug_timeout_is_not_used_for_message_memorization() {
             var blockingStream = new MockBlockingStream();
-            MockPlug2.Register(new XUri("mock://mock"), (plug, verb, uri, request) => {
+            MockPlug.Register(new XUri("mock://mock"), (plug, verb, uri, request) => {
                 _log.Debug("returning blocking stream");
                 return new DreamMessage(DreamStatus.Ok, null, MimeType.TEXT, -1, blockingStream).AsCompletedTask();
             });
             var stopwatch = Stopwatch.StartNew();
-            var msg = Plug.New(MockPlug2.DefaultUri)
+            var msg = Plug.New(MockPlug.DefaultUri)
                 .WithTimeout(TimeSpan.FromSeconds(1))
                 .InvokeEx(Verb.GET, DreamMessage.Ok(), TimeSpan.MaxValue).Result;
             stopwatch.Stop();

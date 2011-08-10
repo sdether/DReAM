@@ -44,29 +44,29 @@ namespace MindTouch.Traum.Webclient.Test {
 
         [TearDown]
         public void Teardown() {
+            Dream.Test.MockPlug.DeregisterAll();
             MockPlug.DeregisterAll();
-            MockPlug2.DeregisterAll();
         }
 
         [Test]
         public void Default_uri_works_as_no_op_without_registrations() {
-            var msg = Plug.New(MockPlug2.DefaultUri).Get().Result;
+            var msg = Plug.New(MockPlug.DefaultUri).Get().Result;
             Assert.AreEqual("", msg.ToText());
         }
 
         [Test]
         public void Default_uri_keeps_working_as_no_op_after_DeregisterAll() {
-            MockPlug2.DeregisterAll();
-            var msg = Plug.New(MockPlug2.DefaultUri).Get().Result;
+            MockPlug.DeregisterAll();
+            var msg = Plug.New(MockPlug.DefaultUri).Get().Result;
             Assert.AreEqual("", msg.ToText());
         }
 
         [Test]
         public void Register_twice_throws() {
             var uri = new XUri("http://www.mindtouch.com/foo");
-            MockPlug2.Register(uri, (p, v, u, r) => DreamMessage.Ok().AsCompletedTask());
+            MockPlug.Register(uri, (p, v, u, r) => DreamMessage.Ok().AsCompletedTask());
             try {
-                MockPlug2.Register(uri, (p, v, u, r) => DreamMessage.Ok().AsCompletedTask());
+                MockPlug.Register(uri, (p, v, u, r) => DreamMessage.Ok().AsCompletedTask());
             } catch(ArgumentException) {
                 return;
             } catch(Exception e) {
@@ -79,15 +79,15 @@ namespace MindTouch.Traum.Webclient.Test {
         public void Deregister_allows_reregister_of_uri() {
             XUri uri = new XUri("http://www.mindtouch.com/foo");
             int firstCalled = 0;
-            MockPlug2.Register(uri, (p, v, u, r) => {
+            MockPlug.Register(uri, (p, v, u, r) => {
                 firstCalled++;
                 return DreamMessage.Ok().AsCompletedTask();
             });
             Assert.IsTrue(Plug.New(uri).Get(TimeSpan.MaxValue).Result.IsSuccessful);
             Assert.AreEqual(1, firstCalled);
-            MockPlug2.Deregister(uri);
+            MockPlug.Deregister(uri);
             int secondCalled = 0;
-            MockPlug2.Register(uri, (p, v, u, r) => {
+            MockPlug.Register(uri, (p, v, u, r) => {
                 secondCalled++;
                 return DreamMessage.Ok().AsCompletedTask();
             });
@@ -100,20 +100,20 @@ namespace MindTouch.Traum.Webclient.Test {
         public void DeregisterAll_clears_all_mocks() {
             int firstCalled = 0;
             XUri uri = new XUri("http://www.mindtouch.com/foo");
-            MockPlug2.Register(uri, (p, v, u, r) => {
+            MockPlug.Register(uri, (p, v, u, r) => {
                 firstCalled++;
                 return DreamMessage.Ok().AsCompletedTask();
             });
-            MockPlug2.Register(new XUri("http://www.mindtouch.com/bar"), (p, v, u, r) => DreamMessage.Ok().AsCompletedTask());
+            MockPlug.Register(new XUri("http://www.mindtouch.com/bar"), (p, v, u, r) => DreamMessage.Ok().AsCompletedTask());
             Assert.IsTrue(Plug.New(uri).Get(TimeSpan.MaxValue).Result.IsSuccessful);
             Assert.AreEqual(1, firstCalled);
-            MockPlug2.DeregisterAll();
+            MockPlug.DeregisterAll();
             int secondCalled = 0;
-            MockPlug2.Register(uri, (p, v, u, r) => {
+            MockPlug.Register(uri, (p, v, u, r) => {
                 secondCalled++;
                 return DreamMessage.Ok().AsCompletedTask();
             });
-            MockPlug2.Register(new XUri("http://www.mindtouch.com/bar"), (p, v, u, r) => DreamMessage.Ok().AsCompletedTask());
+            MockPlug.Register(new XUri("http://www.mindtouch.com/bar"), (p, v, u, r) => DreamMessage.Ok().AsCompletedTask());
             Assert.IsTrue(Plug.New(uri).Get(TimeSpan.MaxValue).Result.IsSuccessful);
             Assert.AreEqual(1, firstCalled);
             Assert.AreEqual(1, secondCalled);
@@ -126,7 +126,7 @@ namespace MindTouch.Traum.Webclient.Test {
             string calledVerb = null;
             XUri calledUri = null;
             DreamMessage calledRequest;
-            MockPlug2.Register(new XUri("http://www.mindtouch.com/foo"), (p, v, u, r) => {
+            MockPlug.Register(new XUri("http://www.mindtouch.com/foo"), (p, v, u, r) => {
                 calledPlug = p;
                 calledVerb = v;
                 calledUri = u;
@@ -149,7 +149,7 @@ namespace MindTouch.Traum.Webclient.Test {
             string calledVerb = null;
             XUri calledUri = null;
             DreamMessage calledRequest;
-            MockPlug2.Register(new XUri("http://www.mindtouch.com"), (p, v, u, r) => {
+            MockPlug.Register(new XUri("http://www.mindtouch.com"), (p, v, u, r) => {
                 calledPlug = p;
                 calledVerb = v;
                 calledUri = u;
@@ -174,7 +174,7 @@ namespace MindTouch.Traum.Webclient.Test {
             string calledVerb = null;
             XUri calledUri = null;
             DreamMessage calledRequest = null;
-            MockPlug2.Register(new XUri("http://www.mindtouch.com/foo"), (p, v, u, r) => {
+            MockPlug.Register(new XUri("http://www.mindtouch.com/foo"), (p, v, u, r) => {
                 calledPlug = p;
                 calledVerb = v;
                 calledUri = u;
@@ -197,7 +197,7 @@ namespace MindTouch.Traum.Webclient.Test {
             string calledVerb = null;
             XUri calledUri = null;
             DreamMessage calledRequest = null;
-            MockPlug2.Register(new XUri("http://www.mindtouch.com/foo"), (p, v, u, r) => {
+            MockPlug.Register(new XUri("http://www.mindtouch.com/foo"), (p, v, u, r) => {
                 calledPlug = p;
                 calledVerb = v;
                 calledUri = u;
@@ -217,7 +217,7 @@ namespace MindTouch.Traum.Webclient.Test {
         [Test]
         public void PostAsync_from_nested_async_workers() {
             AutoResetEvent resetEvent = new AutoResetEvent(false);
-            MockPlug2.Register(new XUri("http://foo/bar"), (p, v, u, r) => {
+            MockPlug.Register(new XUri("http://foo/bar"), (p, v, u, r) => {
                 resetEvent.Set();
                 return DreamMessage.Ok().AsCompletedTask();
             });
@@ -233,35 +233,35 @@ namespace MindTouch.Traum.Webclient.Test {
 
         [Test]
         public void MockPlug_can_verify_call_via_VerifyAll() {
-            MockPlug2.Setup(new XUri("http://mock/foo")).ExpectCalls(Times.AtLeastOnce());
+            MockPlug.Setup(new XUri("http://mock/foo")).ExpectCalls(Times.AtLeastOnce());
             Assert.IsTrue(Plug.New("http://mock/foo").Get().Result.IsSuccessful);
-            MockPlug2.VerifyAll();
+            MockPlug.VerifyAll();
         }
 
         [Test]
         public void Can_verify_call() {
-            var mock = MockPlug2.Setup(new XUri("http://mock/foo")).ExpectCalls(Times.AtLeastOnce());
+            var mock = MockPlug.Setup(new XUri("http://mock/foo")).ExpectCalls(Times.AtLeastOnce());
             Assert.IsTrue(Plug.New("http://mock/foo").Get().Result.IsSuccessful);
             mock.Verify();
         }
 
         [Test]
         public void Can_verify_lack_of_call() {
-            var mock = MockPlug2.Setup(new XUri("http://mock/foo")).ExpectCalls(Times.Never());
+            var mock = MockPlug.Setup(new XUri("http://mock/foo")).ExpectCalls(Times.Never());
             mock.Verify(TimeSpan.FromSeconds(3));
         }
 
         [Test]
         public void MockPlug_without_call_expectation_does_not_throw_on_Verify() {
-            var mock = MockPlug2.Setup(new XUri("http://mock/foo"));
+            var mock = MockPlug.Setup(new XUri("http://mock/foo"));
             mock.Verify(TimeSpan.FromSeconds(3));
         }
 
         [Test]
         public void Can_pick_appropriate_MockPlug_based_on_verb() {
-            var a = MockPlug2.Setup(new XUri("http://mock/foo")).Verb("POST");
-            var b = MockPlug2.Setup(new XUri("http://mock/foo")).Verb("GET");
-            var c = MockPlug2.Setup(new XUri("http://mock/foo")).Verb("DELETE");
+            var a = MockPlug.Setup(new XUri("http://mock/foo")).Verb("POST");
+            var b = MockPlug.Setup(new XUri("http://mock/foo")).Verb("GET");
+            var c = MockPlug.Setup(new XUri("http://mock/foo")).Verb("DELETE");
             Assert.IsTrue(Plug.New("http://mock/foo").Get().Result.IsSuccessful);
             a.Verify(2.Seconds(), Times.Never());
             c.Verify(0.Seconds(), Times.Never());
@@ -270,9 +270,9 @@ namespace MindTouch.Traum.Webclient.Test {
 
         [Test]
         public void Specific_verb_gets_picked_over_wildcard1() {
-            var a = MockPlug2.Setup(new XUri("http://mock/foo"));
-            var b = MockPlug2.Setup(new XUri("http://mock/foo")).Verb("GET");
-            var c = MockPlug2.Setup(new XUri("http://mock/foo")).Verb("DELETE");
+            var a = MockPlug.Setup(new XUri("http://mock/foo"));
+            var b = MockPlug.Setup(new XUri("http://mock/foo")).Verb("GET");
+            var c = MockPlug.Setup(new XUri("http://mock/foo")).Verb("DELETE");
             Assert.IsTrue(Plug.New("http://mock/foo").Get().Result.IsSuccessful);
             a.Verify(2.Seconds(), Times.Never());
             c.Verify(0.Seconds(), Times.Never());
@@ -281,9 +281,9 @@ namespace MindTouch.Traum.Webclient.Test {
 
         [Test]
         public void Specific_verb_gets_picked_over_wildcard2() {
-            var a = MockPlug2.Setup(new XUri("http://mock/foo")).Verb("DELETE");
-            var b = MockPlug2.Setup(new XUri("http://mock/foo")).Verb("GET");
-            var c = MockPlug2.Setup(new XUri("http://mock/foo"));
+            var a = MockPlug.Setup(new XUri("http://mock/foo")).Verb("DELETE");
+            var b = MockPlug.Setup(new XUri("http://mock/foo")).Verb("GET");
+            var c = MockPlug.Setup(new XUri("http://mock/foo"));
             Assert.IsTrue(Plug.New("http://mock/foo").Get().Result.IsSuccessful);
             a.Verify(2.Seconds(), Times.Never());
             c.Verify(0.Seconds(), Times.Never());
@@ -292,9 +292,9 @@ namespace MindTouch.Traum.Webclient.Test {
 
         [Test]
         public void Can_pick_appropriate_MockPlug_based_on_subpath() {
-            var a = MockPlug2.Setup(new XUri("http://mock/foo")).At("bar");
-            var b = MockPlug2.Setup(new XUri("http://mock/foo")).At("eek");
-            var c = MockPlug2.Setup(new XUri("http://mock/foo")).At("baz");
+            var a = MockPlug.Setup(new XUri("http://mock/foo")).At("bar");
+            var b = MockPlug.Setup(new XUri("http://mock/foo")).At("eek");
+            var c = MockPlug.Setup(new XUri("http://mock/foo")).At("baz");
             Assert.IsTrue(Plug.New("http://mock/foo/eek").Get().Result.IsSuccessful);
             a.Verify(2.Seconds(), Times.Never());
             c.Verify(0.Seconds(), Times.Never());
@@ -303,9 +303,9 @@ namespace MindTouch.Traum.Webclient.Test {
 
         [Test]
         public void Can_pick_appropriate_MockPlug_based_on_query() {
-            var a = MockPlug2.Setup(new XUri("http://mock/foo")).With("bar", "a");
-            var b = MockPlug2.Setup(new XUri("http://mock/foo")).With("eek", "b");
-            var c = MockPlug2.Setup(new XUri("http://mock/foo")).With("baz", "c");
+            var a = MockPlug.Setup(new XUri("http://mock/foo")).With("bar", "a");
+            var b = MockPlug.Setup(new XUri("http://mock/foo")).With("eek", "b");
+            var c = MockPlug.Setup(new XUri("http://mock/foo")).With("baz", "c");
             Assert.IsTrue(Plug.New("http://mock/foo/").With("eek", "b").Get().Result.IsSuccessful);
             a.Verify(2.Seconds(), Times.Never());
             c.Verify(0.Seconds(), Times.Never());
@@ -314,9 +314,9 @@ namespace MindTouch.Traum.Webclient.Test {
 
         [Test]
         public void Can_pick_appropriate_MockPlug_based_on_queryarg_values() {
-            var a = MockPlug2.Setup(new XUri("http://mock/foo")).With("bar", "a");
-            var b = MockPlug2.Setup(new XUri("http://mock/foo")).With("bar", "b");
-            var c = MockPlug2.Setup(new XUri("http://mock/foo")).With("bar", "c");
+            var a = MockPlug.Setup(new XUri("http://mock/foo")).With("bar", "a");
+            var b = MockPlug.Setup(new XUri("http://mock/foo")).With("bar", "b");
+            var c = MockPlug.Setup(new XUri("http://mock/foo")).With("bar", "c");
             Assert.IsTrue(Plug.New("http://mock/foo/").With("bar", "b").Get().Result.IsSuccessful);
             a.Verify(2.Seconds(), Times.Never());
             c.Verify(0.Seconds(), Times.Never());
@@ -325,9 +325,9 @@ namespace MindTouch.Traum.Webclient.Test {
 
         [Test]
         public void Can_pick_appropriate_MockPlug_based_on_queryarg_values_via_callback() {
-            var a = MockPlug2.Setup(new XUri("http://mock/foo")).With("bar", x => x == "a");
-            var b = MockPlug2.Setup(new XUri("http://mock/foo")).With("bar", x => x == "b");
-            var c = MockPlug2.Setup(new XUri("http://mock/foo")).With("bar", x => x == "c");
+            var a = MockPlug.Setup(new XUri("http://mock/foo")).With("bar", x => x == "a");
+            var b = MockPlug.Setup(new XUri("http://mock/foo")).With("bar", x => x == "b");
+            var c = MockPlug.Setup(new XUri("http://mock/foo")).With("bar", x => x == "c");
             Assert.IsTrue(Plug.New("http://mock/foo/").With("bar", "b").Get().Result.IsSuccessful);
             a.Verify(2.Seconds(), Times.Never());
             c.Verify(0.Seconds(), Times.Never());
@@ -336,9 +336,9 @@ namespace MindTouch.Traum.Webclient.Test {
 
         [Test]
         public void Can_pick_appropriate_MockPlug_based_on_most_specific_query_args() {
-            var a = MockPlug2.Setup(new XUri("http://mock/foo")).With("bar", "a");
-            var b = MockPlug2.Setup(new XUri("http://mock/foo")).With("bar", "a").With("x", "1").With("y", "2");
-            var c = MockPlug2.Setup(new XUri("http://mock/foo")).With("bar", "a").With("x", "1");
+            var a = MockPlug.Setup(new XUri("http://mock/foo")).With("bar", "a");
+            var b = MockPlug.Setup(new XUri("http://mock/foo")).With("bar", "a").With("x", "1").With("y", "2");
+            var c = MockPlug.Setup(new XUri("http://mock/foo")).With("bar", "a").With("x", "1");
             Assert.IsTrue(Plug.New("http://mock/foo/").With("bar", "a").With("x", "1").With("y", "2").Get().Result.IsSuccessful);
             a.Verify(2.Seconds(), Times.Never());
             c.Verify(0.Seconds(), Times.Never());
@@ -347,9 +347,9 @@ namespace MindTouch.Traum.Webclient.Test {
 
         [Test]
         public void Can_pick_appropriate_MockPlug_based_on_most_less_specific_query_arg_with_value_match() {
-            var a = MockPlug2.Setup(new XUri("http://mock/foo")).With("bar", "a");
-            var b = MockPlug2.Setup(new XUri("http://mock/foo")).With("bar", "a").With("x", "1");
-            var c = MockPlug2.Setup(new XUri("http://mock/foo")).With("bar", "a").With("x", "2").With("y", "2");
+            var a = MockPlug.Setup(new XUri("http://mock/foo")).With("bar", "a");
+            var b = MockPlug.Setup(new XUri("http://mock/foo")).With("bar", "a").With("x", "1");
+            var c = MockPlug.Setup(new XUri("http://mock/foo")).With("bar", "a").With("x", "2").With("y", "2");
             Assert.IsTrue(Plug.New("http://mock/foo/").With("bar", "a").With("x", "1").Get().Result.IsSuccessful);
             a.Verify(2.Seconds(), Times.Never());
             c.Verify(0.Seconds(), Times.Never());
@@ -358,9 +358,9 @@ namespace MindTouch.Traum.Webclient.Test {
 
         [Test]
         public void Extraneous_args_are_not_considered_in_matching() {
-            var a = MockPlug2.Setup(new XUri("http://mock/foo")).With("bar", "a");
-            var b = MockPlug2.Setup(new XUri("http://mock/foo")).With("bar", "a").With("x", "1");
-            var c = MockPlug2.Setup(new XUri("http://mock/foo")).With("bar", "a").With("x", "2").With("y", "2");
+            var a = MockPlug.Setup(new XUri("http://mock/foo")).With("bar", "a");
+            var b = MockPlug.Setup(new XUri("http://mock/foo")).With("bar", "a").With("x", "1");
+            var c = MockPlug.Setup(new XUri("http://mock/foo")).With("bar", "a").With("x", "2").With("y", "2");
             Assert.IsTrue(Plug.New("http://mock/foo/").With("bar", "a").With("x", "1").With("y", "2").Get().Result.IsSuccessful);
             a.Verify(2.Seconds(), Times.Never());
             c.Verify(0.Seconds(), Times.Never());
@@ -369,9 +369,9 @@ namespace MindTouch.Traum.Webclient.Test {
 
         [Test]
         public void Can_differentiate_multiple_plugs_and_their_call_counts() {
-            var bar = MockPlug2.Setup(new XUri("http://mock/foo")).At("bar").ExpectAtLeastOneCall();
-            var eek = MockPlug2.Setup(new XUri("http://mock/foo")).At("eek").With("a", "b").ExpectCalls(Times.Exactly(3));
-            var baz = MockPlug2.Setup(new XUri("http://mock/foo")).At("eek").With("b", "c").ExpectAtLeastOneCall();
+            var bar = MockPlug.Setup(new XUri("http://mock/foo")).At("bar").ExpectAtLeastOneCall();
+            var eek = MockPlug.Setup(new XUri("http://mock/foo")).At("eek").With("a", "b").ExpectCalls(Times.Exactly(3));
+            var baz = MockPlug.Setup(new XUri("http://mock/foo")).At("eek").With("b", "c").ExpectAtLeastOneCall();
             Assert.IsTrue(Plug.New("http://mock/foo/bar").Get().Result.IsSuccessful);
             Assert.IsTrue(Plug.New("http://mock/foo/bar").Get().Result.IsSuccessful);
             Assert.IsTrue(Plug.New("http://mock/foo/eek").With("a", "b").Get().Result.IsSuccessful);
@@ -385,9 +385,9 @@ namespace MindTouch.Traum.Webclient.Test {
 
         [Test]
         public void Can_pick_appropriate_MockPlug_based_on_headers() {
-            var bar = MockPlug2.Setup(new XUri("http://mock/foo")).WithHeader("bar", "a");
-            var eek = MockPlug2.Setup(new XUri("http://mock/foo")).WithHeader("eek", "b");
-            var baz = MockPlug2.Setup(new XUri("http://mock/foo")).WithHeader("baz", "c");
+            var bar = MockPlug.Setup(new XUri("http://mock/foo")).WithHeader("bar", "a");
+            var eek = MockPlug.Setup(new XUri("http://mock/foo")).WithHeader("eek", "b");
+            var baz = MockPlug.Setup(new XUri("http://mock/foo")).WithHeader("baz", "c");
             Assert.IsTrue(Plug.New("http://mock/foo/").WithHeader("eek", "b").Get().Result.IsSuccessful);
             bar.Verify(2.Seconds(), Times.Never());
             baz.Verify(0.Seconds(), Times.Never());
@@ -396,9 +396,9 @@ namespace MindTouch.Traum.Webclient.Test {
 
         [Test]
         public void Can_pick_appropriate_MockPlug_based_on_header_values() {
-            var a = MockPlug2.Setup(new XUri("http://mock/foo")).WithHeader("bar", "a");
-            var b = MockPlug2.Setup(new XUri("http://mock/foo")).WithHeader("bar", "b");
-            var c = MockPlug2.Setup(new XUri("http://mock/foo")).WithHeader("bar", "c");
+            var a = MockPlug.Setup(new XUri("http://mock/foo")).WithHeader("bar", "a");
+            var b = MockPlug.Setup(new XUri("http://mock/foo")).WithHeader("bar", "b");
+            var c = MockPlug.Setup(new XUri("http://mock/foo")).WithHeader("bar", "c");
             Assert.IsTrue(Plug.New("http://mock/foo/").WithHeader("bar", "b").Get().Result.IsSuccessful);
             a.Verify(2.Seconds(), Times.Never());
             c.Verify(0.Seconds(), Times.Never());
@@ -407,9 +407,9 @@ namespace MindTouch.Traum.Webclient.Test {
 
         [Test]
         public void Can_pick_appropriate_MockPlug_based_on_header_values_via_callback() {
-            var a = MockPlug2.Setup(new XUri("http://mock/foo")).WithHeader("bar", x => x == "a");
-            var b = MockPlug2.Setup(new XUri("http://mock/foo")).WithHeader("bar", x => x == "b");
-            var c = MockPlug2.Setup(new XUri("http://mock/foo")).WithHeader("bar", x => x == "c");
+            var a = MockPlug.Setup(new XUri("http://mock/foo")).WithHeader("bar", x => x == "a");
+            var b = MockPlug.Setup(new XUri("http://mock/foo")).WithHeader("bar", x => x == "b");
+            var c = MockPlug.Setup(new XUri("http://mock/foo")).WithHeader("bar", x => x == "c");
             Assert.IsTrue(Plug.New("http://mock/foo/").WithHeader("bar", "b").Get().Result.IsSuccessful);
             a.Verify(2.Seconds(), Times.Never());
             c.Verify(0.Seconds(), Times.Never());
@@ -418,9 +418,9 @@ namespace MindTouch.Traum.Webclient.Test {
 
         [Test]
         public void Can_pick_appropriate_MockPlug_based_on_most_specific_headers() {
-            var a = MockPlug2.Setup(new XUri("http://mock/foo")).WithHeader("bar", "a");
-            var b = MockPlug2.Setup(new XUri("http://mock/foo")).WithHeader("bar", "a").WithHeader("x", "1").WithHeader("y", "2");
-            var c = MockPlug2.Setup(new XUri("http://mock/foo")).WithHeader("bar", "a").WithHeader("x", "1");
+            var a = MockPlug.Setup(new XUri("http://mock/foo")).WithHeader("bar", "a");
+            var b = MockPlug.Setup(new XUri("http://mock/foo")).WithHeader("bar", "a").WithHeader("x", "1").WithHeader("y", "2");
+            var c = MockPlug.Setup(new XUri("http://mock/foo")).WithHeader("bar", "a").WithHeader("x", "1");
             Assert.IsTrue(Plug.New("http://mock/foo/").WithHeader("bar", "a").WithHeader("x", "1").WithHeader("y", "2").Get().Result.IsSuccessful);
             a.Verify(2.Seconds(), Times.Never());
             c.Verify(0.Seconds(), Times.Never());
@@ -429,9 +429,9 @@ namespace MindTouch.Traum.Webclient.Test {
 
         [Test]
         public void Can_pick_appropriate_MockPlug_based_on_most_less_specific_header_with_value_match() {
-            var a = MockPlug2.Setup(new XUri("http://mock/foo")).WithHeader("bar", "a");
-            var b = MockPlug2.Setup(new XUri("http://mock/foo")).WithHeader("bar", "a").WithHeader("x", "1");
-            var c = MockPlug2.Setup(new XUri("http://mock/foo")).WithHeader("bar", "a").WithHeader("x", "2").WithHeader("y", "2");
+            var a = MockPlug.Setup(new XUri("http://mock/foo")).WithHeader("bar", "a");
+            var b = MockPlug.Setup(new XUri("http://mock/foo")).WithHeader("bar", "a").WithHeader("x", "1");
+            var c = MockPlug.Setup(new XUri("http://mock/foo")).WithHeader("bar", "a").WithHeader("x", "2").WithHeader("y", "2");
             Assert.IsTrue(Plug.New("http://mock/foo/").WithHeader("bar", "a").WithHeader("x", "1").Get().Result.IsSuccessful);
             a.Verify(2.Seconds(), Times.Never());
             c.Verify(0.Seconds(), Times.Never());
@@ -440,9 +440,9 @@ namespace MindTouch.Traum.Webclient.Test {
 
         [Test]
         public void Extraneous_headers_are_not_considered_in_matching() {
-            var a = MockPlug2.Setup(new XUri("http://mock/foo")).WithHeader("bar", "a");
-            var b = MockPlug2.Setup(new XUri("http://mock/foo")).WithHeader("bar", "a").WithHeader("x", "1");
-            var c = MockPlug2.Setup(new XUri("http://mock/foo")).WithHeader("bar", "a").WithHeader("x", "2").WithHeader("y", "2");
+            var a = MockPlug.Setup(new XUri("http://mock/foo")).WithHeader("bar", "a");
+            var b = MockPlug.Setup(new XUri("http://mock/foo")).WithHeader("bar", "a").WithHeader("x", "1");
+            var c = MockPlug.Setup(new XUri("http://mock/foo")).WithHeader("bar", "a").WithHeader("x", "2").WithHeader("y", "2");
             Assert.IsTrue(Plug.New("http://mock/foo/").WithHeader("bar", "a").WithHeader("x", "1").WithHeader("y", "2").Get().Result.IsSuccessful);
             a.Verify(2.Seconds(), Times.Never());
             c.Verify(0.Seconds(), Times.Never());
@@ -452,9 +452,9 @@ namespace MindTouch.Traum.Webclient.Test {
 
         [Test]
         public void Can_pick_appropriate_MockPlug_based_on_body() {
-            var a = MockPlug2.Setup(new XUri("http://mock/foo")).WithBody("abc");
-            var b = MockPlug2.Setup(new XUri("http://mock/foo")).WithBody("def");
-            var c = MockPlug2.Setup(new XUri("http://mock/foo")).WithBody("ghi");
+            var a = MockPlug.Setup(new XUri("http://mock/foo")).WithBody("abc");
+            var b = MockPlug.Setup(new XUri("http://mock/foo")).WithBody("def");
+            var c = MockPlug.Setup(new XUri("http://mock/foo")).WithBody("ghi");
             Assert.IsTrue(Plug.New("http://mock/foo/").Post("def").Result.IsSuccessful);
             a.Verify(2.Seconds(), Times.Never());
             c.Verify(0.Seconds(), Times.Never());
@@ -463,9 +463,9 @@ namespace MindTouch.Traum.Webclient.Test {
 
         [Test]
         public void Can_provide_callback_for_custom_body_check_and_pick_mockplug_based_on_its_return() {
-            var a = MockPlug2.Setup(new XUri("http://mock/foo")).WithMessage(msg => false);
-            var b = MockPlug2.Setup(new XUri("http://mock/foo")).WithMessage(msg => true);
-            var c = MockPlug2.Setup(new XUri("http://mock/foo")).WithMessage(msg => false);
+            var a = MockPlug.Setup(new XUri("http://mock/foo")).WithMessage(msg => false);
+            var b = MockPlug.Setup(new XUri("http://mock/foo")).WithMessage(msg => true);
+            var c = MockPlug.Setup(new XUri("http://mock/foo")).WithMessage(msg => false);
             Assert.IsTrue(Plug.New("http://mock/foo/").Post("foo").Result.IsSuccessful);
             a.Verify(2.Seconds(), Times.Never());
             c.Verify(0.Seconds(), Times.Never());
@@ -475,7 +475,7 @@ namespace MindTouch.Traum.Webclient.Test {
         [Test]
         public void Can_add_headers_to_the_response() {
             _log.Debug("Can_add_headers_to_the_response");
-            MockPlug2.Setup(new XUri("http://mock/foo")).WithResponseHeader("foo", "bar");
+            MockPlug.Setup(new XUri("http://mock/foo")).WithResponseHeader("foo", "bar");
             var msg = Plug.New("http://mock/foo").Get().Result;
             Assert.IsTrue(msg.IsSuccessful);
             Assert.AreEqual("bar", msg.Headers["foo"]);
@@ -483,7 +483,7 @@ namespace MindTouch.Traum.Webclient.Test {
 
         [Test]
         public void Can_add_headers_to_the_response_after_specifying_message() {
-            MockPlug2.Setup(new XUri("http://mock/foo")).Returns(DreamMessage.NotModified()).WithResponseHeader("foo", "bar");
+            MockPlug.Setup(new XUri("http://mock/foo")).Returns(DreamMessage.NotModified()).WithResponseHeader("foo", "bar");
             var msg = Plug.New("http://mock/foo").Get().Result;
             Assert.AreEqual(DreamStatus.NotModified, msg.Status);
             Assert.AreEqual("bar", msg.Headers["foo"]);
@@ -491,7 +491,7 @@ namespace MindTouch.Traum.Webclient.Test {
 
         [Test]
         public void Can_add_headers_to_the_response_before_specifying_message() {
-            MockPlug2.Setup(new XUri("http://mock/foo")).WithResponseHeader("foo", "bar").Returns(DreamMessage.NotModified());
+            MockPlug.Setup(new XUri("http://mock/foo")).WithResponseHeader("foo", "bar").Returns(DreamMessage.NotModified());
             var msg = Plug.New("http://mock/foo").Get().Result;
             Assert.AreEqual(DreamStatus.NotModified, msg.Status);
             Assert.AreEqual("bar", msg.Headers["foo"]);
@@ -500,7 +500,7 @@ namespace MindTouch.Traum.Webclient.Test {
         [Test]
         public void Can_add_headers_to_the_response_after_specifying_document() {
             var content = StringUtil.CreateAlphaNumericKey(6);
-            MockPlug2.Setup(new XUri("http://mock/foo")).Returns(content).WithResponseHeader("foo", "bar");
+            MockPlug.Setup(new XUri("http://mock/foo")).Returns(content).WithResponseHeader("foo", "bar");
             var msg = Plug.New("http://mock/foo").Get().Result;
             Assert.IsTrue(msg.IsSuccessful);
             Assert.AreEqual("bar", msg.Headers["foo"]);
@@ -510,7 +510,7 @@ namespace MindTouch.Traum.Webclient.Test {
         [Test]
         public void Can_add_headers_to_the_response_before_specifying_document() {
             var doc = StringUtil.CreateAlphaNumericKey(6);
-            MockPlug2.Setup(new XUri("http://mock/foo")).WithResponseHeader("foo", "bar").Returns(doc);
+            MockPlug.Setup(new XUri("http://mock/foo")).WithResponseHeader("foo", "bar").Returns(doc);
             var msg = Plug.New("http://mock/foo").Get().Result;
             Assert.IsTrue(msg.IsSuccessful);
             Assert.AreEqual("bar", msg.Headers["foo"]);
@@ -522,7 +522,7 @@ namespace MindTouch.Traum.Webclient.Test {
             var doc = StringUtil.CreateAlphaNumericKey(6);
             var success = "yay";
             var uri = new XUri("http://mock/foo/").With("foo", "baz");
-            MockPlug2.Setup(new XUri("http://mock/foo")).Returns(invocation => {
+            MockPlug.Setup(new XUri("http://mock/foo")).Returns(invocation => {
                 if(invocation.Verb != "POST") {
                     return DreamMessage.BadRequest("wrong verb: " + invocation.Verb);
                 }
@@ -545,7 +545,7 @@ namespace MindTouch.Traum.Webclient.Test {
         [Test]
         public void Returns_callback_gets_response_headers_if_added_before_callback() {
             var success ="yay";
-            MockPlug2.Setup(new XUri("http://mock/foo"))
+            MockPlug.Setup(new XUri("http://mock/foo"))
                 .WithResponseHeader("foo", "bar")
                 .Returns(invocation => 
                     invocation.ResponseHeaders["foo"] != "bar" 
@@ -559,7 +559,7 @@ namespace MindTouch.Traum.Webclient.Test {
         [Test]
         public void Returns_callback_gets_response_headers_if_added_after_callback() {
             var success = "yay";
-            MockPlug2.Setup(new XUri("http://mock/foo"))
+            MockPlug.Setup(new XUri("http://mock/foo"))
                 .Returns(invocation => 
                     invocation.ResponseHeaders["foo"] != "bar" 
                         ? DreamMessage.BadRequest("wrong response header") 
@@ -577,12 +577,12 @@ namespace MindTouch.Traum.Webclient.Test {
             File.WriteAllText(tmp, payload);
             var message = DreamMessage.FromFile(tmp);
             var uri = new XUri("http://mock/post/stream");
-            MockPlug2.Setup(uri).Verb("POST")
+            MockPlug.Setup(uri).Verb("POST")
                 .WithMessage(m => m.ToText() == payload)
                 .ExpectAtLeastOneCall();
             var response = Plug.New(uri).Post(message).Result;
             response.AssertSuccess();
-            MockPlug2.VerifyAll(1.Seconds());
+            MockPlug.VerifyAll(1.Seconds());
         }
     }
 }

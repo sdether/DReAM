@@ -33,14 +33,13 @@ namespace MindTouch.Traum.Webclient {
     /// <summary>
     /// Static utility class containing extension and helper methods for Web and Http related tasks.
     /// </summary>
-    public static class HttpUtil {
+    internal static class HttpUtil {
 
         // NOTE (steveb): cookie parsing based on RFC2109 (http://rfc.net/rfc2109.html)
 
         //--- Class Fields ---
         private static readonly MethodInfo _addHeaderMethod = typeof(WebHeaderCollection).GetMethod("AddWithoutValidate", BindingFlags.Instance | BindingFlags.NonPublic);
         private static readonly Regex _rangeRegex = new Regex(@"((?<rangeSpecifier>[^\s]+)\s*(=|\s))?\s*(?<from>\d+)(-(?<to>\d+))?", RegexOptions.Compiled | RegexOptions.CultureInvariant);
-        private static readonly Regex _encodingFixUpRegex = new Regex(@"[ \[\]{}""'`<>]", RegexOptions.Compiled | RegexOptions.Singleline | RegexOptions.CultureInvariant);
 
         //--- Extension Methods ---
 
@@ -112,170 +111,7 @@ namespace MindTouch.Traum.Webclient {
             }
         }
 
-        /// <summary>
-        /// Add a header to a http response.
-        /// </summary>
-        /// <param name="response">Target http response</param>
-        /// <param name="key">Header Key.</param>
-        /// <param name="value">Header Value.</param>
-        public static void AddHeader(this HttpListenerResponse response, string key, string value) {
-            if(string.Compare(key, DreamHeaders.ACCEPT, true) == 0) {
-                throw new ArgumentException(key);
-            } else if(string.Compare(key, DreamHeaders.CONNECTION, true) == 0) {
-
-                // special case: this header is automatically set, just ignore it
-                // throw new ArgumentException(key);
-            } else if(string.Compare(key, DreamHeaders.CONTENT_LENGTH, true) == 0) {
-                response.ContentLength64 = long.Parse(value);
-            } else if(string.Compare(key, DreamHeaders.CONTENT_ENCODING, true) == 0) {
-
-                // special case: not required by WebHeaderCollection, but present in HttpWebResponse
-                response.Headers[DreamHeaders.CONTENT_ENCODING] = value;
-            } else if(string.Compare(key, DreamHeaders.CONTENT_TYPE, true) == 0) {
-                response.ContentType = value;
-            } else if(string.Compare(key, DreamHeaders.EXPECT, true) == 0) {
-                throw new ArgumentException(key);
-            } else if(string.Compare(key, DreamHeaders.DATE, true) == 0) {
-
-                // special case: this header is automatically set, just ignore it
-                // throw new ArgumentException(key);
-            } else if(string.Compare(key, DreamHeaders.HOST, true) == 0) {
-                throw new ArgumentException(key);
-            } else if(string.Compare(key, DreamHeaders.IF_MODIFIED_SINCE, true) == 0) {
-                throw new ArgumentException(key);
-            } else if(string.Compare(key, DreamHeaders.LOCATION, true) == 0) {
-
-                // special case: not required by WebHeaderCollection, but present in HttpWebResponse
-                response.RedirectLocation = value;
-            } else if(string.Compare(key, DreamHeaders.RANGE, true) == 0) {
-                throw new ArgumentException(key);
-            } else if(string.Compare(key, DreamHeaders.REFERER, true) == 0) {
-                throw new ArgumentException(key);
-            } else if(string.Compare(key, DreamHeaders.PROXY_CONNECTION, true) == 0) {
-
-                // TODO (steveb): not implemented
-#if DEBUG
-                throw new NotImplementedException("missing code");
-#endif
-            } else if(string.Compare(key, DreamHeaders.TRANSFER_ENCODING, true) == 0) {
-
-                // special case: this header is automatically set, just ignore it
-                // throw new ArgumentException(key);
-            } else if(string.Compare(key, DreamHeaders.USER_AGENT, true) == 0) {
-                throw new ArgumentException(key);
-            } else if(string.Compare(key, DreamHeaders.AUTHENTICATE, true) == 0) {
-
-                // NOTE (steveb): we didn't have a choice here; we have to be able to set 'WWW-Authenticate', but WebHeaderCollection won't let us any other way
-                UnsafeAddHeader(response.Headers, DreamHeaders.AUTHENTICATE, value);
-            } else {
-                response.AddHeader(key, value);
-            }
-        }
-
         //--- Class Methods ---
-
-        /// <summary>
-        /// Retrieve user credentials from a request uri and/or headers.
-        /// </summary>
-        /// <param name="uri">Request uri.</param>
-        /// <param name="headers">Request headers.</param>
-        /// <param name="username">Parsed user name.</param>
-        /// <param name="password">Parsed password.</param>
-        /// <returns><see langword="True"/> if the credentials were succesfully parsed from request information.</returns>
-        public static bool GetAuthentication(Uri uri, DreamHeaders headers, out string username, out string password) {
-            username = null;
-            password = null;
-
-            // Authorization = Basic 1YJ1TTpPcmx4bMQ=
-
-            // check if a user/password pair was provided in the URI
-            if(!string.IsNullOrEmpty(uri.UserInfo)) {
-                string[] userPwd = uri.UserInfo.Split(new char[] { ':' }, 2);
-                username = XUri.Decode(userPwd[0]);
-                password = XUri.Decode((userPwd.Length > 1) ? userPwd[1] : string.Empty);
-                return true;
-            } else {
-
-                // check if authorization is in the request header
-                string header = headers[DreamHeaders.AUTHORIZATION];
-                if(!string.IsNullOrEmpty(header)) {
-
-                    // extract authorization data
-                    string[] value = header.Split(new char[] { ' ' }, 2);
-                    if((value.Length == 2) && StringUtil.EqualsInvariantIgnoreCase(value[0], "Basic")) {
-                        string[] userPwd = Encoding.UTF8.GetString(Convert.FromBase64String(value[1])).Split(new char[] { ':' }, 2);
-                        username = userPwd[0];
-                        password = (userPwd.Length > 1) ? userPwd[1] : string.Empty;
-                        return true;
-                    }
-                }
-            }
-            return false;
-        }
-
-        /// <summary>
-        /// Render Basic Authentication value.
-        /// </summary>
-        /// <param name="username">User name.</param>
-        /// <param name="password">Password.</param>
-        /// <returns>Basic Authentication string.</returns>
-        public static string RenderBasicAuthentication(string username, string password) {
-            string credentials = XUri.Decode(username ?? string.Empty) + ":" + XUri.Decode(password ?? string.Empty);
-            return Convert.ToBase64String(Encoding.UTF8.GetBytes(credentials));
-        }
-
-        /// <summary>
-        /// Extract <see cref="CultureInfo"/> from a header value.
-        /// </summary>
-        /// <param name="header">Header value to be parsed.</param>
-        /// <param name="def">Default <see cref="CultureInfo"/> to return in case no culture can be parsed from the header.</param>
-        /// <returns>Parsed or default culture.</returns>
-        public static CultureInfo GetCultureInfoFromHeader(string header, CultureInfo def) {
-            if(!string.IsNullOrEmpty(header)) {
-
-                // NOTE: we attempt to find the best acceptable language; format is: da, en-gb;q=0.8, en;q=0.7, *
-
-                // convert language header into sorted list of languages
-                var choices = new List<Tuple<string, double>>();
-                foreach(string choice in header.Split(',')) {
-                    string[] parts = choice.Split(';');
-                    string name = parts[0].Trim();
-
-                    // parse optional quality parameter
-                    double quality = (name == "*") ? 0.0 : 1.0;
-                    if((parts.Length == 2)) {
-                        string value = parts[1].Trim();
-                        if(value.StartsWith("q=")) {
-                            double.TryParse(value.Substring(2), out quality);
-                        }
-                    }
-
-                    // add language option
-                    choices.Add(new Tuple<string, double>(name, quality));
-                }
-                choices.Sort(delegate(Tuple<string, double> left, Tuple<string, double> right) {
-
-                    // reverse order sort based on quality
-                    return Math.Sign(right.Item2 - left.Item2);
-                });
-
-                // find the first acceptable language
-                for(int i = 0; i < choices.Count; ++i) {
-
-                    // check for wildcard
-                    if(choices[0].Item1 == "*") {
-                        return def;
-                    }
-
-                    // expand language to full culture
-                    CultureInfo culture = CultureUtil.GetNonNeutralCulture(choices[i].Item1);
-                    if(culture != null) {
-                        return culture;
-                    }
-                }
-            }
-            return def;
-        }
 
         /// <summary>
         /// Parse all name value pairs from a header string.
@@ -283,7 +119,7 @@ namespace MindTouch.Traum.Webclient {
         /// <param name="header">Header to be parsed.</param>
         /// <returns>Dictionary of header name value pairs.</returns>
         public static Dictionary<string, string> ParseNameValuePairs(string header) {
-            Dictionary<string, string> result = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            var result = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
             int index = 0;
             string name;
             string value;
@@ -310,7 +146,7 @@ namespace MindTouch.Traum.Webclient {
                 int useCommaAsSeparatorStartingAtOffset = (useCommaAsSeparator ? 0 : int.MaxValue);
 
                 // NOTE (steveb): 'expires' can contain commas, but cannot be quoted; so we need skip some characters when we find it before we allows commas again
-                if(useCommaAsSeparator && StringUtil.EqualsInvariantIgnoreCase(name, "expires")) {
+                if(useCommaAsSeparator && name.EqualsInvariantIgnoreCase("expires")) {
                     useCommaAsSeparatorStartingAtOffset = 6;
                 }
 
@@ -456,48 +292,6 @@ namespace MindTouch.Traum.Webclient {
 
         private static void UnsafeAddHeader(WebHeaderCollection collection, string key, string value) {
             _addHeaderMethod.Invoke(collection, new object[] { key, value });
-        }
-
-        /// <summary>
-        /// Derive request uri from the HttpContext.
-        /// </summary>
-        /// <param name="context">Source context.</param>
-        /// <returns>Request uri.</returns>
-        public static XUri FromHttpContext(HttpListenerContext context) {
-
-            // Note (arnec): RawUrl seems to have a leading //, at least on windows, which we need
-            // to trim to at least just a /
-            return FromHttpContextComponents(context.Request.Url, context.Request.RawUrl.Remove(0, 1));
-        }
-
-        /// <summary>
-        /// Derive request uri from the HttpContext.
-        /// </summary>
-        /// <param name="context">Source context.</param>
-        /// <returns>Request uri.</returns>
-        public static XUri FromHttpContext(HttpContext context) {
-            return FromHttpContextComponents(context.Request.Url, context.Request.RawUrl);
-        }
-
-        /// <summary>
-        /// Build request uri from decoded uri and raw path.
-        /// </summary>
-        /// <param name="uri">Already decoded uri.</param>
-        /// <param name="rawpath">Raw path string.</param>
-        /// <returns>Properly encoded request uri.</returns>
-        public static XUri FromHttpContextComponents(Uri uri, string rawpath) {
-
-            // Note (arnec): RawUrl is only the path portion, lacking SchemeHostPort
-            // but Url does path decoding, so we have to construct the url ourselves
-            var parsed = new XUri(uri.GetLeftPart(UriPartial.Authority));
-            try {
-                parsed = parsed.AtAbsolutePath(rawpath);
-            } catch {
-                // need to try to do an extra pass at encoding the uri, just in case
-                rawpath = _encodingFixUpRegex.Replace(rawpath, m => String.Format("%{0}", StringUtil.HexStringFromBytes(Encoding.ASCII.GetBytes((string)m.Value))));
-                parsed = parsed.AtAbsolutePath(rawpath);
-            }
-            return parsed;
         }
     }
 }

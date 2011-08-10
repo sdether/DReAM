@@ -30,7 +30,7 @@ namespace MindTouch.Traum.Webclient.Test.Mock {
 
         // Note (arnec): This is a field, not constant so that access triggers the static constructor
         public readonly static string DEFAULT = "mock://mock";
-        private static readonly MockPlug2.IMockInvokee DefaultInvokee = new MockPlug2.MockInvokee(null, (p, v, u, r) => DreamMessage.Ok().AsCompletedTask(), int.MaxValue);
+        private static readonly MockPlug.IMockInvokee DefaultInvokee = new MockPlug.MockInvokee(null, (p, v, u, r) => DreamMessage.Ok().AsCompletedTask(), int.MaxValue);
         private static readonly Logger.ILog _log = Logger.CreateLog();
 
         //--- Class Constructors ---
@@ -39,8 +39,8 @@ namespace MindTouch.Traum.Webclient.Test.Mock {
         }
 
         //--- Fields ---
-        private readonly Dictionary<XUri, MockPlug2.IMockInvokee> _registry = new Dictionary<XUri, MockPlug2.IMockInvokee>();
-        private readonly XUriMap<MockPlug2.IMockInvokee> _map = new XUriMap<MockPlug2.IMockInvokee>();
+        private readonly Dictionary<XUri, MockPlug.IMockInvokee> _registry = new Dictionary<XUri, MockPlug.IMockInvokee>();
+        private readonly XUriMap<MockPlug.IMockInvokee> _map = new XUriMap<MockPlug.IMockInvokee>();
 
         //--- Events ---
         public event EventHandler AllDeregistered;
@@ -57,8 +57,8 @@ namespace MindTouch.Traum.Webclient.Test.Mock {
         }
 
 
-        private MockPlug2.IMockInvokee GetBestMatch(XUri uri) {
-            MockPlug2.IMockInvokee invokee;
+        private MockPlug.IMockInvokee GetBestMatch(XUri uri) {
+            MockPlug.IMockInvokee invokee;
 
             // using _registry as our guard for both _map and _registry, since they are always modified in sync
             lock(_registry) {
@@ -77,7 +77,7 @@ namespace MindTouch.Traum.Webclient.Test.Mock {
             return Task.Factory.StartNew(() => match.Invoke(plug, verb, uri, MemorizeAndClone(request)).Result);
         }
 
-        public void Register(MockPlug2.IMockInvokee invokee) {
+        public void Register(MockPlug.IMockInvokee invokee) {
             lock(_registry) {
                 if(_registry.ContainsKey(invokee.Uri)) {
                     throw new ArgumentException("the uri already has a mock registered");

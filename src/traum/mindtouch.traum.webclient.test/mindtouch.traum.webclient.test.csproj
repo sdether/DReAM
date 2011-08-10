@@ -100,9 +100,9 @@
     <Compile Include="AssertEx.cs" />
     <Compile Include="DreamMessageEx.cs" />
     <Compile Include="Logger.cs" />
-    <Compile Include="Mock\IMockPlug2.cs" />
+    <Compile Include="Mock\IMockPlug.cs" />
     <Compile Include="Mock\MockEndpoint.cs" />
-    <Compile Include="MockPlug2.cs" />
+    <Compile Include="MockPlug.cs" />
     <Compile Include="Mock\MockPlugException.cs" />
     <Compile Include="Mock\MockPlugInvocation.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

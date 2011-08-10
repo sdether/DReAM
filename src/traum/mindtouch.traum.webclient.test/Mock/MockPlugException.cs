@@ -23,7 +23,7 @@ using System;
 namespace MindTouch.Traum.Webclient.Test.Mock {
 
     /// <summary>
-    /// Exception thrown by a <see cref="MockPlug2"/> failing verification.
+    /// Exception thrown by a <see cref="MockPlug"/> failing verification.
     /// </summary>
     public class MockPlugException : Exception {
         internal MockPlugException(string message) : base(message) { }

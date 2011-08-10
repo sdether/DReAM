@@ -90,25 +90,25 @@
   <ItemGroup>
     <Compile Include="AsyncStreamUtils.cs" />
     <Compile Include="AsyncStreamCopier.cs" />
-    <Compile Include="cultureutil.cs" />
+    <Compile Include="ContentDisposition.cs" />
     <Compile Include="DateTimeUtil.cs" />
-    <Compile Include="dreamutil.cs" />
+    <Compile Include="DreamStatus.cs" />
     <Compile Include="HttpUtil.cs" />
     <Compile Include="DreamCookie.cs" />
     <Compile Include="DreamCookieJar.cs" />
     <Compile Include="DreamHeaders.cs" />
     <Compile Include="DreamMessage.cs" />
     <Compile Include="Logger.cs" />
-    <Compile Include="mimetype.cs" />
+    <Compile Include="MimeType.cs" />
     <Compile Include="HttpPlugEndpoint.cs" />
     <Compile Include="IPlugEndpoint.cs" />
     <Compile Include="Plug.cs" />
     <Compile Include="ResourcePlugEndpoint.cs" />
-    <Compile Include="XriPlugEndpoint.cs" />
+    <Compile Include="Scheme.cs" />
+    <Compile Include="Verb.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="stringutil.cs" />
+    <Compile Include="StringEx.cs" />
     <Compile Include="TraumExtensions.cs" />
-    <Compile Include="types.cs" />
     <Compile Include="XUri.cs" />
     <Compile Include="XUriMap.cs" />
   </ItemGroup>

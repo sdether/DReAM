@@ -102,7 +102,7 @@ namespace MindTouch.Traum.Webclient {
                         // set default domain if needed
                         if(string.IsNullOrEmpty(cookie.Domain)) {
                             cookie = cookie.WithHostPort(uri.HostPort);
-                        } else if(!StringUtil.EqualsInvariantIgnoreCase(cookie.Domain, uri.HostPort)) {
+                        } else if(!cookie.Domain.EqualsInvariantIgnoreCase(uri.HostPort)) {
 
                             // domain doesn't match, ignore cookie
                             continue;
@@ -179,7 +179,7 @@ namespace MindTouch.Traum.Webclient {
                     // TODO (steveb): we need to add support for '.' prefixes on the domain name
 
                     // check if cookie matches the expired cookie
-                    if(StringUtil.EqualsInvariantIgnoreCase(cookie.Domain, updatedCookie.Domain) && StringUtil.EqualsInvariantIgnoreCase(cookie.Name, updatedCookie.Name) && (cookie.Secure == updatedCookie.Secure)) {
+                    if(cookie.Domain.EqualsInvariantIgnoreCase(updatedCookie.Domain) && cookie.Name.EqualsInvariantIgnoreCase(updatedCookie.Name) && (cookie.Secure == updatedCookie.Secure)) {
                         _cookies[i] = updatedCookie;
                         return;
                     }
@@ -205,7 +205,7 @@ namespace MindTouch.Traum.Webclient {
                     }
                 }
             } else if(_cookies != null) {
-                List<DreamCookie> expired = new List<DreamCookie>();
+                var expired = new List<DreamCookie>();
                 foreach(DreamCookie cookie in _cookies) {
 
                     // check if cookie is expired; if so, remove it
@@ -217,7 +217,7 @@ namespace MindTouch.Traum.Webclient {
                     // TODO (steveb): we need to add support for '.' prefixes on the domain name
 
                     // check if cookie matches the expired cookie
-                    if(StringUtil.EqualsInvariantIgnoreCase(cookie.Domain, expiredCookie.Domain) && StringUtil.EqualsInvariantIgnoreCase(cookie.Name, expiredCookie.Name) && (cookie.Secure == expiredCookie.Secure)) {
+                    if(cookie.Domain.EqualsInvariantIgnoreCase(expiredCookie.Domain) && cookie.Name.EqualsInvariantIgnoreCase(expiredCookie.Name) && (cookie.Secure == expiredCookie.Secure)) {
                         expired.Add(cookie);
                         continue;
                     }
@@ -240,7 +240,7 @@ namespace MindTouch.Traum.Webclient {
 
             // collect all cookies that are valid and apply to this uri
             if(_cookies != null) {
-                List<DreamCookie> expired = new List<DreamCookie>();
+                var expired = new List<DreamCookie>();
                 foreach(DreamCookie cookie in _cookies) {
 
                     // check if cookie is expired; if so, remove it
@@ -252,7 +252,7 @@ namespace MindTouch.Traum.Webclient {
                     // TODO (steveb): we need to add support for '.' prefixes on the domain name
 
                     // check if cookie matches the host and uri
-                    if(StringUtil.EqualsInvariantIgnoreCase(cookie.Domain, uri.HostPort) && (!cookie.Secure || (cookie.Secure && StringUtil.EqualsInvariantIgnoreCase(uri.Scheme, "https")))) {
+                    if(cookie.Domain.EqualsInvariantIgnoreCase(uri.HostPort) && (!cookie.Secure || (cookie.Secure && uri.Scheme.EqualsInvariantIgnoreCase("https")))) {
                         result.Add(cookie);
                     }
                 }

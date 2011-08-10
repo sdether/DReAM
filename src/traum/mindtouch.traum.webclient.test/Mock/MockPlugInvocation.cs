@@ -23,7 +23,7 @@
 namespace MindTouch.Traum.Webclient.Test.Mock {
 
     /// <summary>
-    /// Provides access to <see cref="MockPlug2"/> invocation values, used in defining the <see cref="MockPlug2.Returns(DreamMessage)"/> callback.
+    /// Provides access to <see cref="MockPlug"/> invocation values, used in defining the <see cref="MockPlug.Returns(DreamMessage)"/> callback.
     /// </summary>
     public class MockPlugInvocation {
 

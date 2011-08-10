@@ -271,29 +271,29 @@ namespace MindTouch.Traum.Webclient {
             string name;
             string value;
             while(ParseNameValue(out name, out value, text, ref index, true)) {
-                if(StringUtil.EqualsInvariantIgnoreCase(name, "comment")) {
+                if(name.EqualsInvariantIgnoreCase("comment")) {
                     comment = value;
-                } else if(StringUtil.EqualsInvariantIgnoreCase(name, "commenturl")) {
+                } else if(name.EqualsInvariantIgnoreCase("commenturl")) {
                     commentUri = new XUri(value);
-                } else if(StringUtil.EqualsInvariantIgnoreCase(name, "domain")) {
+                } else if(name.EqualsInvariantIgnoreCase("domain")) {
                     domain = value;
-                } else if(StringUtil.EqualsInvariantIgnoreCase(name, "path")) {
+                } else if(name.EqualsInvariantIgnoreCase("path")) {
                     path = value;
-                } else if(StringUtil.EqualsInvariantIgnoreCase(name, "max-age")) {
+                } else if(name.EqualsInvariantIgnoreCase("max-age")) {
                     expires = DateTime.UtcNow.AddSeconds(int.Parse(value, NumberFormatInfo.InvariantInfo));
-                } else if(StringUtil.EqualsInvariantIgnoreCase(name, "expires")) {
+                } else if(name.EqualsInvariantIgnoreCase("expires")) {
                     expires = ParseCookieDateTimeString(value);
-                } else if(StringUtil.EqualsInvariantIgnoreCase(name, "port")) {
+                } else if(name.EqualsInvariantIgnoreCase("port")) {
 
                     // TODO (steveb): why is this commented out?
                     // result.Port = value;
-                } else if(StringUtil.EqualsInvariantIgnoreCase(name, "version")) {
+                } else if(name.EqualsInvariantIgnoreCase("version")) {
                     version = int.Parse(value, NumberFormatInfo.InvariantInfo);
-                } else if(StringUtil.EqualsInvariantIgnoreCase(name, "discard")) {
+                } else if(name.EqualsInvariantIgnoreCase("discard")) {
                     discard = true;
-                } else if(StringUtil.EqualsInvariantIgnoreCase(name, "secure")) {
+                } else if(name.EqualsInvariantIgnoreCase("secure")) {
                     secure = true;
-                } else if(StringUtil.EqualsInvariantIgnoreCase(name, "httponly")) {
+                } else if(name.EqualsInvariantIgnoreCase("httponly")) {
                     httpOnly = true;
                 } else {
 

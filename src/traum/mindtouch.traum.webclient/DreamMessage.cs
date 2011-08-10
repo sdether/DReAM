@@ -285,7 +285,7 @@ namespace MindTouch.Traum.Webclient {
                 FileStream stream = File.OpenRead(filename);
                 result = new DreamMessage(DreamStatus.Ok, null, contentType, stream.Length, stream);
             }
-            if((displayName != null) && !StringUtil.EqualsInvariantIgnoreCase(Path.GetFileName(filename), displayName)) {
+            if((displayName != null) && !Path.GetFileName(filename).EqualsInvariantIgnoreCase(displayName)) {
                 result.Headers.ContentDisposition = new ContentDisposition(true, File.GetLastWriteTimeUtc(filename), null, null, displayName, result.ContentLength);
             }
             return result;

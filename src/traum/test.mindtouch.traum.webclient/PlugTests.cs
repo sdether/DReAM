@@ -51,8 +51,8 @@ namespace MindTouch.Traum.Webclient.Test {
 
         [TearDown]
         public void Teardown() {
+            Dream.Test.MockPlug.DeregisterAll();
             MockPlug.DeregisterAll();
-            MockPlug2.DeregisterAll();
         }
 
         [Test]
@@ -535,13 +535,13 @@ namespace MindTouch.Traum.Webclient.Test {
         [Test]
         public void Result_timeout_is_used_for_message_memorization_and_results_in_ResponseDataTransferTimeout() {
             var blockingStream = new MockBlockingStream();
-            MockPlug2.Register(new XUri("mock://mock"), (plug, verb, uri, request) => {
+            MockPlug.Register(new XUri("mock://mock"), (plug, verb, uri, request) => {
                 _log.Debug("returning blocking stream");
                 return new DreamMessage(DreamStatus.Ok, null, MimeType.TEXT, -1, blockingStream).AsCompletedTask();
             });
             var stopwatch = Stopwatch.StartNew();
             _log.Debug("calling plug");
-            var r = Plug.New(MockPlug2.DefaultUri)
+            var r = Plug.New(MockPlug.DefaultUri)
                 .WithTimeout(1.Seconds())
                 .Get(3.Seconds())
                 .Block();
@@ -558,7 +558,7 @@ namespace MindTouch.Traum.Webclient.Test {
         [Test]
         public void Plug_timeout_on_request_returns_RequestConnectionTimeout_not_ResponseDataTransferTimeout() {
             var blockingStream = new MockBlockingStream();
-            MockPlug2.Register(new XUri("mock://mock"), (plug, verb, uri, request) => {
+            MockPlug.Register(new XUri("mock://mock"), (plug, verb, uri, request) => {
                 _log.Debug("blocking request");
                 Thread.Sleep(5.Seconds());
                 _log.Debug("returning blocking stream");
@@ -566,7 +566,7 @@ namespace MindTouch.Traum.Webclient.Test {
             });
             var stopwatch = Stopwatch.StartNew();
             _log.Debug("calling plug");
-            var r = Plug.New(MockPlug2.DefaultUri)
+            var r = Plug.New(MockPlug.DefaultUri)
                 .WithTimeout(1.Seconds())
                 .Get(5.Seconds())
                 .Block();

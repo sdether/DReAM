@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 
 namespace MindTouch.Traum.Webclient {
-    internal static class TraumExtensions {
+    public static class TraumExtensions {
         public static bool IsStreamMemorized(this Stream stream) {
             return stream is MemoryStream;
         }
