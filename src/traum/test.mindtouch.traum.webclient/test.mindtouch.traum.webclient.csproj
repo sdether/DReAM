@@ -94,29 +94,12 @@
     <Compile Include="AssemblyInfo.cs" />
     <Compile Include="LocalEndpointBridgeTests.cs" />
     <Compile Include="MockPlugTests.cs" />
-    <Compile Include="Plug2AsyncMethodTests.cs" />
-    <Compile Include="Plug2Tests.cs" />
+    <Compile Include="PlugAsyncMethodTests.cs" />
+    <Compile Include="PlugTests.cs" />
     <Compile Include="TestEx.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Resources\html-bom-utf16be.txt" />
-    <EmbeddedResource Include="Resources\html-bom-utf16le.txt" />
-    <EmbeddedResource Include="Resources\html-bom-utf8.txt" />
-    <EmbeddedResource Include="Resources\xml-big5.txt" />
-    <EmbeddedResource Include="Resources\xml-gb2312.txt" />
-    <EmbeddedResource Include="Resources\xml-utf8-chinese.txt" />
-    <EmbeddedResource Include="Resources\resource-test.txt" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Resources\xml-euc-jp.txt" />
-    <EmbeddedResource Include="Resources\xml-iso-2022-jp.txt" />
-    <EmbeddedResource Include="Resources\xml-little-endian-jp.txt" />
-    <EmbeddedResource Include="Resources\xml-shift-jis.txt" />
-    <EmbeddedResource Include="Resources\xml-utf-16-jp.txt" />
-    <EmbeddedResource Include="Resources\xml-utf-8-jp.txt" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties\" />

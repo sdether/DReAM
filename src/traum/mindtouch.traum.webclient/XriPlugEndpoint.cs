@@ -25,7 +25,7 @@ using System.Threading.Tasks;
 
 namespace MindTouch.Traum.Webclient {
 
-    internal class XriPlugEndpoint : IPlugEndpoint2 {
+    internal class XriPlugEndpoint : IPlugEndpoint {
 
         //--- Methods ---
         public int GetScoreWithNormalizedUri(XUri uri, out XUri normalized) {
@@ -38,7 +38,7 @@ namespace MindTouch.Traum.Webclient {
             }
         }
 
-        public Task<DreamMessage2> Invoke(Plug2 plug, string verb, XUri uri, DreamMessage2 request, TimeSpan timeout) {
+        public Task<DreamMessage> Invoke(Plug plug, string verb, XUri uri, DreamMessage request, TimeSpan timeout) {
 
             // NOTE (steveb): we convert 'xri://@name/path?params' into 'http://xri.net/@name/path?params'
 
@@ -52,7 +52,7 @@ namespace MindTouch.Traum.Webclient {
             // build new plug
             List<PlugHandler2> preHandlers = (plug.PreHandlers != null) ? new List<PlugHandler2>(plug.PreHandlers) : null;
             List<PlugHandler2> postHandlers = (plug.PostHandlers != null) ? new List<PlugHandler2>(plug.PostHandlers) : null;
-            Plug2 xri = new Plug2(new XUri("http", null, null, "xri.net", 80, segments.ToArray(), uri.TrailingSlash, uri.Params, uri.Fragment), plug.Timeout, request.Headers, preHandlers, postHandlers, plug.Credentials, plug.CookieJar, plug.MaxAutoRedirects);
+            Plug xri = new Plug(new XUri("http", null, null, "xri.net", 80, segments.ToArray(), uri.TrailingSlash, uri.Params, uri.Fragment), plug.Timeout, request.Headers, preHandlers, postHandlers, plug.Credentials, plug.CookieJar, plug.MaxAutoRedirects);
 
             // add 'Accept' header for 'application/xrds+xml' mime-type
             if((xri.Headers == null) || (xri.Headers.Accept == null)) {

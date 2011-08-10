@@ -26,7 +26,7 @@ namespace MindTouch.Traum.Webclient.Test {
         [Test]
         public void Local_scheme_gets_redirected_to_Dream() {
             MockPlug.Setup("local://foo/bar").Returns(TestEx.DreamMessage("foobar"));
-            var msg = Plug2.New("local://foo").At("bar").Get().Result;
+            var msg = Plug.New("local://foo").At("bar").Get().Result;
             Assert.IsTrue(msg.IsSuccessful, "request failed:" + msg.Status);
             Assert.AreEqual("foobar", msg.ToText());
         }
@@ -36,7 +36,7 @@ namespace MindTouch.Traum.Webclient.Test {
             using(var hostInfo = DreamTestHelper.CreateRandomPortHost()) {
                 var mock = MockService.CreateMockService(hostInfo);
                 mock.Service.CatchAllCallback = (context, request, response) => response.Return(TestEx.DreamMessage("foobar"));
-                var msg = mock.AtLocalMachine.AsPlug2().Get().Result;
+                var msg = mock.AtLocalMachine.AsTraumPlug().Get().Result;
                 Assert.IsTrue(msg.IsSuccessful, "request failed:" + msg.Status);
                 Assert.AreEqual("foobar", msg.ToText());
             }

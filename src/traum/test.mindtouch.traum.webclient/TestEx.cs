@@ -6,14 +6,14 @@ using MindTouch.Dream;
 
 namespace MindTouch.Traum.Webclient.Test {
     public static class TestEx {
-        public static DreamMessage DreamMessage(string content) {
+        public static Dream.DreamMessage DreamMessage(string content) {
             return Dream.DreamMessage.Ok(Dream.MimeType.TEXT_UTF8, content);
         }
 
-        public static Plug2 AsPlug2(this Plug plug) {
+        public static Plug AsTraumPlug(this Dream.Plug plug) {
 
             // TODO: cookies?
-            return Plug2.New(plug.Uri.ToString());
+            return Plug.New(plug.Uri.ToString());
         }
 
         public static XUri ToTraumUri(this Dream.XUri uri) {
@@ -24,7 +24,7 @@ namespace MindTouch.Traum.Webclient.Test {
             return new Dream.XUri(uri.ToString(true));
         }
 
-        public static XUri ToTraumUri(this Plug plug) {
+        public static XUri ToTraumUri(this Dream.Plug plug) {
             return new XUri(plug.Uri.ToString(true));
         }
     }

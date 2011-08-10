@@ -77,7 +77,8 @@
     <ErrorReport>prompt</ErrorReport>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="log4net">
+    <Reference Include="log4net, Version=1.2.10.0, Culture=neutral, PublicKeyToken=1b44e1d426115821, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\redist\log4net.dll</HintPath>
     </Reference>
     <Reference Include="System" />
@@ -96,13 +97,12 @@
     <Compile Include="DreamCookie.cs" />
     <Compile Include="DreamCookieJar.cs" />
     <Compile Include="DreamHeaders.cs" />
-    <Compile Include="DreamMessage2.cs" />
-    <Compile Include="Exceptions.cs" />
-    <Compile Include="LogUtils.cs" />
+    <Compile Include="DreamMessage.cs" />
+    <Compile Include="Logger.cs" />
     <Compile Include="mimetype.cs" />
     <Compile Include="HttpPlugEndpoint.cs" />
-    <Compile Include="IPlugEndpoint2.cs" />
-    <Compile Include="Plug2.cs" />
+    <Compile Include="IPlugEndpoint.cs" />
+    <Compile Include="Plug.cs" />
     <Compile Include="ResourcePlugEndpoint.cs" />
     <Compile Include="XriPlugEndpoint.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

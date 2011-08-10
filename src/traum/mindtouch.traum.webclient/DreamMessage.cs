@@ -30,26 +30,26 @@ namespace MindTouch.Traum.Webclient {
     /// <summary>
     /// Provides the Dream encapsulations of Http request and response objects.
     /// </summary>
-    public class DreamMessage2 {
+    public class DreamMessage {
 
         //--- Class Fields ---
-        private static readonly log4net.ILog _log = LogUtils.CreateLog();
+        private static readonly Logger.ILog _log = Logger.CreateLog();
 
         //--- Class Methods ---
         /// <summary>
         /// New Message with HTTP status: Ok (200).
         /// </summary>
-        /// <returns>New DreamMessage2.</returns>
-        public static DreamMessage2 Ok() {
-            return new DreamMessage2(DreamStatus.Ok);
+        /// <returns>New DreamMessage.</returns>
+        public static DreamMessage Ok() {
+            return new DreamMessage(DreamStatus.Ok);
         }
 
         /// <summary>
         /// New Message with HTTP status: Ok (200).
         /// </summary>
-        /// <returns>New DreamMessage2.</returns>
-        public static DreamMessage2 Ok(string content) {
-            return new DreamMessage2(DreamStatus.Ok, null, MimeType.TEXT_UTF8, content);
+        /// <returns>New DreamMessage.</returns>
+        public static DreamMessage Ok(string content) {
+            return new DreamMessage(DreamStatus.Ok, null, MimeType.TEXT_UTF8, content);
         }
 
         /// <summary>
@@ -57,18 +57,18 @@ namespace MindTouch.Traum.Webclient {
         /// </summary>
         /// <param name="contentType">Content Mime-Type.</param>
         /// <param name="text">Message body.</param>
-        /// <returns>New DreamMessage2.</returns>
-        public static DreamMessage2 Ok(MimeType contentType, string text) {
-            return new DreamMessage2(DreamStatus.Ok, null, contentType, text);
+        /// <returns>New DreamMessage.</returns>
+        public static DreamMessage Ok(MimeType contentType, string text) {
+            return new DreamMessage(DreamStatus.Ok, null, contentType, text);
         }
 
         /// <summary>
         /// New Message with HTTP status: Ok (200).
         /// </summary>
         /// <param name="values">Name/value pair body.</param>
-        /// <returns>New DreamMessage2.</returns>
-        public static DreamMessage2 Ok(KeyValuePair<string, string>[] values) {
-            return new DreamMessage2(DreamStatus.Ok, null, MimeType.FORM_URLENCODED, XUri.RenderParams(values) ?? string.Empty);
+        /// <returns>New DreamMessage.</returns>
+        public static DreamMessage Ok(KeyValuePair<string, string>[] values) {
+            return new DreamMessage(DreamStatus.Ok, null, MimeType.FORM_URLENCODED, XUri.RenderParams(values) ?? string.Empty);
         }
 
         /// <summary>
@@ -76,9 +76,9 @@ namespace MindTouch.Traum.Webclient {
         /// </summary>
         /// <param name="contentType">Content Mime-Type.</param>
         /// <param name="content">Message body.</param>
-        /// <returns>New DreamMessage2.</returns>
-        public static DreamMessage2 Ok(MimeType contentType, byte[] content) {
-            return new DreamMessage2(DreamStatus.Ok, null, contentType, content);
+        /// <returns>New DreamMessage.</returns>
+        public static DreamMessage Ok(MimeType contentType, byte[] content) {
+            return new DreamMessage(DreamStatus.Ok, null, contentType, content);
         }
 
         /// <summary>
@@ -87,66 +87,66 @@ namespace MindTouch.Traum.Webclient {
         /// <param name="contentType">Content Mime-Type.</param>
         /// <param name="contentLength">Content length.</param>
         /// <param name="content">Message body.</param>
-        /// <returns>New DreamMessage2.</returns>
-        public static DreamMessage2 Ok(MimeType contentType, long contentLength, Stream content) {
-            return new DreamMessage2(DreamStatus.Ok, null, contentType, contentLength, content);
+        /// <returns>New DreamMessage.</returns>
+        public static DreamMessage Ok(MimeType contentType, long contentLength, Stream content) {
+            return new DreamMessage(DreamStatus.Ok, null, contentType, contentLength, content);
         }
 
         /// <summary>
         /// New Message with HTTP status: Not Modified (304).
         /// </summary>
         /// <returns>New DreamMessage.</returns>
-        public static DreamMessage2 NotModified() {
-            return new DreamMessage2(DreamStatus.NotModified);
+        public static DreamMessage NotModified() {
+            return new DreamMessage(DreamStatus.NotModified);
         }
 
         /// <summary>
         /// New Message with HTTP status: Not Found (404).
         /// </summary>
         /// <param name="reason">Reason.</param>
-        /// <returns>New DreamMessage2.</returns>
-        public static DreamMessage2 NotFound(string reason) {
+        /// <returns>New DreamMessage.</returns>
+        public static DreamMessage NotFound(string reason) {
             _log.DebugFormat("Response: Not Found - {0}", reason);
-            return new DreamMessage2(DreamStatus.NotFound, null, MimeType.TEXT, reason);
+            return new DreamMessage(DreamStatus.NotFound, null, MimeType.TEXT, reason);
         }
 
         /// <summary>
         /// New Message with HTTP status: Bad Request (400).
         /// </summary>
         /// <param name="reason">Reason.</param>
-        /// <returns>New DreamMessage2.</returns>
-        public static DreamMessage2 BadRequest(string reason) {
+        /// <returns>New DreamMessage.</returns>
+        public static DreamMessage BadRequest(string reason) {
             _log.DebugFormat("Response: Bad Request - {0}", reason);
-            return new DreamMessage2(DreamStatus.BadRequest, null, MimeType.TEXT, reason);
+            return new DreamMessage(DreamStatus.BadRequest, null, MimeType.TEXT, reason);
         }
 
         /// <summary>
         /// New Message with HTTP status: Not Implemented (501).
         /// </summary>
         /// <param name="reason">Reason.</param>
-        /// <returns>New DreamMessage2.</returns>
-        public static DreamMessage2 NotImplemented(string reason) {
+        /// <returns>New DreamMessage.</returns>
+        public static DreamMessage NotImplemented(string reason) {
             _log.DebugFormat("Response: Not Implemented - {0}", reason);
-            return new DreamMessage2(DreamStatus.NotImplemented, null, MimeType.TEXT, reason);
+            return new DreamMessage(DreamStatus.NotImplemented, null, MimeType.TEXT, reason);
         }
 
         /// <summary>
         /// New Message with HTTP status: Conflict (409).
         /// </summary>
         /// <param name="reason">Reason.</param>
-        /// <returns>New DreamMessage2.</returns>
-        public static DreamMessage2 Conflict(string reason) {
+        /// <returns>New DreamMessage.</returns>
+        public static DreamMessage Conflict(string reason) {
             _log.DebugFormat("Response: Conflict - {0}", reason);
-            return new DreamMessage2(DreamStatus.Conflict, null, MimeType.TEXT, reason);
+            return new DreamMessage(DreamStatus.Conflict, null, MimeType.TEXT, reason);
         }
 
         /// <summary>
         /// New Message with HTTP status: Found (302)
         /// </summary>
         /// <param name="uri">Redirect target.</param>
-        /// <returns>New DreamMessage2.</returns>
-        public static DreamMessage2 Redirect(XUri uri) {
-            var result = new DreamMessage2(DreamStatus.Found);
+        /// <returns>New DreamMessage.</returns>
+        public static DreamMessage Redirect(XUri uri) {
+            var result = new DreamMessage(DreamStatus.Found);
             result.Headers.Location = uri;
             return result;
         }
@@ -156,10 +156,10 @@ namespace MindTouch.Traum.Webclient {
         /// </summary>
         /// <param name="accessRealm">Access Realm.</param>
         /// <param name="reason">Reason.</param>
-        /// <returns>New DreamMessage2.</returns>
-        public static DreamMessage2 AccessDenied(string accessRealm, string reason) {
+        /// <returns>New DreamMessage.</returns>
+        public static DreamMessage AccessDenied(string accessRealm, string reason) {
             _log.DebugFormat("Response: Unauthorized - {0}", reason);
-            var result = new DreamMessage2(DreamStatus.Unauthorized, null, MimeType.TEXT, reason);
+            var result = new DreamMessage(DreamStatus.Unauthorized, null, MimeType.TEXT, reason);
             result.Headers.Authenticate = string.Format("Basic realm=\"{0}\"", accessRealm);
             return result;
         }
@@ -168,20 +168,20 @@ namespace MindTouch.Traum.Webclient {
         /// New Message with HTTP status: LicenseRequired (402)
         /// </summary>
         /// <param name="reason">Reason.</param>
-        /// <returns>New DreamMessage2.</returns>
-        public static DreamMessage2 LicenseRequired(string reason) {
+        /// <returns>New DreamMessage.</returns>
+        public static DreamMessage LicenseRequired(string reason) {
             _log.DebugFormat("Response: LicenseRequired - {0}", reason);
-            return new DreamMessage2(DreamStatus.LicenseRequired, null, MimeType.TEXT, reason);
+            return new DreamMessage(DreamStatus.LicenseRequired, null, MimeType.TEXT, reason);
         }
 
         /// <summary>
         /// New Message with HTTP status: Forbidden (403)
         /// </summary>
         /// <param name="reason">Reason.</param>
-        /// <returns>New DreamMessage2.</returns>
-        public static DreamMessage2 Forbidden(string reason) {
+        /// <returns>New DreamMessage.</returns>
+        public static DreamMessage Forbidden(string reason) {
             _log.DebugFormat("Response: Forbidden - {0}", reason);
-            return new DreamMessage2(DreamStatus.Forbidden, null, MimeType.TEXT, reason);
+            return new DreamMessage(DreamStatus.Forbidden, null, MimeType.TEXT, reason);
         }
 
         /// <summary>
@@ -189,10 +189,10 @@ namespace MindTouch.Traum.Webclient {
         /// </summary>
         /// <param name="allowedMethods">Array of allowed request Verbs.</param>
         /// <param name="reason">Reason.</param>
-        /// <returns>New DreamMessage2.</returns>
-        public static DreamMessage2 MethodNotAllowed(string[] allowedMethods, string reason) {
+        /// <returns>New DreamMessage.</returns>
+        public static DreamMessage MethodNotAllowed(string[] allowedMethods, string reason) {
             _log.DebugFormat("Response: MethodNotAllowed - {0}", reason);
-            var result = new DreamMessage2(DreamStatus.MethodNotAllowed, null, MimeType.TEXT, reason);
+            var result = new DreamMessage(DreamStatus.MethodNotAllowed, null, MimeType.TEXT, reason);
             result.Headers.Allow = string.Join(",", allowedMethods);
             return result;
         }
@@ -200,59 +200,59 @@ namespace MindTouch.Traum.Webclient {
         /// <summary>
         /// New Message with HTTP status: Internal Error (500)
         /// </summary>
-        /// <returns>New DreamMessage2.</returns>
-        public static DreamMessage2 InternalError() {
-            _log.DebugMethodCall("Response: Internal Error");
-            return new DreamMessage2(DreamStatus.InternalError);
+        /// <returns>New DreamMessage.</returns>
+        public static DreamMessage InternalError() {
+            _log.Debug("Response: Internal Error");
+            return new DreamMessage(DreamStatus.InternalError);
         }
 
         /// <summary>
         /// New Message with HTTP status: Internal Error (500)
         /// </summary>
         /// <param name="text">Error message.</param>
-        /// <returns>New DreamMessage2.</returns>
-        public static DreamMessage2 InternalError(string reason) {
-            _log.DebugMethodCall("Response: Internal Error", reason);
-            return new DreamMessage2(DreamStatus.InternalError, null, MimeType.TEXT, reason);
+        /// <returns>New DreamMessage.</returns>
+        public static DreamMessage InternalError(string reason) {
+            _log.DebugFormat("Response: Internal Error - {0}", reason);
+            return new DreamMessage(DreamStatus.InternalError, null, MimeType.TEXT, reason);
         }
 
         /// <summary>
         /// New Message with HTTP status: Internal Error (500)
         /// </summary>
         /// <param name="exception">Error.</param>
-        /// <returns>New DreamMessage2.</returns>
-        public static DreamMessage2 InternalError(Exception exception) {
+        /// <returns>New DreamMessage.</returns>
+        public static DreamMessage InternalError(Exception exception) {
             // TODO (arnec): need a better story for exceptions in messages
-            _log.DebugMethodCall("Response: Internal Error", exception.Message);
-            return new DreamMessage2(DreamStatus.InternalError, exception);
+            _log.DebugFormat("Response: Internal Error - {0}", exception.Message);
+            return new DreamMessage(DreamStatus.InternalError, exception);
         }
 
         /// <summary>
         /// New Message with HTTP status: Request Failed (11)
         /// </summary>
         /// <param name="exception">Error.</param>
-        /// <returns>New DreamMessage2.</returns>
-        public static DreamMessage2 RequestFailed(Exception exception) {
-            _log.DebugMethodCall("Response: Request Failed", exception.Message);
-            return new DreamMessage2(DreamStatus.RequestFailed, exception);
+        /// <returns>New DreamMessage.</returns>
+        public static DreamMessage RequestFailed(Exception exception) {
+            _log.DebugFormat("Response: Request Failed - {0}", exception.Message);
+            return new DreamMessage(DreamStatus.RequestFailed, exception);
         }
 
         /// <summary>
         /// New Message with HTTP status: Internal Error (500)
         /// </summary>
         /// <param name="e">Exception responsible for internal error.</param>
-        /// <returns>New DreamMessage2.</returns>
-        //public static DreamMessage2 InternalError(Exception e) {
+        /// <returns>New DreamMessage.</returns>
+        //public static DreamMessage InternalError(Exception e) {
         //    _log.DebugExceptionMethodCall(e, "Response: Internal Error");
-        //    return new DreamMessage2(DreamStatus.InternalError, null, MimeType.DREAM_EXCEPTION, (e != null) ? new XException2(e) : XDoc.Empty);
+        //    return new DreamMessage(DreamStatus.InternalError, null, MimeType.DREAM_EXCEPTION, (e != null) ? new XException2(e) : XDoc.Empty);
         //}
 
         /// <summary>
         /// Create a message from a file.
         /// </summary>
         /// <param name="filename">Path to file.</param>
-        /// <returns>New DreamMessage2.</returns>
-        public static DreamMessage2 FromFile(string filename) {
+        /// <returns>New DreamMessage.</returns>
+        public static DreamMessage FromFile(string filename) {
             return FromFile(filename, false);
         }
 
@@ -261,8 +261,8 @@ namespace MindTouch.Traum.Webclient {
         /// </summary>
         /// <param name="filename">Path to file.</param>
         /// <param name="omitFileContents">If <see langword="True"/> the contents of the file are omitted.</param>
-        /// <returns>New DreamMessage2.</returns>
-        public static DreamMessage2 FromFile(string filename, bool omitFileContents) {
+        /// <returns>New DreamMessage.</returns>
+        public static DreamMessage FromFile(string filename, bool omitFileContents) {
             return FromFile(filename, null, null, omitFileContents);
         }
 
@@ -273,17 +273,17 @@ namespace MindTouch.Traum.Webclient {
         /// <param name="contentType">Mime-Type of message.</param>
         /// <param name="displayName">File name to emit.</param>
         /// <param name="omitFileContents">If <see langword="True"/> the contents of the file are omitted.</param>
-        /// <returns>New DreamMessage2.</returns>
-        public static DreamMessage2 FromFile(string filename, MimeType contentType, string displayName, bool omitFileContents) {
+        /// <returns>New DreamMessage.</returns>
+        public static DreamMessage FromFile(string filename, MimeType contentType, string displayName, bool omitFileContents) {
             if(contentType == null) {
                 contentType = MimeType.FromFileExtension(filename);
             }
-            DreamMessage2 result;
+            DreamMessage result;
             if(omitFileContents) {
-                result = new DreamMessage2(DreamStatus.Ok, null, contentType, new FileInfo(filename).Length, Stream.Null);
+                result = new DreamMessage(DreamStatus.Ok, null, contentType, new FileInfo(filename).Length, Stream.Null);
             } else {
                 FileStream stream = File.OpenRead(filename);
-                result = new DreamMessage2(DreamStatus.Ok, null, contentType, stream.Length, stream);
+                result = new DreamMessage(DreamStatus.Ok, null, contentType, stream.Length, stream);
             }
             if((displayName != null) && !StringUtil.EqualsInvariantIgnoreCase(Path.GetFileName(filename), displayName)) {
                 result.Headers.ContentDisposition = new ContentDisposition(true, File.GetLastWriteTimeUtc(filename), null, null, displayName, result.ContentLength);
@@ -292,11 +292,11 @@ namespace MindTouch.Traum.Webclient {
         }
 
         /// <summary>
-        /// Get a status string from a DreamMessage2 or null, or null, if the message is null.
+        /// Get a status string from a DreamMessage or null, or null, if the message is null.
         /// </summary>
-        /// <param name="message">A DreamMessage2 instance or null.</param>
+        /// <param name="message">A DreamMessage instance or null.</param>
         /// <returns>The <see cref="Status"/> as an information string message if a non-null message was provide, or null otherwise.</returns>
-        public static string GetStatusStringOrNull(DreamMessage2 message) {
+        public static string GetStatusStringOrNull(DreamMessage message) {
             if(message != null) {
                 return string.Format("HTTP Status: {0}({1})", message.Status, (int)message.Status);
             }
@@ -325,7 +325,7 @@ namespace MindTouch.Traum.Webclient {
         /// </summary>
         /// <param name="status">Http status.</param>
         /// <param name="headers">Header collection.</param>
-        public DreamMessage2(DreamStatus status) {
+        public DreamMessage(DreamStatus status) {
             this.Status = status;
             this.Headers = new DreamHeaders();
             _bytes = new byte[0];
@@ -336,7 +336,7 @@ namespace MindTouch.Traum.Webclient {
         /// </summary>
         /// <param name="status">Http status.</param>
         /// <param name="headers">Header collection.</param>
-        public DreamMessage2(DreamStatus status, DreamHeaders headers) {
+        public DreamMessage(DreamStatus status, DreamHeaders headers) {
             this.Status = status;
             this.Headers = new DreamHeaders(headers);
             _bytes = new byte[0];
@@ -347,7 +347,7 @@ namespace MindTouch.Traum.Webclient {
         /// </summary>
         /// <param name="status">Http status.</param>
         /// <param name="exception">Error.</param>
-        public DreamMessage2(DreamStatus status, Exception exception) {
+        public DreamMessage(DreamStatus status, Exception exception) {
             this.Status = status;
             this.Headers = new DreamHeaders();
             _bytes = new byte[0];
@@ -361,7 +361,7 @@ namespace MindTouch.Traum.Webclient {
         /// <param name="contentType">Content Mime-Type</param>
         /// <param name="contentLength">Content byte langth</param>
         /// <param name="stream">Stream to uas as the source for the message's content.</param>
-        public DreamMessage2(DreamStatus status, DreamHeaders headers, MimeType contentType, long contentLength, Stream stream) {
+        public DreamMessage(DreamStatus status, DreamHeaders headers, MimeType contentType, long contentLength, Stream stream) {
             this.Status = status;
             this.Headers = new DreamHeaders(headers);
             if(contentLength != -1) {
@@ -381,7 +381,7 @@ namespace MindTouch.Traum.Webclient {
         /// <param name="headers">Header collection.</param>
         /// <param name="contentType">Content Mime-Type.</param>
         /// <param name="bytes">Message body.</param>
-        public DreamMessage2(DreamStatus status, DreamHeaders headers, MimeType contentType, byte[] bytes) {
+        public DreamMessage(DreamStatus status, DreamHeaders headers, MimeType contentType, byte[] bytes) {
             if(bytes == null) {
                 throw new ArgumentNullException("bytes");
             }
@@ -401,7 +401,7 @@ namespace MindTouch.Traum.Webclient {
         /// <param name="headers">Header collection.</param>
         /// <param name="contentType">Content Mime-Type.</param>
         /// <param name="text">Message body.</param>
-        public DreamMessage2(DreamStatus status, DreamHeaders headers, string text)
+        public DreamMessage(DreamStatus status, DreamHeaders headers, string text)
             : this(status, headers, MimeType.TEXT_UTF8, MimeType.TEXT_UTF8.CharSet.GetBytes(text)) { }
 
         /// <summary>
@@ -411,7 +411,7 @@ namespace MindTouch.Traum.Webclient {
         /// <param name="headers">Header collection.</param>
         /// <param name="contentType">Content Mime-Type.</param>
         /// <param name="text">Message body.</param>
-        public DreamMessage2(DreamStatus status, DreamHeaders headers, MimeType contentType, string text)
+        public DreamMessage(DreamStatus status, DreamHeaders headers, MimeType contentType, string text)
             : this(status, headers, contentType, contentType.CharSet.GetBytes(text)) { }
 
         //--- Properties ---
@@ -555,9 +555,9 @@ namespace MindTouch.Traum.Webclient {
         /// Clone the current message.
         /// </summary>
         /// <returns>A new message instance.</returns>
-        public DreamMessage2 Clone() {
+        public DreamMessage Clone() {
             byte[] bytes = ToBytes();
-            var result = new DreamMessage2(Status, Headers, ContentType, bytes);
+            var result = new DreamMessage(Status, Headers, ContentType, bytes);
 
             // length may differ for HEAD requests
             if(bytes.LongLength != ContentLength) {
@@ -586,7 +586,7 @@ namespace MindTouch.Traum.Webclient {
         /// </summary>
         /// <param name="timeout">The synchronization handle to return.</param>
         /// <returns>Synchronization handle for memorization completion.</returns>
-        public Task<DreamMessage2> Memorize(TimeSpan timeout) {
+        public Task<DreamMessage> Memorize(TimeSpan timeout) {
             return Memorize(-1, timeout);
         }
 
@@ -596,7 +596,7 @@ namespace MindTouch.Traum.Webclient {
         /// <param name="max">Maximum number of bytes to memorize.</param>
         /// <param name="timeout">Async timeout.</param>
         /// <returns>Synchronization handle for memorization completion.</returns>
-        public Task<DreamMessage2> Memorize(int max, TimeSpan timeout) {
+        public Task<DreamMessage> Memorize(int max, TimeSpan timeout) {
             _log.Debug("memorizing");
             // check if we need to call Memorize_Helper()
             if((_stream == null) || _stream.IsStreamMemorized()) {
@@ -619,7 +619,7 @@ namespace MindTouch.Traum.Webclient {
                 _streamOpen = false;
 
                 // throw size exceeded exception
-                return new InternalBufferOverflowException("message body exceeded max size").AsFaultedTask<DreamMessage2>();
+                return new InternalBufferOverflowException("message body exceeded max size").AsFaultedTask<DreamMessage>();
             }
             if(length < 0) {
                 length = int.MaxValue;
@@ -628,7 +628,7 @@ namespace MindTouch.Traum.Webclient {
             // NOTE: the content-length and body length may differ (e.g. HEAD verb)
 
             // copy contents asynchronously
-            var completion = new TaskCompletionSource<DreamMessage2>();
+            var completion = new TaskCompletionSource<DreamMessage>();
             _stream.MemorizeAsync(Math.Min(length, max + 1))
                 .ContinueWith(t => {
                     if(t.Result.Length > max) {

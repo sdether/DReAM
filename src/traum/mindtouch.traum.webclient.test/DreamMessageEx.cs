@@ -24,7 +24,7 @@ using NUnit.Framework;
 namespace MindTouch.Traum.Webclient.Test {
     
     /// <summary>
-    /// Extension methods for testing with <see cref="DreamMessage2"/>.
+    /// Extension methods for testing with <see cref="DreamMessage"/>.
     /// </summary>
     public static class DreamMessageEx {
 
@@ -33,7 +33,7 @@ namespace MindTouch.Traum.Webclient.Test {
         /// </summary>
         /// <param name="message">Message to examine.</param>
         /// <returns>error string if one is contained in the message.</returns>
-        public static string GetErrorString(this DreamMessage2 message) {
+        public static string GetErrorString(this DreamMessage message) {
             if(message.IsSuccessful) {
                 return null;
             }
@@ -45,7 +45,7 @@ namespace MindTouch.Traum.Webclient.Test {
         /// </summary>
         /// <param name="response">Response message.</param>
         /// <param name="status">Status to assert.</param>
-        public static void AssertStatus(this DreamMessage2 response, DreamStatus status) {
+        public static void AssertStatus(this DreamMessage response, DreamStatus status) {
             AssertStatus(response, status, null);
         }
 
@@ -55,7 +55,7 @@ namespace MindTouch.Traum.Webclient.Test {
         /// <param name="response">Response message.</param>
         /// <param name="status">Status to assert.</param>
         /// <param name="failureMessage">Failure message.</param>
-        public static void AssertStatus(this DreamMessage2 response, DreamStatus status, string failureMessage) {
+        public static void AssertStatus(this DreamMessage response, DreamStatus status, string failureMessage) {
             if(response.Status == status) {
                 return;
             }
@@ -74,7 +74,7 @@ namespace MindTouch.Traum.Webclient.Test {
         /// Assert that the response indicates a successful request.
         /// </summary>
         /// <param name="response">Response message.</param>
-        public static void AssertSuccess(this DreamMessage2 response) {
+        public static void AssertSuccess(this DreamMessage response) {
             AssertSuccess(response, null);
         }
 
@@ -83,7 +83,7 @@ namespace MindTouch.Traum.Webclient.Test {
         /// </summary>
         /// <param name="response">Response message.</param>
         /// <param name="failureMessage">Failure message.</param>
-        public static void AssertSuccess(this DreamMessage2 response, string failureMessage) {
+        public static void AssertSuccess(this DreamMessage response, string failureMessage) {
             if(response.IsSuccessful) {
                 return;
             }

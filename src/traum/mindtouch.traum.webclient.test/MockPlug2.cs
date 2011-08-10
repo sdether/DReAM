@@ -26,12 +26,11 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using MindTouch.Traum.Webclient.Test.Mock;
-using log4net;
 
 namespace MindTouch.Traum.Webclient.Test {
 
     /// <summary>
-    /// Provides a mocking framework for intercepting <see cref="Plug2"/> calls.
+    /// Provides a mocking framework for intercepting <see cref="Plug"/> calls.
     /// </summary>
     /// <remarks>
     /// Meant to be used to test services without having to set up dependent remote endpoints the service relies on for proper execution.
@@ -53,7 +52,7 @@ namespace MindTouch.Traum.Webclient.Test {
         internal interface IMockInvokee {
 
             //--- Methods ---
-            Task<DreamMessage2> Invoke(Plug2 plug, string verb, XUri uri, DreamMessage2 request);
+            Task<DreamMessage> Invoke(Plug plug, string verb, XUri uri, DreamMessage request);
 
             //--- Properties ---
             int EndPointScore { get; }
@@ -79,7 +78,7 @@ namespace MindTouch.Traum.Webclient.Test {
             public XUri Uri { get { return _uri; } }
 
             //--- Methods ---
-            public Task<DreamMessage2> Invoke(Plug2 plug, string verb, XUri uri, DreamMessage2 request) {
+            public Task<DreamMessage> Invoke(Plug plug, string verb, XUri uri, DreamMessage request) {
                 return _callback(plug, verb, uri, request);
             }
         }
@@ -94,17 +93,17 @@ namespace MindTouch.Traum.Webclient.Test {
         /// <param name="verb">Request verb.</param>
         /// <param name="uri">Request uri.</param>
         /// <param name="request">Request message.</param>
-        public delegate Task<DreamMessage2> MockInvokeDelegate(Plug2 plug, string verb, XUri uri, DreamMessage2 request);
+        public delegate Task<DreamMessage> MockInvokeDelegate(Plug plug, string verb, XUri uri, DreamMessage request);
 
         //--- Class Fields ---
         private static readonly Dictionary<string, List<MockPlug2>> _mocks = new Dictionary<string, List<MockPlug2>>();
-        private static readonly ILog _log = LogUtils.CreateLog();
+        private static readonly Logger.ILog _log = Logger.CreateLog();
         private static int _setupcounter = 0;
 
         //--- Class Properties ---
 
         /// <summary>
-        /// The default base Uri that will return a <see cref="DreamMessage2.Ok(MindTouch.Xml.XDoc)"/> for any request. Should be used as no-op endpoint.
+        /// The default base Uri that will return a <see cref="DreamMessage.Ok(MindTouch.Xml.XDoc)"/> for any request. Should be used as no-op endpoint.
         /// </summary>
         public static readonly XUri DefaultUri = new XUri(MockEndpoint.DEFAULT);
 
@@ -124,7 +123,7 @@ namespace MindTouch.Traum.Webclient.Test {
         /// </summary>
         /// <param name="uri">Base Uri to intercept.</param>
         /// <param name="mock">Interception callback.</param>
-        /// <param name="endpointScore">The score to return to <see cref="IPlugEndpoint2.GetScoreWithNormalizedUri"/> for this uri.</param>
+        /// <param name="endpointScore">The score to return to <see cref="IPlugEndpoint.GetScoreWithNormalizedUri"/> for this uri.</param>
         public static void Register(XUri uri, MockInvokeDelegate mock, int endpointScore) {
             MockEndpoint.Instance.Register(new MockInvokee(uri, mock, endpointScore));
         }
@@ -171,7 +170,7 @@ namespace MindTouch.Traum.Webclient.Test {
         /// Note: endPointScore is only set on the first set for a specific baseUri. Subsequent values are ignored.
         /// </remarks>
         /// <param name="baseUri">Base Uri to intercept.</param>
-        /// <param name="endPointScore">The score to return to <see cref="IPlugEndpoint2.GetScoreWithNormalizedUri"/> for this uri.</param>
+        /// <param name="endPointScore">The score to return to <see cref="IPlugEndpoint.GetScoreWithNormalizedUri"/> for this uri.</param>
         /// <returns>A new interceptor instance that may intercept the uri, depending on its additional matching parameters.</returns>
         public static IMockPlug2 Setup(XUri baseUri, int endPointScore) {
             _setupcounter++;
@@ -198,7 +197,7 @@ namespace MindTouch.Traum.Webclient.Test {
         /// </remarks>
         /// <param name="baseUri">Base Uri to intercept.</param>
         /// <param name="name">Debug name for setup</param>
-        /// <param name="endPointScore">The score to return to <see cref="IPlugEndpoint2.GetScoreWithNormalizedUri"/> for this uri.</param>
+        /// <param name="endPointScore">The score to return to <see cref="IPlugEndpoint.GetScoreWithNormalizedUri"/> for this uri.</param>
         /// <returns>A new interceptor instance that may intercept the uri, depending on its additional matching parameters.</returns>
         public static IMockPlug2 Setup(XUri baseUri, string name, int endPointScore) {
             List<MockPlug2> mocks;
@@ -219,7 +218,7 @@ namespace MindTouch.Traum.Webclient.Test {
                         }
                         if(bestMatch == null) {
                             _log.Debug("no match");
-                            return DreamMessage2.Ok().AsCompletedTask();
+                            return DreamMessage.Ok().AsCompletedTask();
                         } else {
                             _log.DebugFormat("[{0}] matched", bestMatch.Name);
                             return bestMatch.Invoke(verb, uri, request).AsCompletedTask();
@@ -305,9 +304,9 @@ namespace MindTouch.Traum.Webclient.Test {
         private XUri _uri;
         private string _verb = "*";
         private string _request;
-        private Func<DreamMessage2, bool> _requestCallback;
-        private DreamMessage2 _response;
-        private Func<MockPlugInvocation, DreamMessage2> _responseCallback;
+        private Func<DreamMessage, bool> _requestCallback;
+        private DreamMessage _response;
+        private Func<MockPlugInvocation, DreamMessage> _responseCallback;
         private int _times;
         private Times _verifiable;
         private bool _matchTrailingSlashes;
@@ -325,7 +324,7 @@ namespace MindTouch.Traum.Webclient.Test {
         public bool IsVerifiable { get { return _verifiable != null; } }
 
         //--- Methods ---
-        private int GetMatchScore(string verb, XUri uri, DreamMessage2 request) {
+        private int GetMatchScore(string verb, XUri uri, DreamMessage request) {
             var score = 0;
             if(verb.EqualsInvariantIgnoreCase(_verb)) {
                 score = 1;
@@ -379,14 +378,14 @@ namespace MindTouch.Traum.Webclient.Test {
             return score;
         }
 
-        private DreamMessage2 Invoke(string verb, XUri uri, DreamMessage2 request) {
+        private DreamMessage Invoke(string verb, XUri uri, DreamMessage request) {
             _times++;
             if(_responseCallback != null) {
                 var response = _responseCallback(new MockPlugInvocation(verb, uri, request, _responseHeaders));
                 _response = response;
             }
             if(_response == null) {
-                _response = DreamMessage2.Ok();
+                _response = DreamMessage.Ok();
             }
             _response.Headers.AddRange(_responseHeaders);
             _called.Set();
@@ -433,7 +432,7 @@ namespace MindTouch.Traum.Webclient.Test {
             return this;
         }
 
-        IMockPlug2 IMockPlug2.WithMessage(Func<DreamMessage2, bool> requestCallback) {
+        IMockPlug2 IMockPlug2.WithMessage(Func<DreamMessage, bool> requestCallback) {
             _requestCallback = requestCallback;
             _request = null;
             return this;
@@ -449,12 +448,12 @@ namespace MindTouch.Traum.Webclient.Test {
             return this;
         }
 
-        IMockPlug2 IMockPlug2.Returns(DreamMessage2 response) {
+        IMockPlug2 IMockPlug2.Returns(DreamMessage response) {
             _response = response;
             return this;
         }
 
-        IMockPlug2 IMockPlug2.Returns(Func<MockPlugInvocation, DreamMessage2> response) {
+        IMockPlug2 IMockPlug2.Returns(Func<MockPlugInvocation, DreamMessage> response) {
             _responseCallback = response;
             return this;
         }
@@ -462,7 +461,7 @@ namespace MindTouch.Traum.Webclient.Test {
         IMockPlug2 IMockPlug2.Returns(string response) {
             var status = _response == null ? DreamStatus.Ok : _response.Status;
             var headers = _response == null ? null : _response.Headers;
-            _response = new DreamMessage2(status, headers, MimeType.TEXT, response);
+            _response = new DreamMessage(status, headers, MimeType.TEXT, response);
             return this;
         }
 

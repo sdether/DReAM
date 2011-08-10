@@ -31,30 +31,6 @@ namespace MindTouch.Traum.Webclient {
     /// </summary>
     public static class DreamUtil {
 
-        //--- Constants ---
-
-        /// <summary>
-        /// Default timeout (30 seconds).
-        /// </summary>
-        public const int TIMEOUT_DEFAULT = 30 * 1000;
-
-        /// <summary>
-        /// Long timeout (30 minutes).
-        /// </summary>
-        public const int TIMEOUT_LONG = 30 * 60 * 1000;
-
-        /// <summary>
-        /// Short timeout (10 seconds).
-        /// </summary>
-        public const int TIMEOUT_SHORT = 10 * 1000;
-
-        /// <summary>
-        /// Default Packetsize (1024 bytes).
-        /// </summary>
-        public const int DEFAULT_PACKETSIZE = 1024;
-
-        private const int BUFFER_SIZE = 32768;
-
         //--- Class Fields ---
         private static string _version;
 
@@ -70,65 +46,6 @@ namespace MindTouch.Traum.Webclient {
                 }
                 return _version;
             }
-        }
-
-        //--- Methods ---
-
-        /// <summary>
-        /// Prepare an incoming message with host environment information.
-        /// </summary>
-        /// <param name="message"></param>
-        /// <param name="contentEncoding"></param>
-        /// <param name="transport"></param>
-        /// <param name="requestClientIp"></param>
-        /// <param name="userAgent"></param>
-        public static void PrepareIncomingMessage(DreamMessage2 message, Encoding contentEncoding, string transport, string requestClientIp, string userAgent) {
-            if(message == null) {
-                throw new ArgumentNullException("message");
-            }
-
-            // set content-encoding
-            if(contentEncoding != null) {
-                message.Headers.ContentEncoding = contentEncoding.WebName;
-            }
-
-            // set dream-transport information (i.e. point of entry)
-            message.Headers.DreamTransport = transport;
-
-            // set the client IP header
-            List<string> clientIps = new List<string>();
-            if(!string.IsNullOrEmpty(requestClientIp)) {
-                clientIps.Add(requestClientIp.Split(':')[0]);
-            }
-            string[] forwardeFor = message.Headers.ForwardedFor;
-            Array.Reverse(forwardeFor);
-            clientIps.AddRange(forwardeFor);
-            message.Headers.DreamClientIP = clientIps.ToArray();
-
-            // set host header
-            if(string.IsNullOrEmpty(message.Headers.Host)) {
-                message.Headers.Host = new XUri(transport).HostPort;
-            }
-
-            // set user agent
-            message.Headers.UserAgent = userAgent;
-        }
-
-        /// <summary>
-        /// Append Dream specific headers from a source message to an internally forwarded one.
-        /// </summary>
-        /// <param name="original">Source messag.</param>
-        /// <param name="forwarded">Message to be forwarded.</param>
-        /// <returns>Message to be forwarded instance.</returns>
-        public static DreamMessage2 AppendHeadersToInternallyForwardedMessage(DreamMessage2 original, DreamMessage2 forwarded) {
-
-            // pass along host and public-uri information
-            forwarded.Headers.DreamTransport = original.Headers.DreamTransport;
-            forwarded.Headers.DreamPublicUri = original.Headers.DreamPublicUri;
-            forwarded.Headers.DreamUserHost = original.Headers.DreamUserHost;
-            forwarded.Headers.DreamOrigin = original.Headers.DreamOrigin;
-            forwarded.Headers.DreamClientIP = original.Headers.DreamClientIP;
-            return forwarded;
         }
     }
 }

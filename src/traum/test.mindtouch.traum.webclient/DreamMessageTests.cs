@@ -28,46 +28,25 @@ using NUnit.Framework;
 namespace MindTouch.Traum.Webclient.Test {
 
     [TestFixture]
-    public class DreamMessage2Tests {
+    public class DreamMessageTests {
 
         private static readonly ILog _log = LogUtils.CreateLog();
 
         [Test]
         public void Can_get_status_message_from_message() {
-            var msg = DreamMessage2.Conflict("huh?");
-            Assert.AreEqual(string.Format("HTTP Status: {0}({1})", msg.Status, (int)msg.Status), DreamMessage2.GetStatusStringOrNull(msg));
+            var msg = DreamMessage.Conflict("huh?");
+            Assert.AreEqual(string.Format("HTTP Status: {0}({1})", msg.Status, (int)msg.Status), DreamMessage.GetStatusStringOrNull(msg));
         }
 
         [Test]
         public void Trying_to_get_status_message_from_null_message_returns_null() {
-            DreamMessage2 msg = null;
-            Assert.IsNull(DreamMessage2.GetStatusStringOrNull(msg));
-        }
-
-        [Test]
-        public void DreamResponseException_from_message_contains_status_message_in_ToString() {
-            var msg = DreamMessage2.Conflict("huh?");
-            var exception = new DreamResponseException(msg);
-            Assert.IsTrue(exception.ToString().Contains(DreamMessage2.GetStatusStringOrNull(msg)));
-        }
-
-        [Test]
-        public void DreamResponseException_from_message_contains_status_message_as_exception_message() {
-            var msg = DreamMessage2.Conflict("huh?");
-            var exception = new DreamResponseException(msg);
-            Assert.AreEqual(DreamMessage2.GetStatusStringOrNull(msg), exception.Message);
-        }
-
-        [Test]
-        public void DreamResponseException_from_null_message_returns_default_exception_message() {
-            DreamMessage2 msg = null;
-            var exception = new DreamResponseException(msg);
-            Assert.AreEqual("Exception of type 'MindTouch.Traum.DreamResponseException' was thrown.", exception.Message);
+            DreamMessage msg = null;
+            Assert.IsNull(DreamMessage.GetStatusStringOrNull(msg));
         }
 
         [Test]
         public void Can_clone_no_content_message() {
-            var m = new DreamMessage2(DreamStatus.Ok, new DreamHeaders().Add("foo", "bar"));
+            var m = new DreamMessage(DreamStatus.Ok, new DreamHeaders().Add("foo", "bar"));
             m.Headers.Add("baz", "blah");
             var m2 = m.Clone();
             Assert.AreEqual(m.ToText(), m2.ToText());
@@ -77,7 +56,7 @@ namespace MindTouch.Traum.Webclient.Test {
 
         [Test]
         public void Can_clone_xdoc_message() {
-            var m = new DreamMessage2(DreamStatus.Ok, new DreamHeaders().Add("foo", "bar"), "blah");
+            var m = new DreamMessage(DreamStatus.Ok, new DreamHeaders().Add("foo", "bar"), "blah");
             m.Headers.Add("baz", "blah");
             var m2 = m.Clone();
             Assert.AreEqual(m.ToText(), m2.ToText());
@@ -87,7 +66,7 @@ namespace MindTouch.Traum.Webclient.Test {
 
         [Test]
         public void Can_clone_byte_message() {
-            var m = new DreamMessage2(DreamStatus.Ok, new DreamHeaders().Add("foo", "bar"), MimeType.TIFF, new byte[] { 1, 2, 3, 4 });
+            var m = new DreamMessage(DreamStatus.Ok, new DreamHeaders().Add("foo", "bar"), MimeType.TIFF, new byte[] { 1, 2, 3, 4 });
             m.Headers.Add("baz", "blah");
             var m2 = m.Clone();
             Assert.AreEqual(m.ToBytes(), m2.ToBytes());
@@ -104,7 +83,7 @@ namespace MindTouch.Traum.Webclient.Test {
             writer.Write(text);
             writer.Flush();
             stream.Position = 0;
-            var m = new DreamMessage2(DreamStatus.Ok, new DreamHeaders().Add("foo", "bar"), MimeType.TEXT, stream.Length, stream);
+            var m = new DreamMessage(DreamStatus.Ok, new DreamHeaders().Add("foo", "bar"), MimeType.TEXT, stream.Length, stream);
             m.Headers.Add("baz", "blah");
             _log.Debug("about to clone");
             var m2 = m.Clone();
@@ -122,7 +101,7 @@ namespace MindTouch.Traum.Webclient.Test {
             var writer = new StreamWriter(stream);
             writer.Write(text);
             writer.Flush();
-            var m = new DreamMessage2(DreamStatus.Ok, new DreamHeaders().Add("foo", "bar"), MimeType.TEXT, stream.Length, stream);
+            var m = new DreamMessage(DreamStatus.Ok, new DreamHeaders().Add("foo", "bar"), MimeType.TEXT, stream.Length, stream);
             m.Headers.Add("baz", "blah");
             var m2 = m.Clone();
             var reader = new StreamReader(m2.ToStream());
@@ -134,7 +113,7 @@ namespace MindTouch.Traum.Webclient.Test {
 
         [Test]
         public void Can_clone_a_null_stream_message() {
-            var m = new DreamMessage2(DreamStatus.Ok, new DreamHeaders().Add("foo", "bar"), MimeType.TEXT, Stream.Null.Length, Stream.Null);
+            var m = new DreamMessage(DreamStatus.Ok, new DreamHeaders().Add("foo", "bar"), MimeType.TEXT, Stream.Null.Length, Stream.Null);
             m.Headers.Add("baz", "blah");
             var m2 = m.Clone();
             Assert.AreEqual(0, m2.ContentLength);
@@ -148,7 +127,7 @@ namespace MindTouch.Traum.Webclient.Test {
             var file = Path.GetTempFileName();
             var text = "blah";
             File.WriteAllText(file, text);
-            var m = DreamMessage2.FromFile(file);
+            var m = DreamMessage.FromFile(file);
             m.Headers.Add("baz", "blah");
             try {
                 var m2 = m.Clone();

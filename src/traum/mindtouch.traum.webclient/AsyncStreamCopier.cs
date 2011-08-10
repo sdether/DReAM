@@ -1,13 +1,12 @@
 using System;
 using System.IO;
 using System.Threading.Tasks;
-using log4net;
 
 namespace MindTouch.Traum.Webclient {
     public class AsyncStreamCopier {
 
         //--- Class Fields ---
-        private static readonly ILog _log = LogUtils.CreateLog();
+        private static readonly Logger.ILog _log = Logger.CreateLog();
 
         public static Task Copy(Stream source, Stream destination, int length) {
             var copier = new AsyncStreamCopier(source, destination);

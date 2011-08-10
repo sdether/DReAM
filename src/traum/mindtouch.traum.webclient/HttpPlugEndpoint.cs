@@ -29,11 +29,11 @@ using MindTouch.Traum.Webclient;
 
 namespace MindTouch.Traum.Webclient {
 
-    internal class HttpPlugEndpoint : IPlugEndpoint2 {
+    internal class HttpPlugEndpoint : IPlugEndpoint {
 
         //--- Class Fields ---
-        private static readonly log4net.ILog _log = LogUtils.CreateLog();
-        private static readonly Dictionary<Guid, List<Task<DreamMessage2>>> _requests = new Dictionary<Guid, List<Task<DreamMessage2>>>();
+        private static readonly Logger.ILog _log = Logger.CreateLog();
+        private static readonly Dictionary<Guid, List<Task<DreamMessage>>> _requests = new Dictionary<Guid, List<Task<DreamMessage>>>();
 
         //--- Methods ---
         public int GetScoreWithNormalizedUri(XUri uri, out XUri normalized) {
@@ -53,7 +53,7 @@ namespace MindTouch.Traum.Webclient {
             }
         }
 
-        public Task<DreamMessage2> Invoke(Plug2 plug, string verb, XUri uri, DreamMessage2 request, TimeSpan timeout) {
+        public Task<DreamMessage> Invoke(Plug plug, string verb, XUri uri, DreamMessage request, TimeSpan timeout) {
 
             // remove internal headers
             request.Headers.DreamTransport = null;
@@ -113,7 +113,7 @@ namespace MindTouch.Traum.Webclient {
             foreach(var header in request.Headers) {
                 httpRequest.AddHeader(header.Key, header.Value);
             }
-            var completion = new TaskCompletionSource<DreamMessage2>();
+            var completion = new TaskCompletionSource<DreamMessage>();
             // send message stream
             if((request.ContentLength != 0) || (verb == Verb.POST)) {
                 Task<Stream> getRequestStream = Task.Factory.FromAsync<Stream>(httpRequest.BeginGetRequestStream, httpRequest.EndGetRequestStream, null);
@@ -141,7 +141,7 @@ namespace MindTouch.Traum.Webclient {
             return completion.Task;
         }
 
-        private void GetResponse(TimeSpan timeout, TaskCompletionSource<DreamMessage2> completion, HttpWebRequest httpRequest) {
+        private void GetResponse(TimeSpan timeout, TaskCompletionSource<DreamMessage> completion, HttpWebRequest httpRequest) {
             Task.Factory.FromAsync<WebResponse>(httpRequest.BeginGetResponse, httpRequest.EndGetResponse, null).ContinueWith(t => {
                 if(t.IsFaulted) {
                     var e = t.UnwrapFault();
@@ -151,7 +151,7 @@ namespace MindTouch.Traum.Webclient {
             });
         }
 
-        private void HandleResponse(Exception exception, HttpWebRequest httpRequest, HttpWebResponse httpResponse, TimeSpan timeout, TaskCompletionSource<DreamMessage2> completion) {
+        private void HandleResponse(Exception exception, HttpWebRequest httpRequest, HttpWebResponse httpResponse, TimeSpan timeout, TaskCompletionSource<DreamMessage> completion) {
             if(exception != null) {
                 if(exception is WebException) {
                     httpResponse = (HttpWebResponse)((WebException)exception).Response;
@@ -160,7 +160,7 @@ namespace MindTouch.Traum.Webclient {
                         httpResponse.Close();
                     } catch { }
                     httpRequest.Abort();
-                    completion.SetResult(new DreamMessage2(DreamStatus.UnableToConnect, exception));
+                    completion.SetResult(new DreamMessage(DreamStatus.UnableToConnect, exception));
                     return;
                 }
             }
@@ -168,7 +168,7 @@ namespace MindTouch.Traum.Webclient {
             // check if a response was obtained, otherwise fail
             if(httpResponse == null) {
                 httpRequest.Abort();
-                completion.SetResult(new DreamMessage2(DreamStatus.UnableToConnect, exception));
+                completion.SetResult(new DreamMessage(DreamStatus.UnableToConnect, exception));
                 return;
             }
 
@@ -192,7 +192,7 @@ namespace MindTouch.Traum.Webclient {
             }
 
             // encapsulate the response in a dream message
-            completion.SetResult(new DreamMessage2((DreamStatus)(int)statusCode, new DreamHeaders(headers), contentType, contentLength, stream));
+            completion.SetResult(new DreamMessage((DreamStatus)(int)statusCode, new DreamHeaders(headers), contentType, contentLength, stream));
         }
     }
 }

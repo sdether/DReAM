@@ -99,6 +99,7 @@
   <ItemGroup>
     <Compile Include="AssertEx.cs" />
     <Compile Include="DreamMessageEx.cs" />
+    <Compile Include="Logger.cs" />
     <Compile Include="Mock\IMockPlug2.cs" />
     <Compile Include="Mock\MockEndpoint.cs" />
     <Compile Include="MockPlug2.cs" />

@@ -83,7 +83,7 @@ namespace MindTouch.Traum.Webclient.Test.Mock {
         /// </summary>
         /// <param name="requestCallback">Callback to determine whether the document matches expecations.</param>
         /// <returns>Same instance of <see cref="IMockPlug2"/>.</returns>
-        IMockPlug2 WithMessage(Func<DreamMessage2, bool> requestCallback);
+        IMockPlug2 WithMessage(Func<DreamMessage, bool> requestCallback);
 
         /// <summary>
         /// Expect the presence of a given header.
@@ -106,7 +106,7 @@ namespace MindTouch.Traum.Webclient.Test.Mock {
         /// </summary>
         /// <param name="response">Response message.</param>
         /// <returns>Same instance of <see cref="IMockPlug2"/>.</returns>
-        IMockPlug2 Returns(DreamMessage2 response);
+        IMockPlug2 Returns(DreamMessage response);
 
         /// <summary>
         /// Provide a response message on expectation match.
@@ -120,7 +120,7 @@ namespace MindTouch.Traum.Webclient.Test.Mock {
         /// </summary>
         /// <param name="response">Response message.</param>
         /// <returns>Same instance of <see cref="IMockPlug2"/>.</returns>
-        IMockPlug2 Returns(Func<MockPlugInvocation, DreamMessage2> response);
+        IMockPlug2 Returns(Func<MockPlugInvocation, DreamMessage> response);
 
         /// <summary>
         /// Provide a response header on expectation match.

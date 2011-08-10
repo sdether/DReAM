@@ -28,20 +28,20 @@ using System.Threading.Tasks;
 
 namespace MindTouch.Traum.Webclient {
     /// <summary>
-    /// Provides a contract for intercepting and modifying <see cref="Plug2"/> requests and responses in the invocation pipeline.
+    /// Provides a contract for intercepting and modifying <see cref="Plug"/> requests and responses in the invocation pipeline.
     /// </summary>
     /// <param name="verb">Verb of the intercepted invocation.</param>
     /// <param name="uri">Uri of the intercepted invocation.</param>
     /// <param name="normalizedUri">Normalized version of the uri of the intercepted invocation.</param>
     /// <param name="message">Message of the intercepted invocation.</param>
     /// <returns>The message to return as the result of the interception.</returns>
-    public delegate DreamMessage2 PlugHandler2(string verb, XUri uri, XUri normalizedUri, DreamMessage2 message);
+    public delegate DreamMessage PlugHandler2(string verb, XUri uri, XUri normalizedUri, DreamMessage message);
 
     /// <summary>
     /// Provides a fluent, immutable interface for building request/response invocation  against a resource. Mostly used as an interface
     /// for making Http requests, but can be extended for any resource that can provide request/response semantics.
     /// </summary>
-    public class Plug2 {
+    public class Plug {
 
         //--- Constants ---
 
@@ -51,12 +51,12 @@ namespace MindTouch.Traum.Webclient {
         public const ushort DEFAULT_MAX_AUTO_REDIRECTS = 50;
 
         /// <summary>
-        /// Base score normal priorty <see cref="IPlugEndpoint2"/> implementations should use to signal a successful match.
+        /// Base score normal priorty <see cref="IPlugEndpoint"/> implementations should use to signal a successful match.
         /// </summary>
         public const int BASE_ENDPOINT_SCORE = int.MaxValue / 2;
 
         /// <summary>
-        /// Default timeout of 60 seconds for <see cref="Plug2"/> invocations.
+        /// Default timeout of 60 seconds for <see cref="Plug"/> invocations.
         /// </summary>
         public static readonly TimeSpan DEFAULT_TIMEOUT = TimeSpan.FromSeconds(60);
 
@@ -67,18 +67,18 @@ namespace MindTouch.Traum.Webclient {
         /// </summary>
         public static DreamCookieJar GlobalCookies = new DreamCookieJar();
 
-        private static log4net.ILog _log = LogUtils.CreateLog();
-        private static readonly List<IPlugEndpoint2> _endpoints = new List<IPlugEndpoint2>();
+        private static Logger.ILog _log = Logger.CreateLog();
+        private static readonly List<IPlugEndpoint> _endpoints = new List<IPlugEndpoint>();
 
         //--- Class Constructors ---
-        static Plug2() {
+        static Plug() {
 
             // let's find all IPlugEndpoint derived, concrete classes
-            foreach(Type type in typeof(Plug2).Assembly.GetTypes()) {
-                if(typeof(IPlugEndpoint2).IsAssignableFrom(type) && type.IsClass && !type.IsAbstract && !type.IsGenericTypeDefinition) {
+            foreach(Type type in typeof(Plug).Assembly.GetTypes()) {
+                if(typeof(IPlugEndpoint).IsAssignableFrom(type) && type.IsClass && !type.IsAbstract && !type.IsGenericTypeDefinition) {
                     ConstructorInfo ctor = type.GetConstructor(System.Type.EmptyTypes);
                     if(ctor != null) {
-                        AddEndpoint((IPlugEndpoint2)ctor.Invoke(null));
+                        AddEndpoint((IPlugEndpoint)ctor.Invoke(null));
                     }
                 }
             }
@@ -87,78 +87,78 @@ namespace MindTouch.Traum.Webclient {
         //--- Class Operators ---
 
         /// <summary>
-        /// Implicit conversion operator for casting a <see cref="Plug2"/> to a <see cref="XUri"/>.
+        /// Implicit conversion operator for casting a <see cref="Plug"/> to a <see cref="XUri"/>.
         /// </summary>
         /// <param name="plug">Plug instance to convert.</param>
         /// <returns>New uri instance.</returns>
-        public static implicit operator XUri(Plug2 plug) {
+        public static implicit operator XUri(Plug plug) {
             return (plug != null) ? plug.Uri : null;
         }
 
         //--- Class Methods ---
 
         /// <summary>
-        /// Create a new <see cref="Plug2"/> instance from a uri string.
+        /// Create a new <see cref="Plug"/> instance from a uri string.
         /// </summary>
         /// <param name="uri">Uri string.</param>
         /// <returns>New plug instance.</returns>
-        public static Plug2 New(string uri) {
+        public static Plug New(string uri) {
             return New(uri, DEFAULT_TIMEOUT);
         }
 
         /// <summary>
-        /// Create a new <see cref="Plug2"/> instance from a uri string.
+        /// Create a new <see cref="Plug"/> instance from a uri string.
         /// </summary>
         /// <param name="uri">Uri string.</param>
         /// <param name="timeout">Invocation timeout.</param>
         /// <returns>New plug instance.</returns>
-        public static Plug2 New(string uri, TimeSpan timeout) {
+        public static Plug New(string uri, TimeSpan timeout) {
             if(uri != null) {
-                return new Plug2(new XUri(uri), timeout, null, null, null, null, null, DEFAULT_MAX_AUTO_REDIRECTS);
+                return new Plug(new XUri(uri), timeout, null, null, null, null, null, DEFAULT_MAX_AUTO_REDIRECTS);
             }
             return null;
         }
 
         /// <summary>
-        /// Create a new <see cref="Plug2"/> instance from a <see cref="Uri"/>.
+        /// Create a new <see cref="Plug"/> instance from a <see cref="Uri"/>.
         /// </summary>
         /// <param name="uri">Uri instance.</param>
         /// <returns>New plug instance.</returns>
-        public static Plug2 New(Uri uri) {
+        public static Plug New(Uri uri) {
             return New(uri, DEFAULT_TIMEOUT);
         }
 
         /// <summary>
-        /// Create a new <see cref="Plug2"/> instance from a <see cref="Uri"/>.
+        /// Create a new <see cref="Plug"/> instance from a <see cref="Uri"/>.
         /// </summary>
         /// <param name="uri">Uri instance.</param>
         /// <param name="timeout">Invocation timeout.</param>
         /// <returns>New plug instance.</returns>
-        public static Plug2 New(Uri uri, TimeSpan timeout) {
+        public static Plug New(Uri uri, TimeSpan timeout) {
             if(uri != null) {
-                return new Plug2(new XUri(uri), timeout, null, null, null, null, null, DEFAULT_MAX_AUTO_REDIRECTS);
+                return new Plug(new XUri(uri), timeout, null, null, null, null, null, DEFAULT_MAX_AUTO_REDIRECTS);
             }
             return null;
         }
 
         /// <summary>
-        /// Create a new <see cref="Plug2"/> instance from a <see cref="XUri"/>.
+        /// Create a new <see cref="Plug"/> instance from a <see cref="XUri"/>.
         /// </summary>
         /// <param name="uri">Uri instance.</param>
         /// <returns>New plug instance.</returns>
-        public static Plug2 New(XUri uri) {
+        public static Plug New(XUri uri) {
             return New(uri, DEFAULT_TIMEOUT);
         }
 
         /// <summary>
-        /// Create a new <see cref="Plug2"/> instance from a <see cref="XUri"/>.
+        /// Create a new <see cref="Plug"/> instance from a <see cref="XUri"/>.
         /// </summary>
         /// <param name="uri">Uri instance.</param>
         /// <param name="timeout">Invocation timeout.</param>
         /// <returns>New plug instance.</returns>
-        public static Plug2 New(XUri uri, TimeSpan timeout) {
+        public static Plug New(XUri uri, TimeSpan timeout) {
             if(uri != null) {
-                return new Plug2(uri, timeout, null, null, null, null, null, DEFAULT_MAX_AUTO_REDIRECTS);
+                return new Plug(uri, timeout, null, null, null, null, null, DEFAULT_MAX_AUTO_REDIRECTS);
             }
             return null;
         }
@@ -167,7 +167,7 @@ namespace MindTouch.Traum.Webclient {
         /// Manually add a plug endpoint for handling invocations.
         /// </summary>
         /// <param name="endpoint">Factory instance to add.</param>
-        public static void AddEndpoint(IPlugEndpoint2 endpoint) {
+        public static void AddEndpoint(IPlugEndpoint endpoint) {
             lock(_endpoints) {
                 _endpoints.Add(endpoint);
             }
@@ -177,33 +177,13 @@ namespace MindTouch.Traum.Webclient {
         /// Manually remove a plug endpoint from the handler pool.
         /// </summary>
         /// <param name="endpoint">Factory instance to remove.</param>
-        public static void RemoveEndpoint(IPlugEndpoint2 endpoint) {
+        public static void RemoveEndpoint(IPlugEndpoint endpoint) {
             lock(_endpoints) {
                 _endpoints.Remove(endpoint);
             }
         }
 
-        /// <summary>
-        /// Blocks on a Plug synchronization handle to wait for it ti complete and confirm that it's a non-error response.
-        /// </summary>
-        /// <remarks>
-        /// WARNING: This method is thread-blocking.  Please avoid using it if possible.
-        /// </remarks>
-        /// <param name="task">Plug synchronization handle.</param>
-        /// <returns>Successful reponse message.</returns>
-        public static DreamMessage2 WaitAndConfirm(Task<DreamMessage2> task) {
-
-            // NOTE (steveb): we don't need to set a time-out since 'Memorize()' already guarantees eventual termination
-
-            task.Result.Memorize(TimeSpan.MaxValue).Wait();
-            DreamMessage2 message = task.Result;
-            if(!message.IsSuccessful) {
-                throw new DreamResponseException(message);
-            }
-            return message;
-        }
-
-        private static DreamMessage2 PreProcess(string verb, XUri uri, XUri normalizedUri, DreamHeaders headers, DreamCookieJar cookies, DreamMessage2 message) {
+        private static DreamMessage PreProcess(string verb, XUri uri, XUri normalizedUri, DreamHeaders headers, DreamCookieJar cookies, DreamMessage message) {
             if(cookies != null) {
                 lock(cookies) {
                     message.Cookies.AddRange(cookies.Fetch(uri));
@@ -215,7 +195,7 @@ namespace MindTouch.Traum.Webclient {
             return message;
         }
 
-        private static DreamMessage2 PostProcess(string verb, XUri uri, XUri normalizedUri, DreamHeaders headers, DreamCookieJar cookies, DreamMessage2 message) {
+        private static DreamMessage PostProcess(string verb, XUri uri, XUri normalizedUri, DreamHeaders headers, DreamCookieJar cookies, DreamMessage message) {
 
             // check if we received cookies
             if(message.HasCookies) {
@@ -236,7 +216,7 @@ namespace MindTouch.Traum.Webclient {
             return message;
         }
 
-        private static int FindPlugEndpoint(XUri uri, out IPlugEndpoint2 match, out XUri normalizedUri) {
+        private static int FindPlugEndpoint(XUri uri, out IPlugEndpoint match, out XUri normalizedUri) {
             match = null;
             normalizedUri = null;
 
@@ -296,9 +276,9 @@ namespace MindTouch.Traum.Webclient {
         /// <param name="preHandlers">Optional pre-invocation handlers.</param>
         /// <param name="postHandlers">Optional post-invocation handlers.</param>
         /// <param name="credentials">Optional request credentials.</param>
-        /// <param name="cookieJarOverride">Optional cookie jar to override global jar shared by <see cref="Plug2"/> instances.</param>
+        /// <param name="cookieJarOverride">Optional cookie jar to override global jar shared by <see cref="Plug"/> instances.</param>
         /// <param name="maxAutoRedirects">Maximum number of redirects to follow, 0 if non redirects should be followed.</param>
-        public Plug2(XUri uri, TimeSpan timeout, DreamHeaders headers, List<PlugHandler2> preHandlers, List<PlugHandler2> postHandlers, ICredentials credentials, DreamCookieJar cookieJarOverride, ushort maxAutoRedirects) {
+        public Plug(XUri uri, TimeSpan timeout, DreamHeaders headers, List<PlugHandler2> preHandlers, List<PlugHandler2> postHandlers, ICredentials credentials, DreamCookieJar cookieJarOverride, ushort maxAutoRedirects) {
             if(uri == null) {
                 throw new ArgumentNullException("uri");
             }
@@ -357,11 +337,11 @@ namespace MindTouch.Traum.Webclient {
         /// </summary>
         /// <param name="segments">Segements to add.</param>
         /// <returns>New instance.</returns>
-        public Plug2 At(params string[] segments) {
+        public Plug At(params string[] segments) {
             if(segments.Length == 0) {
                 return this;
             }
-            return new Plug2(Uri.At(segments), Timeout, _headers, _preHandlers, _postHandlers, Credentials, _cookieJarOverride, MaxAutoRedirects);
+            return new Plug(Uri.At(segments), Timeout, _headers, _preHandlers, _postHandlers, Credentials, _cookieJarOverride, MaxAutoRedirects);
         }
 
         /// <summary>
@@ -369,8 +349,8 @@ namespace MindTouch.Traum.Webclient {
         /// </summary>
         /// <param name="path">Path/Query/fragment string.</param>
         /// <returns>New instance.</returns>
-        public Plug2 AtPath(string path) {
-            return new Plug2(Uri.AtPath(path), Timeout, _headers, _preHandlers, _postHandlers, Credentials, _cookieJarOverride, MaxAutoRedirects);
+        public Plug AtPath(string path) {
+            return new Plug(Uri.AtPath(path), Timeout, _headers, _preHandlers, _postHandlers, Credentials, _cookieJarOverride, MaxAutoRedirects);
         }
 
         /// <summary>
@@ -379,8 +359,8 @@ namespace MindTouch.Traum.Webclient {
         /// <param name="key">Query key.</param>
         /// <param name="value">Query value.</param>
         /// <returns>New instance.</returns>
-        public Plug2 With(string key, string value) {
-            return new Plug2(Uri.With(key, value), Timeout, _headers, _preHandlers, _postHandlers, Credentials, _cookieJarOverride, MaxAutoRedirects);
+        public Plug With(string key, string value) {
+            return new Plug(Uri.With(key, value), Timeout, _headers, _preHandlers, _postHandlers, Credentials, _cookieJarOverride, MaxAutoRedirects);
         }
 
         /// <summary>
@@ -389,8 +369,8 @@ namespace MindTouch.Traum.Webclient {
         /// <param name="key">Query key.</param>
         /// <param name="value">Query value.</param>
         /// <returns>New instance.</returns>
-        public Plug2 With(string key, bool value) {
-            return new Plug2(Uri.With(key, value.ToString()), Timeout, _headers, _preHandlers, _postHandlers, Credentials, _cookieJarOverride, MaxAutoRedirects);
+        public Plug With(string key, bool value) {
+            return new Plug(Uri.With(key, value.ToString()), Timeout, _headers, _preHandlers, _postHandlers, Credentials, _cookieJarOverride, MaxAutoRedirects);
         }
 
         /// <summary>
@@ -399,8 +379,8 @@ namespace MindTouch.Traum.Webclient {
         /// <param name="key">Query key.</param>
         /// <param name="value">Query value.</param>
         /// <returns>New instance.</returns>
-        public Plug2 With(string key, int value) {
-            return new Plug2(Uri.With(key, value.ToString()), Timeout, _headers, _preHandlers, _postHandlers, Credentials, _cookieJarOverride, MaxAutoRedirects);
+        public Plug With(string key, int value) {
+            return new Plug(Uri.With(key, value.ToString()), Timeout, _headers, _preHandlers, _postHandlers, Credentials, _cookieJarOverride, MaxAutoRedirects);
         }
 
         /// <summary>
@@ -409,8 +389,8 @@ namespace MindTouch.Traum.Webclient {
         /// <param name="key">Query key.</param>
         /// <param name="value">Query value.</param>
         /// <returns>New instance.</returns>
-        public Plug2 With(string key, long value) {
-            return new Plug2(Uri.With(key, value.ToString()), Timeout, _headers, _preHandlers, _postHandlers, Credentials, _cookieJarOverride, MaxAutoRedirects);
+        public Plug With(string key, long value) {
+            return new Plug(Uri.With(key, value.ToString()), Timeout, _headers, _preHandlers, _postHandlers, Credentials, _cookieJarOverride, MaxAutoRedirects);
         }
 
         /// <summary>
@@ -419,8 +399,8 @@ namespace MindTouch.Traum.Webclient {
         /// <param name="key">Query key.</param>
         /// <param name="value">Query value.</param>
         /// <returns>New instance.</returns>
-        public Plug2 With(string key, decimal value) {
-            return new Plug2(Uri.With(key, value.ToString()), Timeout, _headers, _preHandlers, _postHandlers, Credentials, _cookieJarOverride, MaxAutoRedirects);
+        public Plug With(string key, decimal value) {
+            return new Plug(Uri.With(key, value.ToString()), Timeout, _headers, _preHandlers, _postHandlers, Credentials, _cookieJarOverride, MaxAutoRedirects);
         }
 
         /// <summary>
@@ -429,8 +409,8 @@ namespace MindTouch.Traum.Webclient {
         /// <param name="key">Query key.</param>
         /// <param name="value">Query value.</param>
         /// <returns>New instance.</returns>
-        public Plug2 With(string key, double value) {
-            return new Plug2(Uri.With(key, value.ToString()), Timeout, _headers, _preHandlers, _postHandlers, Credentials, _cookieJarOverride, MaxAutoRedirects);
+        public Plug With(string key, double value) {
+            return new Plug(Uri.With(key, value.ToString()), Timeout, _headers, _preHandlers, _postHandlers, Credentials, _cookieJarOverride, MaxAutoRedirects);
         }
 
         /// <summary>
@@ -439,8 +419,8 @@ namespace MindTouch.Traum.Webclient {
         /// <param name="key">Query key.</param>
         /// <param name="value">Query value.</param>
         /// <returns>New instance.</returns>
-        public Plug2 With(string key, DateTime value) {
-            return new Plug2(Uri.With(key, value.ToUniversalTime().ToString("R")), Timeout, _headers, _preHandlers, _postHandlers, Credentials, _cookieJarOverride, MaxAutoRedirects);
+        public Plug With(string key, DateTime value) {
+            return new Plug(Uri.With(key, value.ToUniversalTime().ToString("R")), Timeout, _headers, _preHandlers, _postHandlers, Credentials, _cookieJarOverride, MaxAutoRedirects);
         }
 
         /// <summary>
@@ -448,8 +428,8 @@ namespace MindTouch.Traum.Webclient {
         /// </summary>
         /// <param name="args">Array of query key/value pairs.</param>
         /// <returns>New instance.</returns>
-        public Plug2 WithParams(KeyValuePair<string, string>[] args) {
-            return new Plug2(Uri.WithParams(args), Timeout, _headers, _preHandlers, _postHandlers, Credentials, _cookieJarOverride, MaxAutoRedirects);
+        public Plug WithParams(KeyValuePair<string, string>[] args) {
+            return new Plug(Uri.WithParams(args), Timeout, _headers, _preHandlers, _postHandlers, Credentials, _cookieJarOverride, MaxAutoRedirects);
         }
 
         /// <summary>
@@ -457,8 +437,8 @@ namespace MindTouch.Traum.Webclient {
         /// </summary>
         /// <param name="query">Query string.</param>
         /// <returns>New instance.</returns>
-        public Plug2 WithQuery(string query) {
-            return new Plug2(Uri.WithQuery(query), Timeout, _headers, _preHandlers, _postHandlers, Credentials, _cookieJarOverride, MaxAutoRedirects);
+        public Plug WithQuery(string query) {
+            return new Plug(Uri.WithQuery(query), Timeout, _headers, _preHandlers, _postHandlers, Credentials, _cookieJarOverride, MaxAutoRedirects);
         }
 
         /// <summary>
@@ -466,8 +446,8 @@ namespace MindTouch.Traum.Webclient {
         /// </summary>
         /// <param name="uri">Uri to extract parameters from.</param>
         /// <returns>New instance.</returns>
-        public Plug2 WithParamsFrom(XUri uri) {
-            return new Plug2(Uri.WithParamsFrom(uri), Timeout, _headers, _preHandlers, _postHandlers, Credentials, _cookieJarOverride, MaxAutoRedirects);
+        public Plug WithParamsFrom(XUri uri) {
+            return new Plug(Uri.WithParamsFrom(uri), Timeout, _headers, _preHandlers, _postHandlers, Credentials, _cookieJarOverride, MaxAutoRedirects);
         }
 
         /// <summary>
@@ -480,8 +460,8 @@ namespace MindTouch.Traum.Webclient {
         /// <param name="user">User.</param>
         /// <param name="password">Password.</param>
         /// <returns>New instance.</returns>
-        public Plug2 WithCredentials(string user, string password) {
-            return new Plug2(Uri.WithCredentials(user, password), Timeout, _headers, _preHandlers, _postHandlers, Credentials, _cookieJarOverride, MaxAutoRedirects);
+        public Plug WithCredentials(string user, string password) {
+            return new Plug(Uri.WithCredentials(user, password), Timeout, _headers, _preHandlers, _postHandlers, Credentials, _cookieJarOverride, MaxAutoRedirects);
         }
 
         /// <summary>
@@ -489,16 +469,16 @@ namespace MindTouch.Traum.Webclient {
         /// </summary>
         /// <param name="credentials">Credential instance.</param>
         /// <returns>New instance.</returns>
-        public Plug2 WithCredentials(ICredentials credentials) {
-            return new Plug2(Uri, Timeout, _headers, _preHandlers, _postHandlers, credentials, _cookieJarOverride, MaxAutoRedirects);
+        public Plug WithCredentials(ICredentials credentials) {
+            return new Plug(Uri, Timeout, _headers, _preHandlers, _postHandlers, credentials, _cookieJarOverride, MaxAutoRedirects);
         }
 
         /// <summary>
         /// Create a copy of the instance with credentials removed.
         /// </summary>
         /// <returns>New instance.</returns>
-        public Plug2 WithoutCredentials() {
-            return new Plug2(Uri.WithoutCredentials(), Timeout, _headers, _preHandlers, _postHandlers, null, _cookieJarOverride, MaxAutoRedirects);
+        public Plug WithoutCredentials() {
+            return new Plug(Uri.WithoutCredentials(), Timeout, _headers, _preHandlers, _postHandlers, null, _cookieJarOverride, MaxAutoRedirects);
         }
 
         /// <summary>
@@ -506,8 +486,8 @@ namespace MindTouch.Traum.Webclient {
         /// </summary>
         /// <param name="cookieJar">Cookie jar to use.</param>
         /// <returns>New instance.</returns>
-        public Plug2 WithCookieJar(DreamCookieJar cookieJar) {
-            return new Plug2(Uri, Timeout, _headers, _preHandlers, _postHandlers, Credentials, cookieJar, MaxAutoRedirects);
+        public Plug WithCookieJar(DreamCookieJar cookieJar) {
+            return new Plug(Uri, Timeout, _headers, _preHandlers, _postHandlers, Credentials, cookieJar, MaxAutoRedirects);
         }
 
         /// <summary>
@@ -515,16 +495,16 @@ namespace MindTouch.Traum.Webclient {
         /// </summary>
         /// <remarks>Will fall back on <see cref="DreamContext"/> or global jar.</remarks>
         /// <returns>New instance.</returns>
-        public Plug2 WithoutCookieJar() {
-            return new Plug2(Uri, Timeout, _headers, _preHandlers, _postHandlers, Credentials, null, MaxAutoRedirects);
+        public Plug WithoutCookieJar() {
+            return new Plug(Uri, Timeout, _headers, _preHandlers, _postHandlers, Credentials, null, MaxAutoRedirects);
         }
 
         /// <summary>
         /// Turn on auto redirect behavior with the <see cref="DEFAULT_MAX_AUTO_REDIRECTS"/> number of redirects to follow.
         /// </summary>
         /// <returns>New instance.</returns>
-        public Plug2 WithAutoRedirects() {
-            return new Plug2(Uri, Timeout, _headers, _preHandlers, _postHandlers, Credentials, _cookieJarOverride, DEFAULT_MAX_AUTO_REDIRECTS);
+        public Plug WithAutoRedirects() {
+            return new Plug(Uri, Timeout, _headers, _preHandlers, _postHandlers, Credentials, _cookieJarOverride, DEFAULT_MAX_AUTO_REDIRECTS);
         }
 
         /// <summary>
@@ -532,16 +512,16 @@ namespace MindTouch.Traum.Webclient {
         /// </summary>
         /// <param name="maxRedirects">Maximum number of redirects to follow before giving up.</param>
         /// <returns>New instance.</returns>
-        public Plug2 WithAutoRedirects(ushort maxRedirects) {
-            return new Plug2(Uri, Timeout, _headers, _preHandlers, _postHandlers, Credentials, _cookieJarOverride, maxRedirects);
+        public Plug WithAutoRedirects(ushort maxRedirects) {
+            return new Plug(Uri, Timeout, _headers, _preHandlers, _postHandlers, Credentials, _cookieJarOverride, maxRedirects);
         }
 
         /// <summary>
         /// Turn off auto-redirect behavior.
         /// </summary>
         /// <returns>New instance.</returns>
-        public Plug2 WithoutAutoRedirects() {
-            return new Plug2(Uri, Timeout, _headers, _preHandlers, _postHandlers, Credentials, _cookieJarOverride, 0);
+        public Plug WithoutAutoRedirects() {
+            return new Plug(Uri, Timeout, _headers, _preHandlers, _postHandlers, Credentials, _cookieJarOverride, 0);
         }
         /// <summary>
         /// Create a copy of the instance with a header added.
@@ -549,7 +529,7 @@ namespace MindTouch.Traum.Webclient {
         /// <param name="name">Header name.</param>
         /// <param name="value">Header value.</param>
         /// <returns>New instance.</returns>
-        public Plug2 WithHeader(string name, string value) {
+        public Plug WithHeader(string name, string value) {
             if(name == null) {
                 throw new ArgumentNullException("name");
             }
@@ -557,7 +537,7 @@ namespace MindTouch.Traum.Webclient {
                 throw new ArgumentNullException("value");
             }
             var newHeaders = new DreamHeaders(_headers) { { name, value } };
-            return new Plug2(Uri, Timeout, newHeaders, _preHandlers, _postHandlers, Credentials, _cookieJarOverride, MaxAutoRedirects);
+            return new Plug(Uri, Timeout, newHeaders, _preHandlers, _postHandlers, Credentials, _cookieJarOverride, MaxAutoRedirects);
         }
 
         /// <summary>
@@ -565,11 +545,11 @@ namespace MindTouch.Traum.Webclient {
         /// </summary>
         /// <param name="headers">Header collection</param>
         /// <returns>New instance.</returns>
-        public Plug2 WithHeaders(DreamHeaders headers) {
+        public Plug WithHeaders(DreamHeaders headers) {
             if(headers != null) {
                 var newHeaders = new DreamHeaders(_headers);
                 newHeaders.AddRange(headers);
-                return new Plug2(Uri, Timeout, newHeaders, _preHandlers, _postHandlers, Credentials, _cookieJarOverride, MaxAutoRedirects);
+                return new Plug(Uri, Timeout, newHeaders, _preHandlers, _postHandlers, Credentials, _cookieJarOverride, MaxAutoRedirects);
             }
             return this;
         }
@@ -579,7 +559,7 @@ namespace MindTouch.Traum.Webclient {
         /// </summary>
         /// <param name="name">Name of the header to remove.</param>
         /// <returns>New instance.</returns>
-        public Plug2 WithoutHeader(string name) {
+        public Plug WithoutHeader(string name) {
             DreamHeaders newHeaders = null;
             if(_headers != null) {
                 newHeaders = new DreamHeaders(_headers);
@@ -588,15 +568,15 @@ namespace MindTouch.Traum.Webclient {
                     newHeaders = null;
                 }
             }
-            return new Plug2(Uri, Timeout, newHeaders, _preHandlers, _postHandlers, Credentials, _cookieJarOverride, MaxAutoRedirects);
+            return new Plug(Uri, Timeout, newHeaders, _preHandlers, _postHandlers, Credentials, _cookieJarOverride, MaxAutoRedirects);
         }
 
         /// <summary>
         /// Create a copy of the instance with all headers removed.
         /// </summary>
         /// <returns>New instance.</returns>
-        public Plug2 WithoutHeaders() {
-            return new Plug2(Uri, Timeout, null, _preHandlers, _postHandlers, Credentials, _cookieJarOverride, MaxAutoRedirects);
+        public Plug WithoutHeaders() {
+            return new Plug(Uri, Timeout, null, _preHandlers, _postHandlers, Credentials, _cookieJarOverride, MaxAutoRedirects);
         }
 
         /// <summary>
@@ -604,10 +584,10 @@ namespace MindTouch.Traum.Webclient {
         /// </summary>
         /// <param name="preHandlers">Pre-invocation handler.</param>
         /// <returns>New instance.</returns>
-        public Plug2 WithPreHandler(params PlugHandler2[] preHandlers) {
+        public Plug WithPreHandler(params PlugHandler2[] preHandlers) {
             List<PlugHandler2> list = (_preHandlers != null) ? new List<PlugHandler2>(_preHandlers) : new List<PlugHandler2>();
             list.AddRange(preHandlers);
-            return new Plug2(Uri, Timeout, _headers, list, _postHandlers, Credentials, _cookieJarOverride, MaxAutoRedirects);
+            return new Plug(Uri, Timeout, _headers, list, _postHandlers, Credentials, _cookieJarOverride, MaxAutoRedirects);
         }
 
         /// <summary>
@@ -615,20 +595,20 @@ namespace MindTouch.Traum.Webclient {
         /// </summary>
         /// <param name="postHandlers">Post-invocation handler.</param>
         /// <returns>New instance.</returns>
-        public Plug2 WithPostHandler(params PlugHandler2[] postHandlers) {
+        public Plug WithPostHandler(params PlugHandler2[] postHandlers) {
             var list = new List<PlugHandler2>(postHandlers);
             if(_postHandlers != null) {
                 list.AddRange(_postHandlers);
             }
-            return new Plug2(Uri, Timeout, _headers, _preHandlers, list, Credentials, _cookieJarOverride, MaxAutoRedirects);
+            return new Plug(Uri, Timeout, _headers, _preHandlers, list, Credentials, _cookieJarOverride, MaxAutoRedirects);
         }
 
         /// <summary>
         /// Create a copy of the instance with all handlers removed.
         /// </summary>
         /// <returns>New instance.</returns>
-        public Plug2 WithoutHandlers() {
-            return new Plug2(Uri, Timeout, _headers, null, null, Credentials, _cookieJarOverride, MaxAutoRedirects);
+        public Plug WithoutHandlers() {
+            return new Plug(Uri, Timeout, _headers, null, null, Credentials, _cookieJarOverride, MaxAutoRedirects);
         }
 
         /// <summary>
@@ -636,40 +616,40 @@ namespace MindTouch.Traum.Webclient {
         /// </summary>
         /// <param name="timeout">Invocation timeout.</param>
         /// <returns>New instance.</returns>
-        public Plug2 WithTimeout(TimeSpan timeout) {
-            return new Plug2(Uri, timeout, _headers, _preHandlers, _postHandlers, Credentials, _cookieJarOverride, MaxAutoRedirects);
+        public Plug WithTimeout(TimeSpan timeout) {
+            return new Plug(Uri, timeout, _headers, _preHandlers, _postHandlers, Credentials, _cookieJarOverride, MaxAutoRedirects);
         }
 
         /// <summary>
         /// Create a copy of the instance with a trailing slash.
         /// </summary>
         /// <returns>New instance.</returns>
-        public Plug2 WithTrailingSlash() {
-            return new Plug2(Uri.WithTrailingSlash(), Timeout, _headers, _preHandlers, _postHandlers, Credentials, _cookieJarOverride, MaxAutoRedirects);
+        public Plug WithTrailingSlash() {
+            return new Plug(Uri.WithTrailingSlash(), Timeout, _headers, _preHandlers, _postHandlers, Credentials, _cookieJarOverride, MaxAutoRedirects);
         }
 
         /// <summary>
         /// Create a copy of the instance without a trailing slash.
         /// </summary>
         /// <returns>New instance.</returns>
-        public Plug2 WithoutTrailingSlash() {
-            return new Plug2(Uri.WithoutTrailingSlash(), Timeout, _headers, _preHandlers, _postHandlers, Credentials, _cookieJarOverride, MaxAutoRedirects);
+        public Plug WithoutTrailingSlash() {
+            return new Plug(Uri.WithoutTrailingSlash(), Timeout, _headers, _preHandlers, _postHandlers, Credentials, _cookieJarOverride, MaxAutoRedirects);
         }
 
         /// <summary>
         /// Turn on double-encoding of segments when the Plug's <see cref="Uri"/> is converted to a <see cref="System.Uri"/>.
         /// </summary>
         /// <returns>New instance.</returns>
-        public Plug2 WithSegmentDoubleEncoding() {
-            return new Plug2(Uri.WithSegmentDoubleEncoding(), Timeout, _headers, _preHandlers, _postHandlers, Credentials, _cookieJarOverride, MaxAutoRedirects);
+        public Plug WithSegmentDoubleEncoding() {
+            return new Plug(Uri.WithSegmentDoubleEncoding(), Timeout, _headers, _preHandlers, _postHandlers, Credentials, _cookieJarOverride, MaxAutoRedirects);
         }
 
         /// <summary>
         /// Turn off double-encoding of segments when the Plug's <see cref="Uri"/> is converted to a <see cref="System.Uri"/>.
         /// </summary>
         /// <returns>New instance.</returns>
-        public Plug2 WithoutSegmentDoubleEncoding() {
-            return new Plug2(Uri.WithoutSegmentDoubleEncoding(), Timeout, _headers, _preHandlers, _postHandlers, Credentials, _cookieJarOverride, MaxAutoRedirects);
+        public Plug WithoutSegmentDoubleEncoding() {
+            return new Plug(Uri.WithoutSegmentDoubleEncoding(), Timeout, _headers, _preHandlers, _postHandlers, Credentials, _cookieJarOverride, MaxAutoRedirects);
         }
 
         /// <summary>
@@ -686,8 +666,8 @@ namespace MindTouch.Traum.Webclient {
         /// Invoke the plug with the <see cref="Verb.POST"/> verb and an empty message.
         /// </summary>
         /// <returns>Synchronization handle.</returns>
-        public Task<DreamMessage2> Post() {
-            return Invoke(Verb.POST, DreamMessage2.Ok(), DEFAULT_TIMEOUT);
+        public Task<DreamMessage> Post() {
+            return Invoke(Verb.POST, DreamMessage.Ok(), DEFAULT_TIMEOUT);
         }
 
         /// <summary>
@@ -695,8 +675,8 @@ namespace MindTouch.Traum.Webclient {
         /// </summary>
         /// <param name="timeout">The timeout for this asynchronous call.</param>
         /// <returns>Synchronization handle.</returns>
-        public Task<DreamMessage2> Post(TimeSpan timeout) {
-            return Invoke(Verb.POST, DreamMessage2.Ok(), timeout);
+        public Task<DreamMessage> Post(TimeSpan timeout) {
+            return Invoke(Verb.POST, DreamMessage.Ok(), timeout);
         }
 
         /// <summary>
@@ -704,7 +684,7 @@ namespace MindTouch.Traum.Webclient {
         /// </summary>
         /// <param name="message">Message to send.</param>
         /// <returns>Synchronization handle.</returns>
-        public Task<DreamMessage2> Post(DreamMessage2 message) {
+        public Task<DreamMessage> Post(DreamMessage message) {
             return Invoke(Verb.POST, message, DEFAULT_TIMEOUT);
         }
 
@@ -713,8 +693,8 @@ namespace MindTouch.Traum.Webclient {
         /// </summary>
         /// <param name="message">Message to send.</param>
         /// <returns>Synchronization handle.</returns>
-        public Task<DreamMessage2> Post(string message) {
-            return Invoke(Verb.POST, DreamMessage2.Ok(MimeType.TEXT_UTF8, message), DEFAULT_TIMEOUT);
+        public Task<DreamMessage> Post(string message) {
+            return Invoke(Verb.POST, DreamMessage.Ok(MimeType.TEXT_UTF8, message), DEFAULT_TIMEOUT);
         }
 
         /// <summary>
@@ -723,7 +703,7 @@ namespace MindTouch.Traum.Webclient {
         /// <param name="message">Message to send.</param>
         /// <param name="timeout">The timeout for this asynchronous call.</param>
         /// <returns>Synchronization handle.</returns>
-        public Task<DreamMessage2> Post(DreamMessage2 message, TimeSpan timeout) {
+        public Task<DreamMessage> Post(DreamMessage message, TimeSpan timeout) {
             return Invoke(Verb.POST, message, timeout);
         }
 
@@ -733,8 +713,8 @@ namespace MindTouch.Traum.Webclient {
         /// <param name="message">Message to send.</param>
         /// <param name="timeout">The timeout for this asynchronous call.</param>
         /// <returns>Synchronization handle.</returns>
-        public Task<DreamMessage2> Post(string message, TimeSpan timeout) {
-            return Invoke(Verb.POST, DreamMessage2.Ok(MimeType.TEXT_UTF8, message), timeout);
+        public Task<DreamMessage> Post(string message, TimeSpan timeout) {
+            return Invoke(Verb.POST, DreamMessage.Ok(MimeType.TEXT_UTF8, message), timeout);
         }
 
         /// <summary>
@@ -742,10 +722,10 @@ namespace MindTouch.Traum.Webclient {
         /// </summary>
         /// <param name="timeout">The timeout for this asynchronous call.</param>
         /// <returns>Synchronization handle.</returns>
-        public Task<DreamMessage2> PostAsForm(TimeSpan timeout) {
-            DreamMessage2 message = DreamMessage2.Ok(Uri.Params);
+        public Task<DreamMessage> PostAsForm(TimeSpan timeout) {
+            DreamMessage message = DreamMessage.Ok(Uri.Params);
             XUri uri = Uri.WithoutParams();
-            return new Plug2(uri, Timeout, Headers, _preHandlers, _postHandlers, Credentials, _cookieJarOverride, MaxAutoRedirects).Invoke(Verb.POST, message, timeout);
+            return new Plug(uri, Timeout, Headers, _preHandlers, _postHandlers, Credentials, _cookieJarOverride, MaxAutoRedirects).Invoke(Verb.POST, message, timeout);
         }
 
         /// <summary>
@@ -754,7 +734,7 @@ namespace MindTouch.Traum.Webclient {
         /// <param name="message">Message to send.</param>
         /// <param name="timeout">The timeout for this asynchronous call.</param>
         /// <returns>Synchronization handle.</returns>
-        public Task<DreamMessage2> Put(DreamMessage2 message, TimeSpan timeout) {
+        public Task<DreamMessage> Put(DreamMessage message, TimeSpan timeout) {
             return Invoke(Verb.PUT, message, timeout);
         }
 
@@ -762,8 +742,8 @@ namespace MindTouch.Traum.Webclient {
         /// Invoke the plug with the <see cref="Verb.GET"/> verb and no message body.
         /// </summary>
         /// <returns>Synchronization handle.</returns>
-        public Task<DreamMessage2> Get() {
-            return Invoke(Verb.GET, DreamMessage2.Ok(), DEFAULT_TIMEOUT);
+        public Task<DreamMessage> Get() {
+            return Invoke(Verb.GET, DreamMessage.Ok(), DEFAULT_TIMEOUT);
         }
 
         /// <summary>
@@ -771,8 +751,8 @@ namespace MindTouch.Traum.Webclient {
         /// </summary>
         /// <param name="timeout">The timeout for this asynchronous call.</param>
         /// <returns>Synchronization handle.</returns>
-        public Task<DreamMessage2> Get(TimeSpan timeout) {
-            return Invoke(Verb.GET, DreamMessage2.Ok(), timeout);
+        public Task<DreamMessage> Get(TimeSpan timeout) {
+            return Invoke(Verb.GET, DreamMessage.Ok(), timeout);
         }
 
         /// <summary>
@@ -781,7 +761,7 @@ namespace MindTouch.Traum.Webclient {
         /// <param name="message">The message to send</param>
         /// <param name="timeout">The timeout for this asynchronous call.</param>
         /// <returns>Synchronization handle.</returns>
-        public Task<DreamMessage2> Get(DreamMessage2 message, TimeSpan timeout) {
+        public Task<DreamMessage> Get(DreamMessage message, TimeSpan timeout) {
             return Invoke(Verb.GET, message, timeout);
         }
 
@@ -790,8 +770,8 @@ namespace MindTouch.Traum.Webclient {
         /// </summary>
         /// <param name="timeout">The timeout for this asynchronous call.</param>
         /// <returns>Synchronization handle.</returns>
-        public Task<DreamMessage2> Head(TimeSpan timeout) {
-            return Invoke(Verb.HEAD, DreamMessage2.Ok(), timeout);
+        public Task<DreamMessage> Head(TimeSpan timeout) {
+            return Invoke(Verb.HEAD, DreamMessage.Ok(), timeout);
         }
 
         /// <summary>
@@ -799,8 +779,8 @@ namespace MindTouch.Traum.Webclient {
         /// </summary>
         /// <param name="timeout">The timeout for this asynchronous call.</param>
         /// <returns>Synchronization handle.</returns>
-        public Task<DreamMessage2> Options(TimeSpan timeout) {
-            return Invoke(Verb.OPTIONS, DreamMessage2.Ok(), timeout);
+        public Task<DreamMessage> Options(TimeSpan timeout) {
+            return Invoke(Verb.OPTIONS, DreamMessage.Ok(), timeout);
         }
 
         /// <summary>
@@ -808,8 +788,8 @@ namespace MindTouch.Traum.Webclient {
         /// </summary>
         /// <param name="timeout">The timeout for this asynchronous call.</param>
         /// <returns>Synchronization handle.</returns>
-        public Task<DreamMessage2> Delete(TimeSpan timeout) {
-            return Invoke(Verb.DELETE, DreamMessage2.Ok(), timeout);
+        public Task<DreamMessage> Delete(TimeSpan timeout) {
+            return Invoke(Verb.DELETE, DreamMessage.Ok(), timeout);
         }
 
         /// <summary>
@@ -818,7 +798,7 @@ namespace MindTouch.Traum.Webclient {
         /// <param name="message">Message to send.</param>
         /// <param name="timeout">The timeout for this asynchronous call.</param>
         /// <returns>Synchronization handle.</returns>
-        public Task<DreamMessage2> Delete(DreamMessage2 message, TimeSpan timeout) {
+        public Task<DreamMessage> Delete(DreamMessage message, TimeSpan timeout) {
             return Invoke(Verb.DELETE, message, timeout);
         }
 
@@ -829,10 +809,10 @@ namespace MindTouch.Traum.Webclient {
         /// <param name="request">Request message.</param>
         /// <param name="timeout">The timeout for this asynchronous call.</param>
         /// <returns>Synchronization handle.</returns>
-        public Task<DreamMessage2> Invoke(string verb, DreamMessage2 request, TimeSpan timeout) {
+        public Task<DreamMessage> Invoke(string verb, DreamMessage request, TimeSpan timeout) {
             var hasTimeout = timeout != TimeSpan.MaxValue;
             var requestTimer = Stopwatch.StartNew();
-            var completion = new TaskCompletionSource<DreamMessage2>();
+            var completion = new TaskCompletionSource<DreamMessage>();
             InvokeEx(verb, request, timeout)
                 .ContinueWith(t1 => {
                     requestTimer.Stop();
@@ -858,13 +838,13 @@ namespace MindTouch.Traum.Webclient {
         }
 
         /// <summary>
-        /// Invoke the plug, but leave the stream unread so that the returned <see cref="DreamMessage2"/> can be streamed.
+        /// Invoke the plug, but leave the stream unread so that the returned <see cref="DreamMessage"/> can be streamed.
         /// </summary>
         /// <param name="verb">Request verb.</param>
         /// <param name="request">Request message.</param>
         /// <param name="timeout">The timeout for this asynchronous call.</param>
         /// <returns>Synchronization handle.</returns>
-        public Task<DreamMessage2> InvokeEx(string verb, DreamMessage2 request, TimeSpan timeout) {
+        public Task<DreamMessage> InvokeEx(string verb, DreamMessage request, TimeSpan timeout) {
             if(verb == null) {
                 throw new ArgumentNullException("verb");
             }
@@ -876,14 +856,14 @@ namespace MindTouch.Traum.Webclient {
             }
 
             // determine which factory has the best match
-            IPlugEndpoint2 match;
+            IPlugEndpoint match;
             XUri normalizedUri;
             FindPlugEndpoint(Uri, out match, out normalizedUri);
 
             // check if we found a match
             if(match == null) {
                 request.Close();
-                return new DreamMessage2(DreamStatus.NoEndpointFound).AsCompletedTask();
+                return new DreamMessage(DreamStatus.NoEndpointFound).AsCompletedTask();
             }
 
             // add matching cookies from service or from global cookie jar
@@ -896,7 +876,7 @@ namespace MindTouch.Traum.Webclient {
                 // check if custom pre-processing handlers are registered
                 if(_preHandlers != null) {
                     foreach(PlugHandler2 handler in _preHandlers) {
-                        request = handler(verb, Uri, normalizedUri, request) ?? new DreamMessage2(DreamStatus.RequestIsNull);
+                        request = handler(verb, Uri, normalizedUri, request) ?? new DreamMessage(DreamStatus.RequestIsNull);
                         if(request.Status != DreamStatus.Ok) {
                             return request.AsCompletedTask();
                         }
@@ -904,7 +884,7 @@ namespace MindTouch.Traum.Webclient {
                 }
             } catch(Exception e) {
                 request.Close();
-                return DreamMessage2.RequestFailed(e).AsCompletedTask();
+                return DreamMessage.RequestFailed(e).AsCompletedTask();
             }
 
             // Note (arnec): Plug never throws, so we usurp the passed result if it has a timeout
@@ -916,7 +896,7 @@ namespace MindTouch.Traum.Webclient {
 
             // if the governing result has a shorter timeout than the plug, it superceeds the plug timeout
             //var timeout = outerTimeout < Timeout ? outerTimeout : Timeout;
-            var completion = new TaskCompletionSource<DreamMessage2>();
+            var completion = new TaskCompletionSource<DreamMessage>();
             match.Invoke(this, verb, normalizedUri, request, timeout).ContinueWith(invokeTask => {
                 _log.Debug("plug handler completed");
                 if(invokeTask.IsFaulted) {
@@ -928,7 +908,7 @@ namespace MindTouch.Traum.Webclient {
                     if(e is TimeoutException) {
                         status = DreamStatus.RequestConnectionTimeout;
                     }
-                    completion.SetResult(new DreamMessage2(status, e));
+                    completion.SetResult(new DreamMessage(status, e));
                     return;
                 }
                 var response = invokeTask.Result;
@@ -940,7 +920,7 @@ namespace MindTouch.Traum.Webclient {
                        AutoRedirect &&
                        request.IsCloneable
                     ) {
-                        var redirectPlug = new Plug2(message.Headers.Location, Timeout, Headers, null, null, null, CookieJar, (ushort)(MaxAutoRedirects - 1));
+                        var redirectPlug = new Plug(message.Headers.Location, Timeout, Headers, null, null, null, CookieJar, (ushort)(MaxAutoRedirects - 1));
                         var redirectMessage = request.Clone();
                         request.Close();
                         redirectPlug.InvokeEx(verb, redirectMessage, Timeout).ContinueWith(redirectTask => completion.SetResult(redirectTask.Result));
@@ -948,14 +928,14 @@ namespace MindTouch.Traum.Webclient {
                         request.Close();
                         if(_postHandlers != null) {
                             foreach(PlugHandler2 handler in _postHandlers) {
-                                response = handler(verb, Uri, normalizedUri, response) ?? new DreamMessage2(DreamStatus.ResponseIsNull);
+                                response = handler(verb, Uri, normalizedUri, response) ?? new DreamMessage(DreamStatus.ResponseIsNull);
                             }
                         }
                         completion.SetResult(response);
                     }
                 } catch(Exception e) {
                     request.Close();
-                    completion.SetResult(new DreamMessage2(DreamStatus.ResponseFailed, e));
+                    completion.SetResult(new DreamMessage(DreamStatus.ResponseFailed, e));
                 }
             });
 

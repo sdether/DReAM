@@ -24,7 +24,7 @@ using System.Threading.Tasks;
 
 namespace MindTouch.Traum.Webclient {
 
-    internal class ResourcePlugEndpoint : IPlugEndpoint2 {
+    internal class ResourcePlugEndpoint : IPlugEndpoint {
 
         //--- Methods ---
         public int GetScoreWithNormalizedUri(XUri uri, out XUri normalized) {
@@ -37,13 +37,13 @@ namespace MindTouch.Traum.Webclient {
             }
         }
 
-        Task<DreamMessage2> IPlugEndpoint2.Invoke(Plug2 plug, string verb, XUri uri, DreamMessage2 request, TimeSpan timeout) {
+        Task<DreamMessage> IPlugEndpoint.Invoke(Plug plug, string verb, XUri uri, DreamMessage request, TimeSpan timeout) {
 
             // we only support GET as verb
-            var result = new TaskCompletionSource<DreamMessage2>();
-            DreamMessage2 reply;
+            var result = new TaskCompletionSource<DreamMessage>();
+            DreamMessage reply;
             if((verb != Verb.GET) && (verb != Verb.HEAD)) {
-                reply = new DreamMessage2(DreamStatus.MethodNotAllowed);
+                reply = new DreamMessage(DreamStatus.MethodNotAllowed);
                 reply.Headers.Allow = Verb.GET + "," + Verb.HEAD;
             } else {
                 bool head = (verb == Verb.HEAD);
@@ -55,25 +55,25 @@ namespace MindTouch.Traum.Webclient {
 
                 // check if request is just about re-validation
                 if(!head && request.CheckCacheRevalidation(timestamp)) {
-                    reply = DreamMessage2.NotModified();
+                    reply = DreamMessage.NotModified();
                 } else {
                     try {
                         System.IO.Stream stream = assembly.GetManifestResourceStream(uri.Path.Substring(1));
                         if(stream != null) {
                             MimeType mime = MimeType.BINARY;
-                            reply = new DreamMessage2(DreamStatus.Ok, null, mime, stream.Length, head ? System.IO.Stream.Null : stream);
+                            reply = new DreamMessage(DreamStatus.Ok, null, mime, stream.Length, head ? System.IO.Stream.Null : stream);
                             if(head) {
                                 stream.Close();
                             } else {
                                 reply.SetCacheMustRevalidate(timestamp);
                             }
                         } else {
-                            reply = DreamMessage2.NotFound("could not find resource");
+                            reply = DreamMessage.NotFound("could not find resource");
                         }
                     } catch(System.IO.FileNotFoundException) {
-                        reply = DreamMessage2.NotFound("could not find resource");
+                        reply = DreamMessage.NotFound("could not find resource");
                     } catch(Exception e) {
-                        reply = DreamMessage2.InternalError(e);
+                        reply = DreamMessage.InternalError(e);
                     }
                 }
             }

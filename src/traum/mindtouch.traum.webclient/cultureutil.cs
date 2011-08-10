@@ -28,7 +28,7 @@ namespace MindTouch.Traum.Webclient {
     /// <summary>
     /// Static Utility class containing extension and helper methods for working with <see cref="CultureInfo"/>.
     /// </summary>
-    public static class CultureUtil {
+    internal static class CultureUtil {
 
         //--- Class Fields ---
         private static readonly Dictionary<string, string> _neutralTofullCulture = new Dictionary<string, string>(StringComparer.CurrentCultureIgnoreCase);

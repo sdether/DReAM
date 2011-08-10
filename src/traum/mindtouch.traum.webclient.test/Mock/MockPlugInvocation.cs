@@ -23,7 +23,7 @@
 namespace MindTouch.Traum.Webclient.Test.Mock {
 
     /// <summary>
-    /// Provides access to <see cref="MockPlug2"/> invocation values, used in defining the <see cref="MockPlug2.Returns(MindTouch.Traum.Webclient.DreamMessage2)"/> callback.
+    /// Provides access to <see cref="MockPlug2"/> invocation values, used in defining the <see cref="MockPlug2.Returns(DreamMessage)"/> callback.
     /// </summary>
     public class MockPlugInvocation {
 
@@ -42,7 +42,7 @@ namespace MindTouch.Traum.Webclient.Test.Mock {
         /// <summary>
         /// Mock invocation request message.
         /// </summary>
-        public readonly DreamMessage2 Request;
+        public readonly DreamMessage Request;
 
         /// <summary>
         /// Headers the mock will attach to the returned message.
@@ -50,7 +50,7 @@ namespace MindTouch.Traum.Webclient.Test.Mock {
         public readonly DreamHeaders ResponseHeaders;
 
         //--- Constructors ---
-        internal MockPlugInvocation(string verb, XUri uri, DreamMessage2 request, DreamHeaders responseHeaders) {
+        internal MockPlugInvocation(string verb, XUri uri, DreamMessage request, DreamHeaders responseHeaders) {
             Verb = verb;
             Uri = uri;
             Request = request;

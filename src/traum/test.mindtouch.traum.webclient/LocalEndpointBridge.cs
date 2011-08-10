@@ -5,7 +5,7 @@ using MindTouch.Tasking;
 using log4net;
 
 namespace MindTouch.Traum.Webclient.Test {
-    public class LocalEndpointBridge : IPlugEndpoint2 {
+    public class LocalEndpointBridge : IPlugEndpoint {
 
         //--- Class Fields ---
         private static readonly LocalEndpointBridge _instance = new LocalEndpointBridge();
@@ -13,7 +13,7 @@ namespace MindTouch.Traum.Webclient.Test {
 
         //--- Class Constructors ---
         static LocalEndpointBridge() {
-            Plug2.AddEndpoint(_instance);
+            Plug.AddEndpoint(_instance);
         }
 
         //--- Class Methods ---
@@ -25,18 +25,18 @@ namespace MindTouch.Traum.Webclient.Test {
             return uri.Scheme == "local" ? int.MaxValue : 0;
         }
 
-        public Task<DreamMessage2> Invoke(Plug2 plug, string verb, XUri uri, DreamMessage2 request, TimeSpan timeout) {
+        public Task<DreamMessage> Invoke(Plug plug, string verb, XUri uri, DreamMessage request, TimeSpan timeout) {
             _log.DebugFormat("routing local call to Dream for uri: {0}", uri);
-            var completion = new TaskCompletionSource<DreamMessage2>();
-            Plug.New(uri.ToString(true)).Invoke(verb, MakeMessage(request), new Result<DreamMessage>(timeout)).WhenDone(
+            var completion = new TaskCompletionSource<DreamMessage>();
+            Dream.Plug.New(uri.ToString(true)).Invoke(verb, MakeMessage(request), new Result<Dream.DreamMessage>(timeout)).WhenDone(
                 msg => completion.SetResult(MakeMessage(msg)),
                 completion.SetException
             );
             return completion.Task;
         }
 
-        private DreamMessage MakeMessage(DreamMessage2 request) {
-            return new DreamMessage(
+        private Dream.DreamMessage MakeMessage(DreamMessage request) {
+            return new Dream.DreamMessage(
                 (Dream.DreamStatus)(int)request.Status,
                 new Dream.DreamHeaders(request.Headers),
                 new Dream.MimeType(request.ContentType.ToString()),
@@ -44,8 +44,8 @@ namespace MindTouch.Traum.Webclient.Test {
             );
         }
 
-        private DreamMessage2 MakeMessage(DreamMessage request) {
-            return new DreamMessage2(
+        private DreamMessage MakeMessage(Dream.DreamMessage request) {
+            return new DreamMessage(
                 (DreamStatus)(int)request.Status,
                 new DreamHeaders(request.Headers),
                 new MimeType(request.ContentType.ToString()),

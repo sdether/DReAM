@@ -31,7 +31,7 @@ namespace MindTouch.Traum.Webclient {
     public class DreamCookie {
 
         //--- Class Fields ---
-        private static log4net.ILog _log = LogUtils.CreateLog();
+        private static Logger.ILog _log = Logger.CreateLog();
 
         //--- Class Methods ---
 

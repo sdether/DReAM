@@ -25,17 +25,17 @@ using System.Threading.Tasks;
 namespace MindTouch.Traum.Webclient {
 
     /// <summary>
-    /// Provides a handler contract for registering a <see cref="Plug2"/> request invocation endpoint.
+    /// Provides a handler contract for registering a <see cref="Plug"/> request invocation endpoint.
     /// </summary>
-    public interface IPlugEndpoint2 {
+    public interface IPlugEndpoint {
 
         //--- Methods ---
 
         /// <summary>
-        /// Called by <see cref="Plug2"/> to let the endpoint determine whether it wants to handle the endpoint and to what level of priority.
+        /// Called by <see cref="Plug"/> to let the endpoint determine whether it wants to handle the endpoint and to what level of priority.
         /// </summary>
         /// <remarks>
-        /// Multiple endpoints can be candidates for handling an invocation. <see cref="Plug2"/> uses the returned score to determine which
+        /// Multiple endpoints can be candidates for handling an invocation. <see cref="Plug"/> uses the returned score to determine which
         /// endpoint to dispatch to.
         /// </remarks>
         /// <param name="uri">Uri to match.</param>
@@ -57,6 +57,6 @@ namespace MindTouch.Traum.Webclient {
         /// <param name="request">Request message.</param>
         /// <param name="timeout">timeout</param>
         /// <returns></returns>
-        Task<DreamMessage2> Invoke(Plug2 plug, string verb, XUri uri, DreamMessage2 request, TimeSpan timeout);
+        Task<DreamMessage> Invoke(Plug plug, string verb, XUri uri, DreamMessage request, TimeSpan timeout);
     }
 }

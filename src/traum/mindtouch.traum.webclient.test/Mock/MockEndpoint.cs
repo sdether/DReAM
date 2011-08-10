@@ -21,22 +21,21 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using log4net;
 
 namespace MindTouch.Traum.Webclient.Test.Mock {
-    internal class MockEndpoint : IPlugEndpoint2 {
+    internal class MockEndpoint : IPlugEndpoint {
 
         //--- Class Fields ---
         public static readonly MockEndpoint Instance = new MockEndpoint();
 
         // Note (arnec): This is a field, not constant so that access triggers the static constructor
         public readonly static string DEFAULT = "mock://mock";
-        private static readonly MockPlug2.IMockInvokee DefaultInvokee = new MockPlug2.MockInvokee(null, (p, v, u, r) => DreamMessage2.Ok().AsCompletedTask(), int.MaxValue);
-        private static readonly ILog _log = LogUtils.CreateLog();
+        private static readonly MockPlug2.IMockInvokee DefaultInvokee = new MockPlug2.MockInvokee(null, (p, v, u, r) => DreamMessage.Ok().AsCompletedTask(), int.MaxValue);
+        private static readonly Logger.ILog _log = Logger.CreateLog();
 
         //--- Class Constructors ---
         static MockEndpoint() {
-            Plug2.AddEndpoint(Instance);
+            Plug.AddEndpoint(Instance);
         }
 
         //--- Fields ---
@@ -72,7 +71,7 @@ namespace MindTouch.Traum.Webclient.Test.Mock {
             return uri.SchemeHostPort.EqualsInvariant(DEFAULT) ? DefaultInvokee : null;
         }
 
-        public Task<DreamMessage2> Invoke(Plug2 plug, string verb, XUri uri, DreamMessage2 request, TimeSpan timeout) {
+        public Task<DreamMessage> Invoke(Plug plug, string verb, XUri uri, DreamMessage request, TimeSpan timeout) {
             var match = GetBestMatch(uri);
             _log.DebugFormat("invoking uri '{0}'", uri);
             return Task.Factory.StartNew(() => match.Invoke(plug, verb, uri, MemorizeAndClone(request)).Result);
@@ -109,8 +108,8 @@ namespace MindTouch.Traum.Webclient.Test.Mock {
             }
         }
 
-        private DreamMessage2 MemorizeAndClone(DreamMessage2 request) {
-            return request.IsCloneable ? request.Clone() : new DreamMessage2(request.Status,request.Headers,request.ContentType,request.ToBytes());
+        private DreamMessage MemorizeAndClone(DreamMessage request) {
+            return request.IsCloneable ? request.Clone() : new DreamMessage(request.Status,request.Headers,request.ContentType,request.ToBytes());
         }
     }
 }
