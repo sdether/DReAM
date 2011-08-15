@@ -11,7 +11,7 @@ namespace MindTouch.Traum.Webclient {
             try {
                 Assembly.Load("log4net");
                 _loggingIsOff = false;
-            } catch { }
+            } catch {}
         }
 
         public static ILog CreateLog() {
@@ -63,52 +63,65 @@ namespace MindTouch.Traum.Webclient {
             void FatalFormat(IFormatProvider provider, string format, params object[] args);
         }
 
-        internal class NoLog : ILog {
-            public bool IsDebugEnabled { get { return false; } }
-            public bool IsInfoEnabled { get { return false; } }
-            public bool IsWarnEnabled { get { return false; } }
-            public bool IsErrorEnabled { get { return false; } }
-            public bool IsFatalEnabled { get { return false; } }
-            public void Debug(object message) { }
-            public void Debug(object message, Exception exception) { }
-            public void DebugFormat(string format, params object[] args) { }
-            public void DebugFormat(string format, object arg0) { }
-            public void DebugFormat(string format, object arg0, object arg1) { }
-            public void DebugFormat(string format, object arg0, object arg1, object arg2) { }
-            public void DebugFormat(IFormatProvider provider, string format, params object[] args) { }
-            public void Info(object message) { }
-            public void Info(object message, Exception exception) { }
-            public void InfoFormat(string format, params object[] args) { }
-            public void InfoFormat(string format, object arg0) { }
-            public void InfoFormat(string format, object arg0, object arg1) { }
-            public void InfoFormat(string format, object arg0, object arg1, object arg2) { }
-            public void InfoFormat(IFormatProvider provider, string format, params object[] args) { }
-            public void Warn(object message) { }
-            public void Warn(object message, Exception exception) { }
-            public void WarnFormat(string format, params object[] args) { }
-            public void WarnFormat(string format, object arg0) { }
-            public void WarnFormat(string format, object arg0, object arg1) { }
-            public void WarnFormat(string format, object arg0, object arg1, object arg2) { }
-            public void WarnFormat(IFormatProvider provider, string format, params object[] args) { }
-            public void Error(object message) { }
-            public void Error(object message, Exception exception) { }
-            public void ErrorFormat(string format, params object[] args) { }
-            public void ErrorFormat(string format, object arg0) { }
-            public void ErrorFormat(string format, object arg0, object arg1) { }
-            public void ErrorFormat(string format, object arg0, object arg1, object arg2) { }
-            public void ErrorFormat(IFormatProvider provider, string format, params object[] args) { }
-            public void Fatal(object message) { }
-            public void Fatal(object message, Exception exception) { }
-            public void FatalFormat(string format, params object[] args) { }
-            public void FatalFormat(string format, object arg0) { }
-            public void FatalFormat(string format, object arg0, object arg1) { }
-            public void FatalFormat(string format, object arg0, object arg1, object arg2) { }
-            public void FatalFormat(IFormatProvider provider, string format, params object[] args) { }
+        private class NoLog : ILog {
+            public bool IsDebugEnabled {
+                get { return false; }
+            }
+
+            public bool IsInfoEnabled {
+                get { return false; }
+            }
+
+            public bool IsWarnEnabled {
+                get { return false; }
+            }
+
+            public bool IsErrorEnabled {
+                get { return false; }
+            }
+
+            public bool IsFatalEnabled {
+                get { return false; }
+            }
+
+            public void Debug(object message) {}
+            public void Debug(object message, Exception exception) {}
+            public void DebugFormat(string format, params object[] args) {}
+            public void DebugFormat(string format, object arg0) {}
+            public void DebugFormat(string format, object arg0, object arg1) {}
+            public void DebugFormat(string format, object arg0, object arg1, object arg2) {}
+            public void DebugFormat(IFormatProvider provider, string format, params object[] args) {}
+            public void Info(object message) {}
+            public void Info(object message, Exception exception) {}
+            public void InfoFormat(string format, params object[] args) {}
+            public void InfoFormat(string format, object arg0) {}
+            public void InfoFormat(string format, object arg0, object arg1) {}
+            public void InfoFormat(string format, object arg0, object arg1, object arg2) {}
+            public void InfoFormat(IFormatProvider provider, string format, params object[] args) {}
+            public void Warn(object message) {}
+            public void Warn(object message, Exception exception) {}
+            public void WarnFormat(string format, params object[] args) {}
+            public void WarnFormat(string format, object arg0) {}
+            public void WarnFormat(string format, object arg0, object arg1) {}
+            public void WarnFormat(string format, object arg0, object arg1, object arg2) {}
+            public void WarnFormat(IFormatProvider provider, string format, params object[] args) {}
+            public void Error(object message) {}
+            public void Error(object message, Exception exception) {}
+            public void ErrorFormat(string format, params object[] args) {}
+            public void ErrorFormat(string format, object arg0) {}
+            public void ErrorFormat(string format, object arg0, object arg1) {}
+            public void ErrorFormat(string format, object arg0, object arg1, object arg2) {}
+            public void ErrorFormat(IFormatProvider provider, string format, params object[] args) {}
+            public void Fatal(object message) {}
+            public void Fatal(object message, Exception exception) {}
+            public void FatalFormat(string format, params object[] args) {}
+            public void FatalFormat(string format, object arg0) {}
+            public void FatalFormat(string format, object arg0, object arg1) {}
+            public void FatalFormat(string format, object arg0, object arg1, object arg2) {}
+            public void FatalFormat(IFormatProvider provider, string format, params object[] args) {}
         }
 
-
-
-        internal class Log4NetLogger : ILog {
+        private class Log4NetLogger : ILog {
 
             //--- Fields ---
             private readonly log4net.ILog _rootLogger;
@@ -123,11 +136,25 @@ namespace MindTouch.Traum.Webclient {
             }
 
             //--- Properties ---
-            public bool IsDebugEnabled { get { return _rootLogger.IsDebugEnabled; } }
-            public bool IsInfoEnabled { get { return _rootLogger.IsInfoEnabled; } }
-            public bool IsWarnEnabled { get { return _rootLogger.IsWarnEnabled; } }
-            public bool IsErrorEnabled { get { return _rootLogger.IsFatalEnabled; } }
-            public bool IsFatalEnabled { get { return _rootLogger.IsFatalEnabled; } }
+            public bool IsDebugEnabled {
+                get { return _rootLogger.IsDebugEnabled; }
+            }
+
+            public bool IsInfoEnabled {
+                get { return _rootLogger.IsInfoEnabled; }
+            }
+
+            public bool IsWarnEnabled {
+                get { return _rootLogger.IsWarnEnabled; }
+            }
+
+            public bool IsErrorEnabled {
+                get { return _rootLogger.IsFatalEnabled; }
+            }
+
+            public bool IsFatalEnabled {
+                get { return _rootLogger.IsFatalEnabled; }
+            }
 
             //--- Methods ---
             public void Debug(object message) {
