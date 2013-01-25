@@ -27,7 +27,6 @@ using System.Security.Cryptography;
 using System.Security.Principal;
 using System.Text;
 using Autofac;
-using Autofac.Builder;
 using MindTouch.Security.Cryptography;
 using MindTouch.Tasking;
 using MindTouch.Web;
@@ -137,7 +136,7 @@ namespace MindTouch.Dream {
         private readonly string[] _suffixes;
         private readonly Dictionary<string, string[]> _pathParams;
         private readonly Dictionary<string, string> _license;
-        private readonly Func<Action<ContainerBuilder>, ILifetimeScope> _requestContainerFactory;
+        private readonly Func<DreamContext, ILifetimeScope> _requestContainerFactory;
         private XUri _publicUriOverride;
         private XUri _serverUri;
         private Hashtable _state;
@@ -145,6 +144,7 @@ namespace MindTouch.Dream {
         private CultureInfo _culture;
         private bool _isTaskDisposed;
         private ILifetimeScope _lifetimeScope;
+        private bool _inLifetimeScopeInitialization;
         private TaskEnv _ownerEnv;
 
         //--- Constructors ---
@@ -161,7 +161,7 @@ namespace MindTouch.Dream {
         /// <param name="request">Request message.</param>
         /// <param name="culture">Request Culture.</param>
         /// <param name="requestContainerFactory">Factory delegate to create a request container on demand.</param>
-        public DreamContext(IDreamEnvironment env, string verb, XUri uri, DreamFeature feature, XUri publicUri, XUri serverUri, DreamMessage request, CultureInfo culture, Func<Action<ContainerBuilder>, ILifetimeScope> requestContainerFactory) {
+        public DreamContext(IDreamEnvironment env, string verb, XUri uri, DreamFeature feature, XUri publicUri, XUri serverUri, DreamMessage request, CultureInfo culture, Func<DreamContext, ILifetimeScope> requestContainerFactory) {
             if(env == null) {
                 throw new ArgumentNullException("env");
             }
@@ -203,7 +203,7 @@ namespace MindTouch.Dream {
             _license = CheckServiceLicense();
         }
 
-        private DreamContext(IDreamEnvironment env, string verb, XUri uri, DreamFeature feature, XUri publicUri, XUri serverUri, DreamMessage request, CultureInfo culture, Func<Action<ContainerBuilder>, ILifetimeScope> requestContainerFactory, Dictionary<string, string> license) {
+        private DreamContext(IDreamEnvironment env, string verb, XUri uri, DreamFeature feature, XUri publicUri, XUri serverUri, DreamMessage request, CultureInfo culture, Func<DreamContext, ILifetimeScope> requestContainerFactory, Dictionary<string, string> license) {
             if(env == null) {
                 throw new ArgumentNullException("env");
             }
@@ -325,7 +325,12 @@ namespace MindTouch.Dream {
         public ILifetimeScope Container {
             get {
                 if(_lifetimeScope == null ) {
-                    _lifetimeScope = _requestContainerFactory(builder => builder.RegisterInstance(this).ExternallyOwned());
+                    if(_inLifetimeScopeInitialization) {
+                        throw new InvalidOperationException("Trying to access the DreamContext.Container while in DreamContext.Container initialization");
+                    }
+                    _inLifetimeScopeInitialization = true;
+                    _lifetimeScope = _requestContainerFactory(this);
+                    _inLifetimeScopeInitialization = false;
                 }
                 return _lifetimeScope;
             }

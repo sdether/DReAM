@@ -1534,15 +1534,19 @@ namespace MindTouch.Dream {
             }
         }
 
-        private Func<Action<ContainerBuilder>, ILifetimeScope> GetRequestLifetimeScopeFactory(IDreamService service) {
-            return buildAction => {
-                ILifetimeScope serviceLifetimeScope;
+        private Func<DreamContext, ILifetimeScope> GetRequestLifetimeScopeFactory(IDreamService service) {
+            return (context) => {
+                ILifetimeScope baseLifeTimeScope;
                 lock(_serviceLifetimeScopes) {
-                    if(!_serviceLifetimeScopes.TryGetValue(service, out serviceLifetimeScope)) {
+                    if(!_serviceLifetimeScopes.TryGetValue(service, out baseLifeTimeScope)) {
                         throw new InvalidOperationException(string.Format("Cannot create a request container for service  '{0}' at '{1}'. This error  normally occurs if DreamContext.Container is invoked in Service Start or Shutdown", service, service.Self.Uri));
                     }
                 }
-                var requestLifetimeScope = serviceLifetimeScope.BeginLifetimeScope(DreamContainerScope.Request, buildAction);
+                ITenantRepository tenantRepository;
+                if(baseLifeTimeScope.TryResolve(out tenantRepository)) {
+                    baseLifeTimeScope = tenantRepository.GetTenantScope(context);
+                }
+                var requestLifetimeScope = baseLifeTimeScope.BeginLifetimeScope(DreamContainerScope.Request, builder => builder.RegisterInstance(context).ExternallyOwned());
                 return requestLifetimeScope;
             };
         }
