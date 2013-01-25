@@ -5,11 +5,11 @@ using Autofac.Core.Lifetime;
 namespace MindTouch.Dream {
     public interface ITenantRepository {
         ILifetimeScope GetTenantScope(DreamContext context);
-        void ShutdownTenantScope(ILifetimeScope scope);
+        void DisposeTenantScope(ILifetimeScope scope);
     }
 
     public interface ITentantScopeManager {
-        void RequestShutdown();
+        void RequestDisposal();
     }
 
     public class LifetimeScopeContainer : ITentantScopeManager, IDisposable {

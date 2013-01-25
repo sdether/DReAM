@@ -136,15 +136,15 @@ namespace MindTouch.Dream {
         private readonly string[] _suffixes;
         private readonly Dictionary<string, string[]> _pathParams;
         private readonly Dictionary<string, string> _license;
-        private readonly Func<DreamContext, ILifetimeScope> _requestContainerFactory;
+        private readonly Func<DreamContext, IComponentContext> _requestContainerFactory;
         private XUri _publicUriOverride;
         private XUri _serverUri;
         private Hashtable _state;
         private System.Diagnostics.StackTrace _stackTrace = DebugUtil.GetStackTrace();
         private CultureInfo _culture;
         private bool _isTaskDisposed;
-        private ILifetimeScope _lifetimeScope;
-        private bool _inLifetimeScopeInitialization;
+        private IComponentContext _requestContainer;
+        private bool _inRequestScopeInitialization;
         private TaskEnv _ownerEnv;
 
         //--- Constructors ---
@@ -161,7 +161,7 @@ namespace MindTouch.Dream {
         /// <param name="request">Request message.</param>
         /// <param name="culture">Request Culture.</param>
         /// <param name="requestContainerFactory">Factory delegate to create a request container on demand.</param>
-        public DreamContext(IDreamEnvironment env, string verb, XUri uri, DreamFeature feature, XUri publicUri, XUri serverUri, DreamMessage request, CultureInfo culture, Func<DreamContext, ILifetimeScope> requestContainerFactory) {
+        public DreamContext(IDreamEnvironment env, string verb, XUri uri, DreamFeature feature, XUri publicUri, XUri serverUri, DreamMessage request, CultureInfo culture, Func<DreamContext, IComponentContext> requestContainerFactory) {
             if(env == null) {
                 throw new ArgumentNullException("env");
             }
@@ -203,7 +203,7 @@ namespace MindTouch.Dream {
             _license = CheckServiceLicense();
         }
 
-        private DreamContext(IDreamEnvironment env, string verb, XUri uri, DreamFeature feature, XUri publicUri, XUri serverUri, DreamMessage request, CultureInfo culture, Func<DreamContext, ILifetimeScope> requestContainerFactory, Dictionary<string, string> license) {
+        private DreamContext(IDreamEnvironment env, string verb, XUri uri, DreamFeature feature, XUri publicUri, XUri serverUri, DreamMessage request, CultureInfo culture, Func<DreamContext, IComponentContext> requestContainerFactory, Dictionary<string, string> license) {
             if(env == null) {
                 throw new ArgumentNullException("env");
             }
@@ -322,17 +322,17 @@ namespace MindTouch.Dream {
         /// <summary>
         /// Request Inversion of Control container.
         /// </summary>
-        public ILifetimeScope Container {
+        public IComponentContext Container {
             get {
-                if(_lifetimeScope == null ) {
-                    if(_inLifetimeScopeInitialization) {
+                if(_requestContainer == null ) {
+                    if(_inRequestScopeInitialization) {
                         throw new InvalidOperationException("Trying to access the DreamContext.Container while in DreamContext.Container initialization");
                     }
-                    _inLifetimeScopeInitialization = true;
-                    _lifetimeScope = _requestContainerFactory(this);
-                    _inLifetimeScopeInitialization = false;
+                    _inRequestScopeInitialization = true;
+                    _requestContainer = _requestContainerFactory(this);
+                    _inRequestScopeInitialization = false;
                 }
-                return _lifetimeScope;
+                return _requestContainer;
             }
         }
 
@@ -829,9 +829,9 @@ namespace MindTouch.Dream {
                 _log.Warn("disposing already disposed context");
             }
             _isTaskDisposed = true;
-            if(_lifetimeScope != null) {
-                _lifetimeScope.Dispose();
-                _lifetimeScope = null;
+            if(_requestContainer != null) {
+                _requestContainer.Dispose();
+                _requestContainer = null;
             }
             if(_state == null) {
                 return;
