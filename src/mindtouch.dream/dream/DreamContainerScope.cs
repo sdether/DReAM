@@ -50,6 +50,11 @@ namespace MindTouch.Dream {
         /// <summary>
         /// Per call instance.
         /// </summary>
-        Factory
+        Factory,
+
+        /// <summary>
+        /// Singleton belonging to a Tenant Scope created by <see cref="ITenantRepository"/>
+        /// </summary>
+        Tenant
     }
 }

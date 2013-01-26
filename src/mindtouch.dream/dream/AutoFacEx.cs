@@ -41,7 +41,7 @@ namespace MindTouch.Dream {
         }
 
         /// <summary>
-        /// Set the registered item's contrainer resolution scope to <see cref="DreamContainerScope.Host"/>
+        /// Set the registered item's container resolution scope to <see cref="DreamContainerScope.Host"/>
         /// </summary>
         /// <param name="registrar">Registrar instance.</param>
         /// <returns>The modified registrar instance.</returns>
@@ -50,7 +50,7 @@ namespace MindTouch.Dream {
         }
 
         /// <summary>
-        /// Set the registered item's contrainer resolution scope to <see cref="DreamContainerScope.Service"/>
+        /// Set the registered item's container resolution scope to <see cref="DreamContainerScope.Service"/>
         /// </summary>
         /// <param name="registrar">Registrar instance.</param>
         /// <returns>The modified registrar instance.</returns>
@@ -59,12 +59,21 @@ namespace MindTouch.Dream {
         }
 
         /// <summary>
-        /// Set the registered item's contrainer resolution scope to <see cref="DreamContainerScope.Request"/>
+        /// Set the registered item's container resolution scope to <see cref="DreamContainerScope.Request"/>
         /// </summary>
         /// <param name="registrar">Registrar instance.</param>
         /// <returns>The modified registrar instance.</returns>
         public static IRegistrationBuilder<TLimit, TActivatorData, TRegistrationStyle> RequestScoped<TLimit, TActivatorData, TRegistrationStyle>(this IRegistrationBuilder<TLimit, TActivatorData, TRegistrationStyle> registrar) {
             return registrar.InScope(DreamContainerScope.Request);
+        }
+
+        /// <summary>
+        /// Set the registered item's contrainer resolution scope to <see cref="DreamContainerScope.Tenant"/>
+        /// </summary>
+        /// <param name="registrar">Registrar instance.</param>
+        /// <returns>The modified registrar instance.</returns>
+        public static IRegistrationBuilder<TLimit, TActivatorData, TRegistrationStyle> TenantScoped<TLimit, TActivatorData, TRegistrationStyle>(this IRegistrationBuilder<TLimit, TActivatorData, TRegistrationStyle> registrar) {
+            return registrar.InScope(DreamContainerScope.Tenant);
         }
     }
 }

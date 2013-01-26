@@ -136,14 +136,14 @@ namespace MindTouch.Dream {
         private readonly string[] _suffixes;
         private readonly Dictionary<string, string[]> _pathParams;
         private readonly Dictionary<string, string> _license;
-        private readonly Func<DreamContext, IComponentContext> _requestContainerFactory;
+        private readonly Func<DreamContext, IRequestContainer> _requestContainerFactory;
         private XUri _publicUriOverride;
         private XUri _serverUri;
         private Hashtable _state;
         private System.Diagnostics.StackTrace _stackTrace = DebugUtil.GetStackTrace();
         private CultureInfo _culture;
         private bool _isTaskDisposed;
-        private IComponentContext _requestContainer;
+        private IRequestContainer _requestContainer;
         private bool _inRequestScopeInitialization;
         private TaskEnv _ownerEnv;
 
@@ -161,7 +161,7 @@ namespace MindTouch.Dream {
         /// <param name="request">Request message.</param>
         /// <param name="culture">Request Culture.</param>
         /// <param name="requestContainerFactory">Factory delegate to create a request container on demand.</param>
-        public DreamContext(IDreamEnvironment env, string verb, XUri uri, DreamFeature feature, XUri publicUri, XUri serverUri, DreamMessage request, CultureInfo culture, Func<DreamContext, IComponentContext> requestContainerFactory) {
+        public DreamContext(IDreamEnvironment env, string verb, XUri uri, DreamFeature feature, XUri publicUri, XUri serverUri, DreamMessage request, CultureInfo culture, Func<DreamContext, IRequestContainer> requestContainerFactory) {
             if(env == null) {
                 throw new ArgumentNullException("env");
             }
@@ -203,7 +203,7 @@ namespace MindTouch.Dream {
             _license = CheckServiceLicense();
         }
 
-        private DreamContext(IDreamEnvironment env, string verb, XUri uri, DreamFeature feature, XUri publicUri, XUri serverUri, DreamMessage request, CultureInfo culture, Func<DreamContext, IComponentContext> requestContainerFactory, Dictionary<string, string> license) {
+        private DreamContext(IDreamEnvironment env, string verb, XUri uri, DreamFeature feature, XUri publicUri, XUri serverUri, DreamMessage request, CultureInfo culture, Func<DreamContext, IRequestContainer> requestContainerFactory, Dictionary<string, string> license) {
             if(env == null) {
                 throw new ArgumentNullException("env");
             }

@@ -142,6 +142,7 @@
     <Compile Include="SysUtilTests.cs" />
     <Compile Include="TaskTests.cs" />
     <Compile Include="TaskTimerTests.cs" />
+    <Compile Include="TenancyTests.cs" />
     <Compile Include="Text\EncodingDetectorTest.cs" />
     <Compile Include="Threading\MonitorSemaphoreTests.cs" />
     <Compile Include="Threading\ThreadPoolTests.cs" />

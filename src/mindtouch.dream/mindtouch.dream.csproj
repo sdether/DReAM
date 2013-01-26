@@ -137,7 +137,9 @@
     <Compile Include="dream\DreamServiceRegistrationBuilder.cs" />
     <Compile Include="dream\IDreamServiceConfigurationBuilder.cs" />
     <Compile Include="dream\IRequestContainer.cs" />
+    <Compile Include="dream\ITenant.cs" />
     <Compile Include="dream\ITenantRepository.cs" />
+    <Compile Include="dream\ITentantScopeManager.cs" />
     <Compile Include="dream\RegistrationInspector.cs" />
     <Compile Include="dream\services\PubSub\MemoryPubsubDispatchQueue.cs" />
     <Compile Include="dream\services\PubSub\MemoryPubSubDispatchQueueRepository.cs" />
@@ -148,6 +150,8 @@
     <Compile Include="dream\services\PubSub\IPubSubDispatchQueueRepository.cs" />
     <Compile Include="dream\services\PubSub\IPubSubDispatchQueue.cs" />
     <Compile Include="dream\services\PubSub\PersistentPubSubDispatchQueueRepository.cs" />
+    <Compile Include="dream\TenantRepository.cs" />
+    <Compile Include="dream\TenantScopeManager.cs" />
     <Compile Include="Extensions\ReflectionEx.cs" />
     <Compile Include="IO\ChunkedMemoryStream.cs" />
     <Compile Include="Numeric.cs" />
