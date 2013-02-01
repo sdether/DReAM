@@ -18,19 +18,35 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+using System;
 using System.Collections.Generic;
 using Autofac;
 
 namespace MindTouch.Dream {
-    public abstract class TenantRepository<T> : ITenantRepository where T : ITenant {
-        protected readonly IDictionary<string, T> _tenantsByName = new Dictionary<string, T>();
+    public abstract class TenantRepository<T> : IDisposable, ITenantRepository where T : class, IDisposable {
+
+        private class Tenant {
+            public T Data;
+            public ILifetimeScope LifetimeScope;
+            public string Name;
+        }
+
+        private readonly IDictionary<string, Tenant> _tenantsByName = new Dictionary<string, Tenant>();
 
         public IRequestContainer GetRequestContainer(ILifetimeScope serviceLifetimeScope, DreamContext context) {
             var name = GetTenantName(context);
-            T tenant;
+            Tenant tenant;
             lock(_tenantsByName) {
                 if(!_tenantsByName.TryGetValue(name, out tenant)) {
-                    _tenantsByName[name] = tenant = CreateTenant(name, serviceLifetimeScope.BeginLifetimeScope(DreamContainerScope.Tenant));
+                    var tenantData = CreateTenantData(name);
+                    _tenantsByName[name] = tenant = new Tenant {
+                        LifetimeScope = serviceLifetimeScope.BeginLifetimeScope(
+                            DreamContainerScope.Tenant, 
+                            builder => builder.RegisterInstance(tenantData).TenantScoped()
+                        ),
+                        Data = tenantData
+                    };
                 }
             }
             var tenantScopeManager = new TenantScopeManager();
@@ -49,8 +65,27 @@ namespace MindTouch.Dream {
             });
         }
 
+        public T this[string name] {
+            get {
+                Tenant t;
+                lock(_tenantsByName) {
+                    _tenantsByName.TryGetValue(name, out t);
+                }
+                return t == null ? null : t.Data;
+            }
+        }
+
         protected abstract string GetTenantName(DreamContext context);
 
-        protected abstract T CreateTenant(string name, ILifetimeScope lifetimeScope);
+        protected abstract T CreateTenantData(string name);
+
+        public void Dispose() {
+            lock(_tenantsByName) {
+                foreach(var t in _tenantsByName.Values) {
+                    t.LifetimeScope.Dispose();
+                }
+                _tenantsByName.Clear();
+            }
+        }
     }
 }
