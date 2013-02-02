@@ -41,18 +41,22 @@ namespace MindTouch.Dream {
                 if(!_tenantsByName.TryGetValue(name, out tenant)) {
                     var tenantData = CreateTenantData(name);
                     _tenantsByName[name] = tenant = new Tenant {
+                        Name = name,
                         LifetimeScope = serviceLifetimeScope.BeginLifetimeScope(
                             DreamContainerScope.Tenant, 
-                            builder => builder.RegisterInstance(tenantData).TenantScoped()
+                            builder => builder.RegisterInstance(tenantData).As<T>().SingleInstance()
                         ),
                         Data = tenantData
                     };
+
+                    // have to prime resolution of tenant or it won't get disposed with the scope
+                    tenant.LifetimeScope.Resolve<T>();
                 }
             }
             var tenantScopeManager = new TenantScopeManager();
             var requestLifetimeScope = tenant.LifetimeScope.BeginLifetimeScope(DreamContainerScope.Request, builder => {
                 builder.RegisterInstance(context).ExternallyOwned();
-                builder.RegisterInstance(tenantScopeManager).ExternallyOwned();
+                builder.RegisterInstance(tenantScopeManager).As<ITentantScopeManager>().ExternallyOwned();
             });
             return new RequestContainer(requestLifetimeScope, () => {
                 if(!tenantScopeManager.DisposalRequested) {
@@ -79,7 +83,7 @@ namespace MindTouch.Dream {
 
         protected abstract T CreateTenantData(string name);
 
-        public void Dispose() {
+        public virtual void Dispose() {
             lock(_tenantsByName) {
                 foreach(var t in _tenantsByName.Values) {
                     t.LifetimeScope.Dispose();

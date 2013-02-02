@@ -19,10 +19,11 @@
  * limitations under the License.
  */
 
+using System;
 using Autofac;
 
 namespace MindTouch.Dream {
-    public interface ITenantRepository {
+    public interface ITenantRepository : IDisposable {
         IRequestContainer GetRequestContainer(ILifetimeScope serviceLifetimeScope, DreamContext context);
     }
 }

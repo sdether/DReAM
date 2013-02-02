@@ -50,7 +50,11 @@ namespace MindTouch.Dream {
             }
             _isDisposed = true;
             _requestScope.Dispose();
-            _disposalCallback();
+            try {
+                _disposalCallback();
+            }catch {
+                // DisposalCallback cannot be allowed to disrupte dispose
+            }
         }
 
         private void CheckDisposed() {

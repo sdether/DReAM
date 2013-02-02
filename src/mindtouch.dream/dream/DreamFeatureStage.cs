@@ -355,7 +355,7 @@ namespace MindTouch.Dream {
         private static DreamFeatureAdapter MakeConvertingContextParamGetter(string name, Type type) {
             return new DreamFeatureAdapter(name, (context, request, response) => {
                 object value = context.GetParam(name, null);
-                if(value == null && type.IsInterface) {
+                if(value == null && (type.IsClass || type.IsInterface)) {
                     object resolvedInstance;
                     if(context.Container.TryResolve(type, out resolvedInstance)) {
                         return resolvedInstance;

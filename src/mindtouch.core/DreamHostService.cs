@@ -1466,6 +1466,12 @@ namespace MindTouch.Dream {
                     _log.WarnFormat("LifetimeScope for service '{0}' at '{1}' already gone.", service, service.Self.Uri);
                     return;
                 }
+                ITenantRepository tenantRepository;
+                if(serviceLifetimeScope.TryResolve(out tenantRepository)) {
+                    
+                    // dispose the tenantRepository so that all tenantscopes are disposed before the service scope goes away
+                    tenantRepository.Dispose();
+                }
                 serviceLifetimeScope.Dispose();
                 _serviceLifetimeScopes.Remove(service);
             }

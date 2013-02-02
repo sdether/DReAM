@@ -19,6 +19,7 @@
  * limitations under the License.
  */
 
+using System;
 using Autofac;
 using Autofac.Builder;
 using Autofac.Core;
@@ -89,6 +90,57 @@ namespace MindTouch.Dream.Test {
                 return;
             }
             Assert.Fail("resolved component in wrong scope");
+        }
+
+        [Test]
+        public void Disposable_registered_as_single_instance_in_child_scope_is_disposed_with_that_scope() {
+            var serviceScope = new ContainerBuilder().Build().BeginLifetimeScope();
+            var tenant = new Disposable();
+            using(var tentantScope = serviceScope.BeginLifetimeScope(c => c.RegisterInstance(tenant).SingleInstance())) {
+                using(var requestScope = tentantScope.BeginLifetimeScope()) {
+                    var t2 = requestScope.Resolve<Disposable>();
+                    Assert.AreSame(tenant, t2);
+                }
+                Assert.IsFalse(tenant.IsDisposed,"tenant was disposed after request");
+            }
+            Assert.IsTrue(tenant.IsDisposed,"tenant wasn't disposed after tenantscope");
+        }
+
+        [Test]
+        public void Disposing_parent_scope_before_child_scope_disables_child_disposal() {
+            var serviceScope = new ContainerBuilder().Build().BeginLifetimeScope();
+            var tenant = new Disposable();
+            var tentantScope = serviceScope.BeginLifetimeScope(c => c.RegisterInstance(tenant).SingleInstance());
+            serviceScope.Dispose();
+            Assert.IsFalse(tenant.IsDisposed, "tenant was disposed by parent scope disposal");
+            tentantScope.Dispose();
+            Assert.IsFalse(tenant.IsDisposed, "tenant was unexpectedly, but properly disposed");
+        }
+
+        [Test]
+        public void Registered_instance_that_is_never_resolved_will_not_get_disposed() {
+            var serviceScope = new ContainerBuilder().Build().BeginLifetimeScope();
+            var tenant = new Disposable();
+            using(var tentantScope = serviceScope.BeginLifetimeScope(c => c.RegisterInstance(tenant).SingleInstance())) { }
+            Assert.IsFalse(tenant.IsDisposed, "tenant was unexpectedly, but properly disposed");
+        }
+
+        [Test]
+        public void Registered_instance_that_is_resolved_will_get_disposed() {
+            var serviceScope = new ContainerBuilder().Build().BeginLifetimeScope();
+            var tenant = new Disposable();
+            using(var tenantScope = serviceScope.BeginLifetimeScope(c => c.RegisterInstance(tenant).SingleInstance())) {
+                var x = tenantScope.Resolve<Disposable>();
+            }
+            Assert.IsTrue(tenant.IsDisposed, "unresolved tenant was not disposed by scope disposal");
+        }
+
+        public class Disposable : IDisposable {
+            public bool IsDisposed;
+
+            public void Dispose() {
+                IsDisposed = true;
+            }
         }
 
         public class Foo : IFoo, IBaz {

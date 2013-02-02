@@ -897,7 +897,7 @@ namespace MindTouch.Dream.Test {
             }
 
             private static DreamMessage Response(XDoc body) {
-                var frame = new System.Diagnostics.StackFrame(1, false);
+                var frame = new System.Diagnostics.StackFrame(1, true);
                 return Response(frame.GetMethod().Name, body);
             }
 
