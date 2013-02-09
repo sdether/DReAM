@@ -20,11 +20,12 @@
  */
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using Autofac;
 
 namespace MindTouch.Dream {
-    public abstract class TenantRepository<T> : IDisposable, ITenantRepository where T : class, IDisposable {
+    public abstract class TenantRepository<T> : IEnumerable<T>, ITenantRepository where T : class, IDisposable {
 
         private class Tenant {
             public T Data;
@@ -77,6 +78,14 @@ namespace MindTouch.Dream {
                 }
                 return t == null ? null : t.Data;
             }
+        }
+
+        public IEnumerator<T> GetEnumerator() {
+            throw new NotImplementedException();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator() {
+            return GetEnumerator();
         }
 
         protected abstract string GetTenantName(DreamContext context);

@@ -22,6 +22,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using Autofac;
 using Autofac.Builder;
@@ -42,7 +43,7 @@ namespace MindTouch.Dream.Test {
         private Plug _plug;
         private XDoc _blueprint;
 
-        public interface IFoo {}
+        public interface IFoo { }
         public class Foo : IFoo { }
 
         [TestFixtureSetUp]
@@ -528,7 +529,7 @@ namespace MindTouch.Dream.Test {
         public void Can_resolve_instance_from_the_context_container() {
             AssertFeature(
                 "GET:sync/inject/instance",
-                _plug.At("sync", "inject","instance"),
+                _plug.At("sync", "inject", "instance"),
                 new XDoc("body").Elem("class", typeof(Foo).FullName)
             );
         }
@@ -561,9 +562,6 @@ namespace MindTouch.Dream.Test {
 
             // --- Class Fields ---
             private static readonly ILog _log = LogUtils.CreateLog();
-
-            //-- Fields ---
-            private Plug _inner;
 
             //--- Features ---
             [DreamFeature("GET:sync/nada", "")]
@@ -881,21 +879,6 @@ namespace MindTouch.Dream.Test {
             }
 
             //--- Methods ---
-            protected override Yield Start(XDoc config, Result result) {
-                yield return Coroutine.Invoke(base.Start, config, new Result());
-                yield return CreateService("inner", "http://services.mindtouch.com/dream/test/2007/03/sample-inner", new XDoc("config").Start("prologue").Attr("name", "dummy").Value("p3").End().Start("epilogue").Attr("name", "dummy").Value("e3").End(), new Result<Plug>()).Set(v => _inner = v);
-                result.Return();
-            }
-
-            protected override Yield Stop(Result result) {
-                if(_inner != null) {
-                    yield return _inner.DeleteAsync().CatchAndLog(_log);
-                    _inner = null;
-                }
-                yield return Coroutine.Invoke(base.Stop, new Result());
-                result.Return();
-            }
-
             private static DreamMessage Response(XDoc body) {
                 var frame = new System.Diagnostics.StackFrame(1, true);
                 return Response(frame.GetMethod().Name, body);

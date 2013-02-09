@@ -101,6 +101,14 @@ namespace MindTouch.Dream {
         /// Creates a new stage instance.
         /// </summary>
         /// <param name="service">Service instance to which the stage belongs to.</param>
+        /// <param name="methodName">Method name for stage handler.</param>
+        /// <param name="access">Stage access level.</param>
+        public DreamFeatureStage(IDreamService service, string methodName, DreamAccess access) : this(service, service.GetType().GetMethod(methodName, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance), access) { }
+
+        /// <summary>
+        /// Creates a new stage instance.
+        /// </summary>
+        /// <param name="service">Service instance to which the stage belongs to.</param>
         /// <param name="method">Method definintion for stage handler.</param>
         /// <param name="access">Stage access level.</param>
         public DreamFeatureStage(IDreamService service, MethodInfo method, DreamAccess access) {

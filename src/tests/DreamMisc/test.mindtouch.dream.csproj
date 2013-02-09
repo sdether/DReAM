@@ -110,6 +110,7 @@
     <Compile Include="Collections\LockFreeStackTests.cs" />
     <Compile Include="Collections\WorkStealingDequeTests.cs" />
     <Compile Include="CookieTests.cs" />
+    <Compile Include="DreamPrologueEpilogueTests.cs" />
     <Compile Include="DataUpdaterTests.cs" />
     <Compile Include="DreamFeatureTests.cs" />
     <Compile Include="DreamHeadersTests.cs" />
