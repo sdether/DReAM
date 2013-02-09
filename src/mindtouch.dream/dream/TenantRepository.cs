@@ -22,6 +22,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using Autofac;
 
 namespace MindTouch.Dream {
@@ -40,11 +41,11 @@ namespace MindTouch.Dream {
             Tenant tenant;
             lock(_tenantsByName) {
                 if(!_tenantsByName.TryGetValue(name, out tenant)) {
-                    var tenantData = CreateTenantData(name);
+                    var tenantData = CreateTenantData(name, context);
                     _tenantsByName[name] = tenant = new Tenant {
                         Name = name,
                         LifetimeScope = serviceLifetimeScope.BeginLifetimeScope(
-                            DreamContainerScope.Tenant, 
+                            DreamContainerScope.Tenant,
                             builder => builder.RegisterInstance(tenantData).As<T>().SingleInstance()
                         ),
                         Data = tenantData
@@ -80,8 +81,18 @@ namespace MindTouch.Dream {
             }
         }
 
+        public int Count {
+            get {
+                lock(_tenantsByName) {
+                    return _tenantsByName.Count;
+                }
+            }
+        }
+
         public IEnumerator<T> GetEnumerator() {
-            throw new NotImplementedException();
+            lock(_tenantsByName) {
+                return _tenantsByName.Values.Select(x => x.Data).ToList().GetEnumerator();
+            }
         }
 
         IEnumerator IEnumerable.GetEnumerator() {
@@ -90,7 +101,7 @@ namespace MindTouch.Dream {
 
         protected abstract string GetTenantName(DreamContext context);
 
-        protected abstract T CreateTenantData(string name);
+        protected abstract T CreateTenantData(string name, DreamContext context);
 
         public virtual void Dispose() {
             lock(_tenantsByName) {

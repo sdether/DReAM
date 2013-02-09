@@ -40,7 +40,7 @@ namespace MindTouch.Dream.Test {
                 return context.Request.Headers["tenant-id"];
             }
 
-            protected override TenantData CreateTenantData(string name) {
+            protected override TenantData CreateTenantData(string name, DreamContext context) {
                 return new TenantData {
                     Name = name
                 };
