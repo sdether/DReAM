@@ -20,11 +20,13 @@
  */
 
 using System;
+using System.Collections.Generic;
 
 namespace MindTouch.Aws {
     public interface ISqsPollClient : IDisposable {
 
         //--- Methods ---
         void Listen(string queuename, TimeSpan pollInterval, Action<AwsSqsMessage> callback);
+        void ListenMany(string queuename, TimeSpan pollInterval, Action<IEnumerable<SqsPollClient.Item>> callback);
     }
 }
