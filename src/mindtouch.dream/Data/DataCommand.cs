@@ -336,19 +336,13 @@ namespace MindTouch.Data {
                 return;
             }
             using(var command = connection.CreateCommand()) {
-                try {
-                    command.CommandText = "SELECT DATABASE()";
-                    using(var reader = command.ExecuteReader()) {
-                        reader.Read();
-                        var database = reader.GetString(0);
-                        if(!_catalogName.EqualsInvariantIgnoreCase(database)) {
-                            throw new InvalidOperationException(string.Format("Database catalog does not match command catalog: {0} != {1}", _catalogName, database));
-                        }
+                command.CommandText = "SELECT DATABASE()";
+                using(var reader = command.ExecuteReader()) {
+                    reader.Read();
+                    var database = reader.GetString(0);
+                    if(!_catalogName.EqualsInvariantIgnoreCase(database)) {
+                        throw new InvalidOperationException(string.Format("[Verify Catalog] Database catalog does not match command catalog: {0} != {1}", _catalogName, database));
                     }
-                } catch(InvalidOperationException) {
-                    throw;
-                } catch(Exception e) {
-                    _log.Warn("Unable to check DB catalog", e);
                 }
             }
         }

@@ -250,7 +250,7 @@ namespace MindTouch.Data {
                 return;
             }
             if(!_catalogName.EqualsInvariantIgnoreCase(catalog)) {
-                throw new InvalidOperationException(string.Format("Database catalog does not match session catalog: {0} != {1}", _catalogName, catalog));
+                throw new InvalidOperationException(string.Format("[Verify Catalog] Database catalog does not match session catalog: {0} != {1}", _catalogName, catalog));
             }
         }
     }
