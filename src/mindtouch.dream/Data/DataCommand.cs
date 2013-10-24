@@ -333,10 +333,9 @@ namespace MindTouch.Data {
 
         private void VerifyConnectionCatalog(IDbConnection connection) {
             if(string.IsNullOrEmpty(_catalogName)) {
-                _log.WarnFormat("Command was created without explicit catalog");
                 return;
             }
-            using(IDbCommand command = connection.CreateCommand()) {
+            using(var command = connection.CreateCommand()) {
                 try {
                     command.CommandText = "SELECT DATABASE()";
                     using(var reader = command.ExecuteReader()) {
