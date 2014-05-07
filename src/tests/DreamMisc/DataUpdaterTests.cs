@@ -27,7 +27,6 @@ using System.Reflection;
 using MindTouch.Data;
 
 namespace MindTouch.Dream.Test {
-
     internal class TestDataUpdater : ADataUpdater {
 
         //--- Constructors ---

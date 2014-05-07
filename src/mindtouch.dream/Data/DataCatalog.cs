@@ -132,7 +132,7 @@ namespace MindTouch.Data {
         }
 
         //--- Properties ---
-        
+
         /// <summary>
         /// This property bypasses the safety measures provided by MindTouch.Data objects.  Please avoid using it if possible.
         /// </summary>
@@ -219,6 +219,9 @@ namespace MindTouch.Data {
             return new DataCommand(_factory, this, @readonly ? _readonlyconnection : _connection, _factory.CreateProcedure(name));
         }
 
+        public DataSemaphore TryAcquireSemaphore(string name, int timeoutSeconds) {
+            return new DataSemaphore(name, timeoutSeconds, _factory, _connection);
+        }
         /// <summary>
         /// Test the database connection.
         /// </summary>

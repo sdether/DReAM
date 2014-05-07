@@ -126,6 +126,7 @@
     <Compile Include="Aws\AwsExtensions.cs" />
     <Compile Include="Data\attributes.cs" />
     <Compile Include="Data\ADataUpdater.cs" />
+    <Compile Include="Data\DataSemaphore.cs" />
     <Compile Include="Data\IDataUpdater.cs" />
     <Compile Include="Data\MysqlDataUpdater.cs">
       <SubType>Code</SubType>
